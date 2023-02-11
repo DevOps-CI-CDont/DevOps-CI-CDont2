@@ -1,10 +1,13 @@
 package main
 
 import (
+	"crypto/sha256"
 	"database/sql"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
@@ -19,10 +22,10 @@ func main() {
 	router.GET("/user/:username", getUsername)
 	router.POST("/user/:username/follow", followUser)
 	router.POST("/user/:username/unfollow", unfollowUser)
-	router.POST("/post", postMessage)
+	router.POST("/add_message", postMessage)
 	router.POST("/login", login)
 	router.POST("/register", register)
-	router.POST("/logout", logout)
+	router.GET("/logout", logout)
 
 	router.Run("localhost:8080")
 }
@@ -155,7 +158,29 @@ func unfollowUser(c *gin.Context) {
 }
 
 func postMessage(c *gin.Context) {
-	log.Println("postMessage called")
+	connect_db()
+
+	userid, err := c.Cookie("user_id")
+	errorCheck(err)
+	if userid == "" || userid == "-1" {
+		c.JSON(401, gin.H{"error": "not logged in"})
+		return
+	}
+
+	text := c.PostForm("text")
+	authorid := userid
+	pub_date := time.Now().Unix()
+	flagged := 0
+
+	stmt, err := DB.Prepare(`insert into message (author_id, text, pub_date, flagged) values (?, ?, ?, ?)`)
+	errorCheck(err)
+	defer stmt.Close()
+
+	_, err = stmt.Exec(authorid, text, pub_date, flagged)
+	errorCheck(err)
+
+	c.JSON(200, gin.H{"message": "message posted"})
+
 }
 
 func login(c *gin.Context) {
@@ -163,23 +188,76 @@ func login(c *gin.Context) {
 
 	username := c.PostForm("username")
 	password := c.PostForm("password")
-	//check if username and password are empty
+	//convert password to byte[]
 
-	connect_db()
-	userid := DB.QueryRow(`select user_id from user where user.Username = ? and user.pw_hash = ?`, username, password)
+	passwordHash := sha256.Sum256([]byte(password)) //hash password1
+	passwordHashString := string(passwordHash[:])
+	//check if username and password are empty
+	if username == "" || password == "" {
+		c.JSON(400, gin.H{"error": "username or password is empty"})
+		return
+	}
+
+	userid := DB.QueryRow(`select user_id from user where user.Username = ? and user.pw_hash = ?`, username, passwordHashString)
 
 	var userIdAsInt int
 	err := userid.Scan(&userIdAsInt)
-	errorCheck(err)
-
-	// set cookie
+	if err != nil {
+		c.SetCookie("user_id", "", -1, "/", "localhost", false, false)
+		return
+	}
+	// succes: set cookie
 	c.SetCookie("user_id", strconv.Itoa(userIdAsInt), 3600, "/", "localhost", false, false)
 }
 
-func register(c *gin.Context) 
-	
+func register(c *gin.Context) {
+	connect_db()
 
-	log.Println("register called")
+	username := c.PostForm("username")
+	email := c.PostForm("email")
+	password := c.PostForm("password")
+	password2 := c.PostForm("password2")
+
+	//check if username and password are empty
+	if username == "" || password == "" || password2 == "" {
+		c.JSON(400, gin.H{"error": "username or password is empty"})
+		return
+	} else if email == "" || !strings.Contains(email, "@") {
+		c.JSON(400, gin.H{"error": "email is empty or invalid"})
+		return
+	} else if password != password2 {
+		c.JSON(400, gin.H{"error": "passwords don't match"})
+		return
+	} else if getUserByName(username) != nil {
+		c.JSON(400, gin.H{"error": "username already exists"})
+		return
+	}
+
+	passwordHash := sha256.Sum256([]byte(password))
+	//convert back to string
+	passwordHashString := string(passwordHash[:])
+	log.Println(passwordHashString)
+
+	stmt, err := DB.Prepare(`insert into user (username, email, pw_hash) values (?, ?, ?)`)
+	errorCheck(err)
+	defer stmt.Close()
+	_, err = stmt.Exec(username, email, passwordHashString)
+	errorCheck(err)
+
+	c.JSON(200, gin.H{"message": "user registered"})
+}
+
+func getUserByName(userName string) *sql.Row {
+	connect_db()
+	row := DB.QueryRow(`select * from user where user.username = ?`, userName)
+	user := User{}
+	err := row.Scan(&user.User_id, &user.Username, &user.Email, &user.Pw_hash)
+	if err != nil {
+		return nil
+	}
+	return row
+	// if user exists, return user, else return nil
+
 }
 
 func logout(c *gin.Context) {
