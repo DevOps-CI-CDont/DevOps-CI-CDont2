@@ -25,6 +25,7 @@ func main() {
 	router.Run("localhost:8080")
 }
 
+// Capitalized names are public, lowercase are privat
 type User struct {
 	User_id  int    `json:"user_id"`
 	Username string `json:"username"`
@@ -43,10 +44,14 @@ type Message struct {
 	Text       string `json:"text"`
 	Pub_date   int    `json:"pub_date"`
 	Flagged    int    `json:"flagged"`
+	Author     User   `json:"author"`
 }
 
 var dbPath = "./../../tmp/minitwit.db"
 var DB *sql.DB // global DB variable
+var PER_PAGE = 30
+var DEBUG = true
+var SECRET_KEY = "development key"
 
 func connect_db() error {
 	db, err := sql.Open("sqlite3", dbPath)
@@ -71,7 +76,9 @@ func errorCheck(err error) {
 func getPublicTimeline(c *gin.Context) {
 	connect_db()
 	log.Println("connect_db done")
-	rows, err := DB.Query(`select * from message`, 30)
+	rows, err := DB.Query(`select message.*, user.* from message, user
+	where message.flagged = 0 and message.author_id = user.user_id
+	order by message.pub_date desc limit ?`, PER_PAGE)
 	errorCheck(err)
 
 	// make a empty slice of messages
@@ -79,9 +86,10 @@ func getPublicTimeline(c *gin.Context) {
 
 	for rows.Next() {
 		msg := Message{}
-		err = rows.Scan(&msg.Message_id, &msg.Author_id, &msg.Text, &msg.Pub_date, &msg.Flagged)
-		log.Println(msg.Text)
+		user := User{}
+		err = rows.Scan(&msg.Message_id, &msg.Author_id, &msg.Text, &msg.Pub_date, &msg.Flagged, &user.User_id, &user.Username, &user.Email, &user.Pw_hash)
 		log.Println(msg)
+		msg.Author = user
 
 		messages = append(messages, msg)
 	}
@@ -90,9 +98,9 @@ func getPublicTimeline(c *gin.Context) {
 
 	errorCheck(err)
 
-	c.JSON(200, gin.H{"data": messages})
+	c.JSON(200, gin.H{"tweets": messages})
 
-	// defer rows.Close()
+	defer rows.Close()
 }
 
 func getUsername(c *gin.Context) {
