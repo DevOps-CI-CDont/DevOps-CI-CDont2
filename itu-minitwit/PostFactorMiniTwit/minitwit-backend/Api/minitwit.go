@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +18,7 @@ func main() {
 	// endpoints
 	router.GET("/", getTimeline)
 	router.GET("/public", getPublicTimeline)
-	router.GET("/user/:username", getUsername)
+	router.GET("/user/:username", getUsersTweets)
 	router.POST("/user/:username/follow", followUser)
 	router.POST("/user/:username/unfollow", unfollowUser)
 	router.POST("/add_message", postMessage)
@@ -173,9 +172,29 @@ func getPublicTimeline(c *gin.Context) {
 	defer rows.Close()
 }
 
-func getUsername(c *gin.Context) {
+func getUsersTweets(c *gin.Context) {
 	name := c.Param("username")
-	c.String(http.StatusOK, "Hello %s", name)
+	connect_db()
+	userID := getUserIdByName(name)
+	if userID == "-1" {
+		c.JSON(200, gin.H{"message": "user does not exist"})
+		return
+	}
+	rows, err := DB.Query(`select message.*, user.* from message, user where message.author_id = ? and message.author_id = user.user_id order by message.pub_date desc limit ?`, userID, PER_PAGE)
+	errorCheck(err)
+	defer rows.Close()
+	messages := make([]Message, 0)
+	for rows.Next() {
+		msg := Message{}
+		user := User{}
+		err = rows.Scan(&msg.Message_id, &msg.Author_id, &msg.Text, &msg.Pub_date, &msg.Flagged, &user.User_id, &user.Username, &user.Email, &user.Pw_hash)
+		errorCheck(err)
+		msg.Author = user
+
+		messages = append(messages, msg)
+	}
+	c.JSON(200, gin.H{"tweets": messages})
+
 }
 
 func followUser(c *gin.Context) {
