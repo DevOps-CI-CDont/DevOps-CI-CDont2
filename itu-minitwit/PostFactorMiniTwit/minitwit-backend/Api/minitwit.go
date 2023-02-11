@@ -150,22 +150,72 @@ func getUsername(c *gin.Context) {
 }
 
 func followUser(c *gin.Context) {
-	log.Println("followUser called")
+	connect_db()
+
+	userid := getUserIdIfLoggedIn(c)
+	whom_name := c.Param("username")
+	whom_id := getUserIdByName(whom_name)
+	if doesUsersFollow(userid, whom_id) {
+		c.JSON(200, gin.H{"message": "user already followed"})
+		return
+	}
+
+	if whom_id == "-1" {
+		c.JSON(200, gin.H{"message": "user does not exist"})
+		return
+	}
+	stmt, err := DB.Prepare(`insert into follower (who_id, whom_id) values (?, ?)`)
+	errorCheck(err)
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userid, whom_id)
+	errorCheck(err)
+
+	c.JSON(200, gin.H{"message": "followed user"})
+}
+
+func doesUsersFollow(who_id string, whom_id string) bool {
+	connect_db()
+
+	row := DB.QueryRow(`select * from follower where who_id = ? and whom_id = ?`, who_id, whom_id)
+
+	follower := follower{}
+	err := row.Scan(&follower.Who_id, &follower.Whom_id)
+	return err == nil
+
 }
 
 func unfollowUser(c *gin.Context) {
-	log.Println("unfollowUser called")
+	connect_db()
+
+	userid := getUserIdIfLoggedIn(c)
+	whom_name := c.Param("username")
+	whom_id := getUserIdByName(whom_name)
+	if !doesUsersFollow(userid, whom_id) {
+		c.JSON(200, gin.H{"message": "user dosent follow the target"})
+		return
+	}
+	log.Println(whom_id)
+	if whom_id == "-1" {
+		c.JSON(200, gin.H{"message": "user does not exist"})
+		return
+	}
+
+	stmt, err := DB.Prepare(`Delete FROM follower WHERE who_id = ? and whom_id = ?`)
+	errorCheck(err)
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userid, whom_id)
+	errorCheck(err)
+
+	c.JSON(200, gin.H{"message": "unfollowed user"})
+
 }
 
 func postMessage(c *gin.Context) {
 	connect_db()
 
-	userid, err := c.Cookie("user_id")
-	errorCheck(err)
-	if userid == "" || userid == "-1" {
-		c.JSON(401, gin.H{"error": "not logged in"})
-		return
-	}
+	userid := getUserIdIfLoggedIn(c)
 
 	text := c.PostForm("text")
 	authorid := userid
@@ -258,6 +308,30 @@ func getUserByName(userName string) *sql.Row {
 	return row
 	// if user exists, return user, else return nil
 
+}
+
+func getUserIdIfLoggedIn(c *gin.Context) string {
+	userid, err := c.Cookie("user_id")
+	errorCheck(err)
+	if userid == "" || userid == "-1" {
+		c.JSON(401, gin.H{"error": "not logged in"})
+		return "-1"
+	}
+	return userid
+
+}
+
+func getUserIdByName(username string) string {
+	connect_db()
+	row := DB.QueryRow(`select * from user where user.username = ?`, username)
+
+	user := User{}
+	err := row.Scan(&user.User_id, &user.Username, &user.Email, &user.Pw_hash)
+	if err != nil {
+		return "-1"
+	}
+
+	return strconv.Itoa(user.User_id)
 }
 
 func logout(c *gin.Context) {
