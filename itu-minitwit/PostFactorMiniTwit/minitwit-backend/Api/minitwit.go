@@ -26,6 +26,7 @@ func main() {
 	router.POST("/login", login)
 	router.POST("/register", register)
 	router.GET("/logout", logout)
+	router.GET("/RESET", init_db)
 
 	router.Run("localhost:8080")
 }
@@ -64,6 +65,47 @@ func connect_db() error {
 
 	DB = db
 	return nil
+}
+
+func init_db(c *gin.Context) {
+	connect_db()
+	// create tables
+	sqlStmt2 := `
+	drop table if exists user;
+	drop table if exists message;
+	drop table if exists follower;
+	create table if not exists user (user_id integer not null primary key, username text, email text, pw_hash text);
+	create table if not exists message (message_id integer not null primary key, author_id integer, text text, pub_date integer, flagged integer);
+	create table if not exists follower (who_id integer, whom_id integer);
+	INSERT INTO user (username, email, pw_hash)
+	VALUES
+	("Benjamin", "bekj@itu.dk", "1a86a3c5991086b3afc27fa1341d9e80e68ab278ab836ca4a7c9498db7f607bf"),
+	("Oliver", "ojoe@itu.dk", "1a86a3c5991086b3afc27fa1341d9e80e68ab278ab836ca4a7c9498db7f607bf"),
+	("Silas", "sipn@itu.dk", "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"),
+	("Janus", "januh@itu.dk", "850ca8e0ec3f2106b6a230cd36a86cf163b3b005dd2b6c94eafaf604cbdf03a8");
+	INSERT INTO message (author_id, text, pub_date, flagged)
+	VALUES
+	(1, "I like apples", 123456789, 0),
+	(2, "I like tarteletter", 123456789, 0),
+	(3, "I like Pizza", 123456789, 0),
+	(4, "I like bananas ", 123456789, 0);
+	INSERT INTO follower (who_id, whom_id)
+	VALUES
+	(1, 2),
+	(1, 3),
+	(1, 4),
+	(2, 1),
+	(2, 3),
+	(2, 4),
+	(3, 1),
+	(3, 2),
+	(3, 4),
+	(4, 1),
+	(4, 2);
+	`
+	_, err := DB.Exec(sqlStmt2)
+	errorCheck(err)
+
 }
 
 func errorCheck(err error) {
