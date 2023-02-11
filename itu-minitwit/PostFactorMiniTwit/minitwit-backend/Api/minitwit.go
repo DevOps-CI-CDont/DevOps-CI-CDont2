@@ -76,42 +76,29 @@ func errorCheck(err error) {
 func getTimeline(c *gin.Context) {
 	connect_db()
 	//query database
-	// check cookie for session
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("user_id")
-		if err != nil {
-			// The cookie doesn't exist
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		userID := cookie.Value
-		rows, err := DB.Query(`select message.*, user.* from message, user
-	where message.flagged = 0 and message.author_id = user.user_id and (
+	// check cookie for session,
+	userID := getUserIdIfLoggedIn(c)
+
+	rows, err := DB.Query(`select message.*, user.* from message, user
+		where message.flagged = 0 and message.author_id = user.user_id and (
 		user.user_id = ? or
 		user.user_id in (select whom_id from follower
-								where who_id = ?))
-	order by message.pub_date desc limit ?`, userID, userID, PER_PAGE)
-		messages := make([]Message, 0)
-		for rows.Next() {
-			msg := Message{}
-			user := User{}
-			err = rows.Scan(&msg.Message_id, &msg.Author_id, &msg.Text, &msg.Pub_date, &msg.Flagged, &user.User_id, &user.Username, &user.Email, &user.Pw_hash)
-			log.Println(msg)
-			msg.Author = user
-
-			messages = append(messages, msg)
-		}
-		log.Println("printing messages")
-		log.Println(messages)
-
+		where who_id = ?))
+		order by message.pub_date desc limit ?`, userID, userID, PER_PAGE)
+	errorCheck(err)
+	defer rows.Close()
+	messages := make([]Message, 0)
+	for rows.Next() {
+		msg := Message{}
+		user := User{}
+		err = rows.Scan(&msg.Message_id, &msg.Author_id, &msg.Text, &msg.Pub_date, &msg.Flagged, &user.User_id, &user.Username, &user.Email, &user.Pw_hash)
 		errorCheck(err)
+		log.Println(msg)
+		msg.Author = user
 
-		c.JSON(200, gin.H{"tweets": messages})
-
-		defer rows.Close()
-	})
-	http.ListenAndServe(":8080", nil)
-
+		messages = append(messages, msg)
+	}
+	c.JSON(200, gin.H{"tweets": messages})
 }
 
 func getPublicTimeline(c *gin.Context) {
