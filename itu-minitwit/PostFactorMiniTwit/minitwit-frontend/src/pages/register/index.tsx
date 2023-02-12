@@ -60,8 +60,6 @@ export default function RegisterPage() {
       return;
     }
 
-    console.log(username, password, password2, email);
-
     const res = await postSignUp({ username, password, password2, email });
 
     if (res.message) {

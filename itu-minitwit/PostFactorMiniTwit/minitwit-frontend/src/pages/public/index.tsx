@@ -30,15 +30,13 @@ export async function getServerSideProps() {
       };
     }
 
-    console.log(messages);
-
     return {
       props: {
         tweets: messages.tweets,
       },
     };
   } catch (e) {
-    console.log(e);
+    console.error(e);
 
     return {
       props: {

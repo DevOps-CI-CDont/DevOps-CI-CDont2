@@ -1,6 +1,7 @@
 import { getAvatarUrl } from "@/lib/dicebear";
 import { Tweet } from "@/types/tweet.type";
 import Image from "next/image";
+import Link from "next/link";
 
 export function Tweet({ text, author, pub_date }: Tweet) {
   return (
@@ -17,8 +18,11 @@ export function Tweet({ text, author, pub_date }: Tweet) {
       <div className='ml-4 my-2 text-white flex flex-col'>
         <span className='text-md'>{text}</span>
         <span className='text-sm text-gray-200'>
-          Tweeted by <span className='font-bold'>{author.username}</span> at{" "}
-          {new Date(pub_date).toDateString()}
+          Tweeted by{" "}
+          <Link href={`/${author.username}`} className='font-bold'>
+            {author.username}
+          </Link>{" "}
+          at {new Date(pub_date).toDateString()}
         </span>
       </div>
     </div>
