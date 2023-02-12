@@ -1,12 +1,14 @@
 package main
+
 import (
 	"database/sql"
-	"log"
 	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
 const docStr = `ITU-Minitwit Tweet Flagging Tool
 
 Usage:
@@ -38,12 +40,12 @@ func errorCheck(err error) {
 func main() {
 	args := os.Args[1:]
 
-	db, err := sql.Open("sqlite3", "/tmp/minitwit.db")
+	db, err := sql.Open("sqlite3", "./../tmp/minitwit.db")
 	errorCheck(err)
 	defer db.Close()
 
 	if len(args) == 1 && args[0] == "-h" {
-		fmt.Println(docStr)
+		fmt.Print(docStr)
 		return
 	}
 	if len(args) == 1 && args[0] == "-i" {
@@ -51,8 +53,9 @@ func main() {
 		errorCheck(err)
 		callback(rows)
 	}
-	if len(args) >= 2 && args[0] != "-i" && args[0] != "-h" {
-		for i := 1; i < len(args); i++ {
+	if args[0] != "-i" && args[0] != "-h" {
+		fmt.Println("Flagging entries: ")
+		for i := 0; i < len(args); i++ {
 			_, err = db.Exec("UPDATE message SET flagged=1 WHERE message_id=" + args[i])
 			if err != nil {
 				fmt.Println("Error executing query:", err)
@@ -62,6 +65,3 @@ func main() {
 		}
 	}
 }
-
-
-

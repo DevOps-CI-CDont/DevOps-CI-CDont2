@@ -13,23 +13,30 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var Router *gin.Engine
+
+func SetUpRouter() *gin.Engine {
+	r := gin.Default()
+	return r
+}
+
 func main() {
-	router := gin.Default()
+	Router = SetUpRouter()
 
 	// endpoints
-	router.GET("/", getTimeline)
-	router.GET("/public", getPublicTimeline)
-	router.GET("/user/:username", getUsersTweets)
-	router.POST("/user/:username/follow", followUser)
-	router.POST("/user/:username/unfollow", unfollowUser)
-	router.POST("/add_message", postMessage)
-	router.POST("/login", login)
-	router.POST("/register", register)
-	router.GET("/logout", logout)
-	router.GET("/RESET", init_db)
+	Router.GET("/", getTimeline)
+	Router.GET("/public", getPublicTimeline)
+	Router.GET("/user/:username", getUsersTweets)
+	Router.POST("/user/:username/follow", followUser)
+	Router.POST("/user/:username/unfollow", unfollowUser)
+	Router.POST("/add_message", postMessage)
+	Router.POST("/login", login)
+	Router.POST("/register", register)
+	Router.GET("/logout", logout)
+	Router.GET("/RESET", init_db)
 
 	// middleware
-	router.Use(cors.New(cors.Config{
+	Router.Use(cors.New(cors.Config{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:     []string{"*"},
@@ -38,7 +45,7 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	router.Run("localhost:8080")
+	Router.Run("localhost:8080")
 }
 
 // Capitalized names are public, lowercase are privat
@@ -317,8 +324,14 @@ func login(c *gin.Context) {
 
 	var userIdAsInt int
 	err := userid.Scan(&userIdAsInt)
+	if userIdAsInt == 0 {
+		c.SetCookie("user_id", "", -1, "/", "localhost", false, false)
+		c.JSON(401, gin.H{"error": "username or password is incorrect"})
+		return
+	}
 	if err != nil {
 		c.SetCookie("user_id", "", -1, "/", "localhost", false, false)
+		c.JSON(401, gin.H{"error": "username or password is incorrect"})
 		return
 	}
 	// succes: set cookie

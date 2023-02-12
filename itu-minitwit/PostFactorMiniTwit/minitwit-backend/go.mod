@@ -4,7 +4,14 @@ go 1.20
 
 require github.com/gin-gonic/gin v1.8.2
 
-require github.com/gin-contrib/cors v1.4.0 // indirect
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gin-contrib/cors v1.4.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/steinfletcher/apitest v1.5.14 // indirect
+	github.com/stretchr/testify v1.8.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect

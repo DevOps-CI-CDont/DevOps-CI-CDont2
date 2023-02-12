@@ -37,13 +37,13 @@ export async function getServerSideProps(context: any) {
       };
     }
  
-    const filteredMessages = messages.tweets.filter(
+    /* const filteredMessages = messages.tweets.filter(
       (tweet: Tweet) => tweet.author_id === parseInt(parsed.user)
-    );
+    ); */
 
     return {
       props: {
-        tweets: filteredMessages,
+        tweets: messages,
       },
     };
   } catch (e) {
