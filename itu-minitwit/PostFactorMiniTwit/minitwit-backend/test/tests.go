@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,8 +18,8 @@ func main() {
 	// r := main.SetUpRouter
 	testing.Main(func(pat, str string) (bool, error) { return true, nil }, []testing.InternalTest{
 		{
-			Name: "TestTimeline",
-			F:    TestTimeline,
+			Name: "TestTimelines",
+			F:    TestTimelines,
 		},
 		{
 			Name: "TestRegister",
@@ -26,6 +28,10 @@ func main() {
 		{
 			Name: "TestLoginLogout",
 			F:    TestLoginLogout,
+		},
+		{
+			Name: "TestPostTweet",
+			F:    TestPostTweet,
 		},
 	}, []testing.InternalBenchmark{}, []testing.InternalExample{})
 
@@ -80,6 +86,29 @@ func TestLoginLogout(t *testing.T) {
 
 func TestPostTweet(t *testing.T) {
 	//Check if adding messages works
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{
+		Jar: jar,
+	}
+	form := url.Values{}
+	form.Add("text", "hello world")
+	res, err := http.NewRequest("POST", base+"/add_message", strings.NewReader(form.Encode()))
+	res.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	cookie := &http.Cookie{
+		Name:  "user_id",
+		Value: "1",
+	}
+	res.AddCookie(cookie)
+	if err != nil {
+		log.Fatal(err)
+	}
+	resp, err := client.Do(res)
+	if err != nil {
+		log.Fatal(err)
+	}
+	assert.Equal(t, 200, resp.StatusCode)
+	log.Println("Testing add message passed")
 
 }
 func getHelper(endpoint string, t *testing.T, expected int, name string) {
@@ -102,10 +131,32 @@ func postHelper(endpoint string, t *testing.T, expected int, name string, data u
 	log.Println("Testing " + name + " passed")
 }
 
-func TestTimeline(t *testing.T) {
+func TestTimelines(t *testing.T) {
 	// public & user timeline
 	getHelper("/public", t, 200, "Public Timeline")
-	// needs authentication
-	//getHelper("/", t, 200, "User Timeline")
+
+	// personal timeline: needs authentication
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{
+		Jar: jar,
+	}
+	res, err := http.NewRequest("GET", base+"/", nil)
+	res.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	cookie := &http.Cookie{
+		Name:  "user_id",
+		Value: "1",
+	}
+	res.AddCookie(cookie)
+	if err != nil {
+		log.Fatal(err)
+	}
+	resp, err := client.Do(res)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(resp.Body)
+
+	assert.Equal(t, 200, resp.StatusCode)
 
 }
