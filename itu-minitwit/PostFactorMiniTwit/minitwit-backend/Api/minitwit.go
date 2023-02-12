@@ -86,6 +86,20 @@ func connect_db() error {
 
 func init_db(c *gin.Context) {
 	connect_db()
+	const Benjapass = "12345678"
+	const Oliverpass = "1234"
+	const Silaspass = "password"
+	const Januspass = "Janus"
+
+	passwordHashB := sha256.Sum256([]byte(Benjapass)) //hash password1
+	passwordHashString := string(passwordHashB[:])
+	passwordHashO := sha256.Sum256([]byte(Oliverpass)) //hash password1
+	passwordHashStringO := string(passwordHashO[:])
+	passwordHashS := sha256.Sum256([]byte(Silaspass)) //hash password1
+	passwordHashStringS := string(passwordHashS[:])
+	passwordHashJ := sha256.Sum256([]byte(Januspass)) //hash password1
+	passwordHashStringJ := string(passwordHashJ[:])
+
 	// create tables
 	sqlStmt2 := `
 	drop table if exists user;
@@ -96,10 +110,10 @@ func init_db(c *gin.Context) {
 	create table if not exists follower (who_id integer, whom_id integer);
 	INSERT INTO user (username, email, pw_hash)
 	VALUES
-	("Benjamin", "bekj@itu.dk", "1a86a3c5991086b3afc27fa1341d9e80e68ab278ab836ca4a7c9498db7f607bf"),
-	("Oliver", "ojoe@itu.dk", "1a86a3c5991086b3afc27fa1341d9e80e68ab278ab836ca4a7c9498db7f607bf"),
-	("Silas", "sipn@itu.dk", "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"),
-	("Janus", "januh@itu.dk", "850ca8e0ec3f2106b6a230cd36a86cf163b3b005dd2b6c94eafaf604cbdf03a8");
+	("Benjamin", "bekj@itu.dk", ?),
+	("Oliver", "ojoe@itu.dk", ?),
+	("Silas", "sipn@itu.dk", ?),
+	("Janus", "januh@itu.dk", ?);
 	INSERT INTO message (author_id, text, pub_date, flagged)
 	VALUES
 	(1, "I like apples", 123456789, 0),
@@ -120,7 +134,7 @@ func init_db(c *gin.Context) {
 	(4, 1),
 	(4, 2);
 	`
-	_, err := DB.Exec(sqlStmt2)
+	_, err := DB.Exec(sqlStmt2, passwordHashString, passwordHashStringO, passwordHashStringS, passwordHashStringJ)
 	errorCheck(err)
 
 }
@@ -314,6 +328,7 @@ func login(c *gin.Context) {
 
 	passwordHash := sha256.Sum256([]byte(password)) //hash password1
 	passwordHashString := string(passwordHash[:])
+
 	//check if username and password are empty
 	if username == "" || password == "" {
 		c.JSON(400, gin.H{"error": "username or password is empty"})

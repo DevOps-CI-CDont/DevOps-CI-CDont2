@@ -79,6 +79,7 @@ func TestLoginLogout(t *testing.T) {
 }
 
 func TestPostTweet(t *testing.T) {
+	//Check if adding messages works
 
 }
 func getHelper(endpoint string, t *testing.T, expected int, name string) {
