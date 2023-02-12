@@ -7,8 +7,8 @@ import { useCookies } from "react-cookie";
 
 export function Header() {
   const isAuth = useAuthStore((state) => state.isAuth);
-  const [sessionCookie, setSessionCookie, removeSessionCookie] = useCookies([
-    "session",
+  const [userIdCookie, setUserIdCookie, removeUserIdCookie] = useCookies([
+    "user_id",
   ]);
   const nextRouter = useRouter();
 
@@ -48,7 +48,7 @@ export function Header() {
 
   async function handleSignOut() {
     await getLogout();
-    removeSessionCookie("session");
+    removeUserIdCookie('user_id');
     nextRouter.push("/public");
   }
 }

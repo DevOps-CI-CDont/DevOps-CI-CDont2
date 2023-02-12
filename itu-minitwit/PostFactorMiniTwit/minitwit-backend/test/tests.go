@@ -140,7 +140,7 @@ func TestTimelines(t *testing.T) {
 	client := &http.Client{
 		Jar: jar,
 	}
-	res, err := http.NewRequest("GET", base+"/", nil)
+	res, err := http.NewRequest("GET", base+"/mytimeline", nil)
 	res.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	cookie := &http.Cookie{

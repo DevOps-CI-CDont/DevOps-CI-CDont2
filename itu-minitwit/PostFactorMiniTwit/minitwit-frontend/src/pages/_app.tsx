@@ -5,15 +5,15 @@ import { useEffect } from "react";
 import { useCookies } from "react-cookie";
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [sessionCookie] = useCookies(["session"]);
+  const [sessionCookie] = useCookies(["user_id"]);
 
-  const setLoginStore = useAuthStore((state) => state.setIsAuth);
+  const setAuthStore = useAuthStore((state) => state.setIsAuth);
 
   useEffect(() => {
-    if (sessionCookie.session) {
-      setLoginStore(true);
+    if (sessionCookie.user_id) {
+      setAuthStore(true);
     } else {
-      setLoginStore(false);
+      setAuthStore(false);
     }
   }, [sessionCookie]);
 

@@ -24,7 +24,7 @@ func main() {
 	Router = SetUpRouter()
 
 	// endpoints
-	Router.GET("/", getTimeline)
+	Router.GET("/mytimeline", getTimeline)
 	Router.GET("/public", getPublicTimeline)
 	Router.GET("/user/:username", getUsersTweets)
 	Router.POST("/user/:username/follow", followUser)
@@ -34,6 +34,7 @@ func main() {
 	Router.POST("/register", register)
 	Router.GET("/logout", logout)
 	Router.GET("/RESET", init_db)
+	Router.GET("/AmIFollowing/:username", amIFollowing)
 
 	// middleware
 	Router.Use(cors.New(cors.Config{
@@ -146,6 +147,22 @@ func errorCheck(err error) {
 }
 
 // endpoints
+
+func amIFollowing(c *gin.Context) {
+	connect_db()
+	username := c.Param("username")
+	userID := getUserIdIfLoggedIn(c)
+	rows, err := DB.Query(`select * from follower
+		where who_id = ? and whom_id = (select user_id from user where username = ?)`, userID, username)
+	errorCheck(err)
+	defer rows.Close()
+	following := false
+	for rows.Next() {
+		following = true
+	}
+	c.JSON(200, following)
+}
+
 func getTimeline(c *gin.Context) {
 	connect_db()
 	//query database

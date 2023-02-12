@@ -1,7 +1,7 @@
 import { CreateMessage } from "@/components/Message/CreateTweet";
 import { TweetContainer } from "@/components/Message/TweetContainer";
 import DefaultLayout from "@/layouts/DefaultLayout";
-import { getPublicTweets } from "@/server/getPublicTweets";
+import { getTimeline } from "@/server/getTimeline";
 import { Tweet } from "@/types/tweet.type";
 import * as cookie from "cookie";
 
@@ -15,7 +15,9 @@ export default function MyTimelinePage({ tweets }: MyTimelinePageProps) {
       <div className='wrapper mt-4'>
         <h1 className='font-bold'>My timeline</h1>
         <CreateMessage />
-        <TweetContainer tweets={tweets} />
+        {
+          tweets && <TweetContainer tweets={tweets} />
+        }
       </div>
     </DefaultLayout>
   );
@@ -23,31 +25,31 @@ export default function MyTimelinePage({ tweets }: MyTimelinePageProps) {
 
 export async function getServerSideProps(context: any) {
   try {
-    const c = cookie.parse(context.req.headers.cookie);
+    const cookie = context.req.headers.cookie
 
-    const parsed = JSON.parse(c.session);
+    if(!cookie) {
+      throw new Error("Not signed in")
+    }
 
-    const messages = await getPublicTweets();
+    const userId = cookie[8]
+
+    const messages = await getTimeline(parseInt(userId));
 
     if (!messages.tweets) {
       return {
         props: {
           tweets: [],
         },
-      };
+      }
     }
- 
-    /* const filteredMessages = messages.tweets.filter(
-      (tweet: Tweet) => tweet.author_id === parseInt(parsed.user)
-    ); */
 
     return {
       props: {
-        tweets: messages,
+        tweets: messages.tweets,
       },
     };
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return {
       props: {
         tweets: [],

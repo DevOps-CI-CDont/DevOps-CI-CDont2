@@ -19,7 +19,7 @@ export function Tweet({ text, author, pub_date }: Tweet) {
         <span className='text-md'>{text}</span>
         <span className='text-sm text-gray-200'>
           Tweeted by{" "}
-          <Link href={`/${author.username}`} className='font-bold'>
+          <Link href={`/user/${author.username}`} className='font-bold'>
             {author.username}
           </Link>{" "}
           at {new Date(pub_date).toDateString()}
