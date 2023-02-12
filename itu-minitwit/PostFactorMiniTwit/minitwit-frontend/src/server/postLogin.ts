@@ -5,7 +5,7 @@ interface PostLoginProps {
 
 export async function postLogin(username: string, password: string) {
   var myHeaders = new Headers();
-  myHeaders.append("Cookie", "user_id=3");
+  //myHeaders.append("Cookie", "user_id=3");
 
   var formdata = new FormData();
   formdata.append("username", username);

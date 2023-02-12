@@ -36,7 +36,7 @@ export async function getServerSideProps(context: any) {
         },
       };
     }
-
+ 
     const filteredMessages = messages.tweets.filter(
       (tweet: Tweet) => tweet.author_id === parseInt(parsed.user)
     );

@@ -1,17 +1,19 @@
-export async function postTweet() {
+export async function postTweet(message: string) {
+  let formData = new FormData()
+  formData.append("text", message)
+  console.log("formdata text", formData.get("text"))
   return await fetch(
     `${process.env.NEXT_PUBLIC_CORS_ORIGIN}/${process.env.NEXT_PUBLIC_API_URL}/add_message`,
     {
+      mode: "no-cors",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         origin: "http://localhost:3000",
       },
-      credentials: "same-origin",
+      credentials: "include",
       redirect: "follow",
-      body: JSON.stringify({
-        text: "hello",
-      }),
+      body: formData
     }
   ).then((response) => response.json());
 }

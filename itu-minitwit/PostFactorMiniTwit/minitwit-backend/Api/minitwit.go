@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -26,6 +27,16 @@ func main() {
 	router.POST("/register", register)
 	router.GET("/logout", logout)
 	router.GET("/RESET", init_db)
+
+	// middleware
+	router.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
+		AllowHeaders:     []string{"*"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	router.Run("localhost:8080")
 }
@@ -265,10 +276,16 @@ func postMessage(c *gin.Context) {
 
 	userid := getUserIdIfLoggedIn(c)
 
+	if userid == "-1" {
+		c.JSON(401, gin.H{"message": "user not logged in"})
+		return
+	}
+
 	text := c.PostForm("text")
 	authorid := userid
 	pub_date := time.Now().Unix()
 	flagged := 0
+	log.Println("text:" + text)
 
 	stmt, err := DB.Prepare(`insert into message (author_id, text, pub_date, flagged) values (?, ?, ?, ?)`)
 	errorCheck(err)
@@ -306,6 +323,7 @@ func login(c *gin.Context) {
 	}
 	// succes: set cookie
 	c.SetCookie("user_id", strconv.Itoa(userIdAsInt), 3600, "/", "localhost", false, false)
+	c.JSON(200, gin.H{"user_id": userIdAsInt})
 }
 
 func register(c *gin.Context) {
@@ -360,6 +378,7 @@ func getUserByName(userName string) *sql.Row {
 
 func getUserIdIfLoggedIn(c *gin.Context) string {
 	userid, err := c.Cookie("user_id")
+	log.Println("cookie user_id: " + userid)
 	errorCheck(err)
 	if userid == "" || userid == "-1" {
 		c.JSON(401, gin.H{"error": "not logged in"})

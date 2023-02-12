@@ -6,6 +6,7 @@ import { useCookies } from "react-cookie";
 
 export default function LoginPage() {
   const [sessionCookie, setSessionCookie] = useCookies(["session"]);
+  const [userIdCookie, setUserIdCookie] = useCookies(["user_id"]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
@@ -45,8 +46,9 @@ export default function LoginPage() {
 
     try {
       const res = await postLogin(username, password);
+      console.log(res);
 
-      setSessionCookie("session", res);
+      setUserIdCookie("user_id", res["user_id"]);
 
       router.push("/");
     } catch (e) {}

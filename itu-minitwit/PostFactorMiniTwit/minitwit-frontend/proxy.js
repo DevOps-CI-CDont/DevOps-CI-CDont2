@@ -8,6 +8,9 @@ cors_proxy
     originWhitelist: [], // Allow all origins
     requireHeader: ["origin", "x-requested-with"],
     redirectSameOrigin: true,
+    setHeaders: function(res, req) {
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+    }
   })
   .listen(port, host, function () {
     console.log("Running CORS Anywhere on " + host + ":" + port);

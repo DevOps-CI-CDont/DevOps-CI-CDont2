@@ -30,8 +30,7 @@ export function CreateMessage() {
     e.preventDefault();
 
     try {
-      await postTweet();
-
+      await postTweet(message);
       setMessage("");
     } catch (e) {
       alert("Something went wrong");
