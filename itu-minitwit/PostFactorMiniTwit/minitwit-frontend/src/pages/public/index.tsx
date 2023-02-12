@@ -8,8 +8,6 @@ interface HomePageProps {
 }
 
 export default function PublicTimelinePage({ tweets }: HomePageProps) {
-  console.log(tweets);
-
   return (
     <DefaultLayout>
       <div className='mt-4'>
@@ -21,19 +19,31 @@ export default function PublicTimelinePage({ tweets }: HomePageProps) {
 }
 
 export async function getServerSideProps() {
-  const messages = await getPublicTweets();
+  try {
+    const messages = await getPublicTweets();
 
-  if (!messages.tweets) {
+    if (!messages.tweets) {
+      return {
+        props: {
+          tweets: [],
+        },
+      };
+    }
+
+    console.log(messages);
+
+    return {
+      props: {
+        tweets: messages.tweets,
+      },
+    };
+  } catch (e) {
+    console.log(e);
+
     return {
       props: {
         tweets: [],
       },
     };
   }
-
-  return {
-    props: {
-      tweets: messages.tweets,
-    },
-  };
 }

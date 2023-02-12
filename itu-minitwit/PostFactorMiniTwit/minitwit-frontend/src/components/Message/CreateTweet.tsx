@@ -1,3 +1,4 @@
+import { postTweet } from "@/server/postTweet";
 import { useState } from "react";
 
 export function CreateMessage() {
@@ -25,9 +26,15 @@ export function CreateMessage() {
     </div>
   );
 
-  function handleSubmit(e: any) {
+  async function handleSubmit(e: any) {
     e.preventDefault();
-    console.log(message);
-    setMessage("");
+
+    try {
+      await postTweet();
+
+      setMessage("");
+    } catch (e) {
+      alert("Something went wrong");
+    }
   }
 }

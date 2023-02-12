@@ -1,5 +1,6 @@
 import DefaultLayout from "@/layouts/DefaultLayout";
 import { postLogin } from "@/server/postLogin";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useCookies } from "react-cookie";
 
@@ -7,6 +8,7 @@ export default function LoginPage() {
   const [sessionCookie, setSessionCookie] = useCookies(["session"]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
 
   return (
     <DefaultLayout>
@@ -41,10 +43,12 @@ export default function LoginPage() {
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const res = await postLogin(username, password);
+    try {
+      const res = await postLogin(username, password);
 
-    console.log(res);
+      setSessionCookie("session", res);
 
-    setSessionCookie("session", res);
+      router.push("/");
+    } catch (e) {}
   }
 }

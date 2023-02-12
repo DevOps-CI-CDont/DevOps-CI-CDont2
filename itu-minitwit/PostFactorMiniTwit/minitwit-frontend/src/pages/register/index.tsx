@@ -1,13 +1,15 @@
 import { Input } from "@/components/Input/Input";
 import DefaultLayout from "@/layouts/DefaultLayout";
 import { postSignUp } from "@/server/postSignUp";
-import { ChangeEvent, useState } from "react";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [email, setEmail] = useState("");
+  const router = useRouter();
 
   return (
     <DefaultLayout>
@@ -58,8 +60,15 @@ export default function RegisterPage() {
       return;
     }
 
-    const res = await postSignUp({ username, password, email });
+    console.log(username, password, password2, email);
 
-    console.log(res);
+    const res = await postSignUp({ username, password, password2, email });
+
+    if (res.message) {
+      alert(res.message);
+      router.push("/");
+    } else {
+      alert("Something went wrong");
+    }
   }
 }

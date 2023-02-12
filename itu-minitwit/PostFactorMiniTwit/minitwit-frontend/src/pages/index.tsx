@@ -21,19 +21,27 @@ export default function MyTimelinePage({ tweets }: MyTimelinePageProps) {
 }
 
 export async function getServerSideProps() {
-  const messages = await getPublicTweets();
+  try {
+    const messages = await getPublicTweets();
 
-  if (!messages.tweets) {
+    if (!messages.tweets) {
+      return {
+        props: {
+          tweets: [],
+        },
+      };
+    }
+
+    return {
+      props: {
+        tweets: messages.tweets,
+      },
+    };
+  } catch (e) {
     return {
       props: {
         tweets: [],
       },
     };
   }
-
-  return {
-    props: {
-      tweets: messages.tweets,
-    },
-  };
 }
