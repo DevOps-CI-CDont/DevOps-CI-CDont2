@@ -26,7 +26,7 @@ export default function UserProfilePage({
     <DefaultLayout>
       <div className='mt-4'>
         <div className="flex items-center justify-between">
-          <h1 className="text-lg">{username}'s profile</h1>
+          <h1 className="text-lg">{username}&apos;s profile</h1>
           <button onClick={handleFollow} className="ml-2 font-bold px-2 py-1 border bg-blue-500 shadow-md text-white rounded-md">{
             follow ? 'Unfollow' : 'Follow'
           }</button>

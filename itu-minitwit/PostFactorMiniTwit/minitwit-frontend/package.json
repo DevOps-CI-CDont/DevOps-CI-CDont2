@@ -1,9 +1,9 @@
 {
   "name": "minitwit-frontend",
-  "version": "0.1.0",
+  "version": "2.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently --kill-others \"npm run devnextjs\" \"node proxy.js\"",
+    "dev": "next dev",
     "devnextjs": "next dev",
     "build": "next build",
     "start": "next start",

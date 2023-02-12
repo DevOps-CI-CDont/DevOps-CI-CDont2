@@ -5,9 +5,10 @@ interface GetIsFollowingProps {
 
 export async function getIsFollowing({userId, username}: GetIsFollowingProps) {
     return await fetch(
-        `${process.env.NEXT_PUBLIC_CORS_ORIGIN}/${process.env.NEXT_PUBLIC_API_URL}/AmIFollowing/${username}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/AmIFollowing/${username}`,
         {
           method: "GET",
+          mode: "no-cors",
           headers: {
             "Cookie": `user_id=${userId}`,
             "Content-Type": "application/json",

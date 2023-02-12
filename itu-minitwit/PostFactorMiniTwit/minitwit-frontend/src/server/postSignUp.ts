@@ -18,7 +18,7 @@ export async function postSignUp({
   formdata.append("password2", password2);
 
   return await fetch(
-    `${process.env.NEXT_PUBLIC_CORS_ORIGIN}/${process.env.NEXT_PUBLIC_API_URL}/register`,
+    `${process.env.NEXT_PUBLIC_API_URL}/register`,
     {
       method: "POST",
       redirect: "follow",

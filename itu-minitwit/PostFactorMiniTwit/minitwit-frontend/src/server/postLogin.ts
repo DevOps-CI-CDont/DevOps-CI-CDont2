@@ -12,7 +12,7 @@ export async function postLogin(username: string, password: string) {
   formdata.append("password", password);
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_CORS_ORIGIN}/${process.env.NEXT_PUBLIC_API_URL}/login`,
+    `${process.env.NEXT_PUBLIC_API_URL}/login`,
     {
       method: "POST",
       headers: myHeaders,

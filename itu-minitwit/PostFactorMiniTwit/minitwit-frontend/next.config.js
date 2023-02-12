@@ -4,7 +4,8 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_CORS_ORIGIN: "http://localhost:6001",
     NEXT_PUBLIC_API_URL: "http://localhost:8080"
-  }
+  },
+  output:'standalone'
 }
 
 /* module.exports = {
