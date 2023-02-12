@@ -1,6 +1,6 @@
-export async function getPublicTweets() {
+export async function getLogout() {
   return await fetch(
-    `${process.env.NEXT_PUBLIC_CORS_ORIGIN}/${process.env.NEXT_PUBLIC_API_URL}/public`,
+    `${process.env.NEXT_PUBLIC_CORS_ORIGIN}/${process.env.NEXT_PUBLIC_API_URL}/logout`,
     {
       method: "GET",
       headers: {
@@ -9,5 +9,5 @@ export async function getPublicTweets() {
       },
       redirect: "follow",
     }
-  ).then((response) => response.json());
+  );
 }

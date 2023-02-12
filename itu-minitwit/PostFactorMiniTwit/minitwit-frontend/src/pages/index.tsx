@@ -3,6 +3,7 @@ import { TweetContainer } from "@/components/Message/TweetContainer";
 import DefaultLayout from "@/layouts/DefaultLayout";
 import { getPublicTweets } from "@/server/getPublicTweets";
 import { Tweet } from "@/types/tweet.type";
+import * as cookie from "cookie";
 
 interface MyTimelinePageProps {
   tweets?: Tweet[];
@@ -20,20 +21,37 @@ export default function MyTimelinePage({ tweets }: MyTimelinePageProps) {
   );
 }
 
-export async function getServerSideProps() {
-  const messages = await getPublicTweets();
+export async function getServerSideProps(context: any) {
+  try {
+    const c = cookie.parse(context.req.headers.cookie);
 
-  if (!messages.tweets) {
+    const parsed = JSON.parse(c.session);
+
+    const messages = await getPublicTweets();
+
+    if (!messages.tweets) {
+      return {
+        props: {
+          tweets: [],
+        },
+      };
+    }
+
+    const filteredMessages = messages.tweets.filter(
+      (tweet: Tweet) => tweet.author_id === parseInt(parsed.user)
+    );
+
+    return {
+      props: {
+        tweets: filteredMessages,
+      },
+    };
+  } catch (e) {
+    console.log(e);
     return {
       props: {
         tweets: [],
       },
     };
   }
-
-  return {
-    props: {
-      tweets: messages.tweets,
-    },
-  };
 }

@@ -9,7 +9,9 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
   return (
     <div>
       <Header />
-      <main className='pt-20 pb-20 wrapper min-h-screen px-2'>{children}</main>
+      <main className='pt-20 pb-20 mx-auto max-w-3xl min-h-screen px-2'>
+        {children}
+      </main>
       <Footer />
     </div>
   );
