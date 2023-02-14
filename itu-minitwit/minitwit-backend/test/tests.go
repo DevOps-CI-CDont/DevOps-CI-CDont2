@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const base = "http://localhost:8080"
+const base = "http://0.0.0.0:8080"
 
 func main() {
 	// run the test

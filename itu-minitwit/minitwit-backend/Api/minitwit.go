@@ -46,7 +46,7 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	Router.Run("localhost:8080")
+	Router.Run("0.0.0.0:8080")
 }
 
 // Capitalized names are public, lowercase are privat

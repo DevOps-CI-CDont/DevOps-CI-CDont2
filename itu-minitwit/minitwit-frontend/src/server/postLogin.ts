@@ -15,6 +15,7 @@ export async function postLogin(username: string, password: string) {
     `${process.env.NEXT_PUBLIC_API_URL}/login`,
     {
       method: "POST",
+      mode: "no-cors",
       headers: myHeaders,
       body: formdata,
     }
