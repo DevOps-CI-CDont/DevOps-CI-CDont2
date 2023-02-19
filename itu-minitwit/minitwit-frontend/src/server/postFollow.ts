@@ -33,6 +33,7 @@ async function unFollow({userId, username}: GetIsFollowingProps) {
       {
         method: "POST",
         mode: 'no-cors',
+        cache: "no-cache",
         headers: {
           "Cookie": `user_id=${userId}`,
           "Content-Type": "application/json",

@@ -50,6 +50,7 @@ export default function UserProfilePage({
 
 export async function getServerSideProps(context: any) {
   try {
+    
     const { username } = context.query;
 
     const cookie = context.req.headers.cookie

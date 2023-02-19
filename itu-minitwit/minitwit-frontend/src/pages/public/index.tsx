@@ -7,7 +7,14 @@ interface HomePageProps {
   tweets: Tweet[];
 }
 
-export default function PublicTimelinePage({ tweets }: HomePageProps) {
+export default function PublicTimelinePage() {
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+
+  useEffect(() => {
+    getPublicTweets().then((res) => setTweets(res.tweets));
+
+  }, []);
+  
   return (
     <DefaultLayout>
       <div className='mt-4'>
@@ -45,3 +52,11 @@ export async function getServerSideProps() {
     };
   }
 }
+function useEffect(arg0: () => void, arg1: never[]) {
+  throw new Error("Function not implemented.");
+}
+
+function useState<T>(arg0: never[]): [any, any] {
+  throw new Error("Function not implemented.");
+}
+

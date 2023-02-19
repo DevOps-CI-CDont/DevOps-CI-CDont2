@@ -9,6 +9,7 @@ export async function getIsFollowing({userId, username}: GetIsFollowingProps) {
         {
           method: "GET",
           mode: "no-cors",
+          cache: "no-cache",
           headers: {
             "Cookie": `user_id=${userId}`,
             "Content-Type": "application/json",

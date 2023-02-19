@@ -22,7 +22,7 @@ export function Header() {
               {authenticatedRouter.map((route) => {
                 return (
                   <li key={route.id} className='mx-2 hover:underline'>
-                    <Link href={route.path || ""}>{route.text}</Link>
+                    <Link href={route.path || ""} prefetch={false} >{route.text}</Link>
                   </li>
                 );
               })}
@@ -36,7 +36,7 @@ export function Header() {
             router.map((route) => {
               return (
                 <li key={route.id} className='mx-2 hover:underline'>
-                  <Link href={route.path || ""}>{route.text}</Link>
+                  <Link href={route.path || ""} prefetch={false}>{route.text}</Link>
                 </li>
               );
             })

@@ -6,7 +6,7 @@ services:
   frontend:
     image: cicdont/frontend
     container_name: frontend
-    hostname: localhost
+    hostname: docker_host
     ports:
       - "3000:3000"
     networks:

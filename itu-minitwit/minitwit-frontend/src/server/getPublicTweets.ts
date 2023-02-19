@@ -4,6 +4,7 @@ export async function getPublicTweets() {
     {
       method: "GET",
       mode: "no-cors",
+      cache: "no-cache",
       headers: {
         "Content-Type": "application/json",
         origin: "http://localhost:3000",
