@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   env: {
     NEXT_PUBLIC_CORS_ORIGIN: "http://0.0.0.0:6001",
-    NEXT_PUBLIC_API_URL: "http://0.0.0.0:8080"
+    NEXT_PUBLIC_API_URL: "http://api:8080"
   },
   output:'standalone'
 }

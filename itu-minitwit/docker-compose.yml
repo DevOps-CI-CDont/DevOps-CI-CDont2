@@ -5,6 +5,8 @@
 services:
   frontend:
     image: cicdont/frontend
+    container_name: frontend
+    hostname: localhost
     ports:
       - "3000:3000"
     networks:
@@ -12,6 +14,7 @@ services:
 
   backend:
     image: cicdont/backend
+    container_name: api
     ports:
       - "8080:8080"
       - "8081:8081"
