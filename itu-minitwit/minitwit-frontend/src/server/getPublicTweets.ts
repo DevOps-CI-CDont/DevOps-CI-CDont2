@@ -6,7 +6,14 @@ export async function getPublicTweets() {
 
   const response = await fetch(
     PROXY_URL + "/" +
-    API_URL + "/public")
+    API_URL + "/public", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "origin": "http://localhost:3000",
+        "x-requested-with": "XMLHttpRequest",
+      }
+    })
   const data = await response.json()
   return data
 }
