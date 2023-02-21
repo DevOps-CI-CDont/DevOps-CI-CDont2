@@ -1,7 +1,7 @@
 // Listen on a specific host via the HOST environment variable
 var host = process.env.HOST || "localhost";
 // Listen on a specific port via the PORT environment variable
-var port = 6001;
+var port = 3001;
 var cors_proxy = require("cors-anywhere");
 cors_proxy
   .createServer({
