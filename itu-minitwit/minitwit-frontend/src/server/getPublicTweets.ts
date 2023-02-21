@@ -1,15 +1,8 @@
 export async function getPublicTweets() {
-  return await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/public`,
-    {
-      method: "GET",
-      mode: "no-cors",
-      cache: "no-cache",
-      headers: {
-        "Content-Type": "application/json",
-        origin: "http://localhost:3000",
-      },
-      redirect: "follow",
-    }
-  ).then((response) => response.json());
+  console.log("getPublicTweets fetching from proxy + : ", process.env.NEXT_PUBLIC_API_URL + "/public")
+  const response = await fetch(
+    process.env.NEXT_PUBLIC_PROXY_URL + "/" +
+    process.env.NEXT_PUBLIC_API_URL + "/public")
+  const data = await response.json()
+  return data
 }

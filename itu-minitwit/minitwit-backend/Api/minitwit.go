@@ -38,7 +38,7 @@ func Start() {
 
 	// middleware
 	Router.Use(cors.New(cors.Config{
-		AllowAllOrigins:  true,
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:     []string{"*"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -73,6 +73,7 @@ type Message struct {
 
 // TODO: path should be decided at run time (perhaps by an environment variable)
 // var dbPath = "../tmp/minitwit.db"
+
 var dbPath = "/user/src/app/tmp/minitwit.db"
 
 // var dbPath = "./../tmp/minitwit.db"
@@ -219,6 +220,11 @@ func getPublicTimeline(c *gin.Context) {
 	log.Println(messages)
 
 	errorCheck(err)
+
+	// if no messages, return 401
+	if len(messages) == 0 {
+		c.JSON(401, gin.H{"message": "no messages"})
+	}
 
 	c.JSON(200, gin.H{"tweets": messages})
 

@@ -2,6 +2,7 @@ import { TweetContainer } from "@/components/Message/TweetContainer";
 import DefaultLayout from "@/layouts/DefaultLayout";
 import { getPublicTweets } from "@/server/getPublicTweets";
 import { Tweet } from "@/types/tweet.type";
+import { useEffect, useState } from "react";
 
 interface HomePageProps {
   tweets: Tweet[];
@@ -12,7 +13,6 @@ export default function PublicTimelinePage() {
 
   useEffect(() => {
     getPublicTweets().then((res) => setTweets(res.tweets));
-
   }, []);
   
   return (
@@ -25,7 +25,7 @@ export default function PublicTimelinePage() {
   );
 }
 
-export async function getServerSideProps() {
+async function getServerSideProps() {
   try {
     const messages = await getPublicTweets();
 
@@ -52,11 +52,3 @@ export async function getServerSideProps() {
     };
   }
 }
-function useEffect(arg0: () => void, arg1: never[]) {
-  throw new Error("Function not implemented.");
-}
-
-function useState<T>(arg0: never[]): [any, any] {
-  throw new Error("Function not implemented.");
-}
-

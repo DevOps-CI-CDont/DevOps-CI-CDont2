@@ -6,11 +6,8 @@ services:
   frontend:
     image: cicdont/frontend
     container_name: frontend
-    hostname: docker_host
     ports:
       - "3000:3000"
-    networks:
-      - outside
 
   backend:
     image: cicdont/backend
@@ -18,10 +15,3 @@ services:
     ports:
       - "8080:8080"
       - "8081:8081"
-    networks:
-      - outside
-
-networks:
-  outside:
-    external:
-      name: minitwit-network

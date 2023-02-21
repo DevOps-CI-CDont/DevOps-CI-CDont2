@@ -35,7 +35,8 @@ export default function MyTimelinePage() {
   );
 }
 
-// export async function getServerSideProps(context: any) {
+async function getServerSideProps(context: any) {
+}
 //   try {
 //     const cookie = context.req.headers.cookie
 
