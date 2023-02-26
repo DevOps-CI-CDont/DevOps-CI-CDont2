@@ -25,6 +25,8 @@ func Start() {
 
 	// router config 
 	Router.Use(cors.Default()) // cors.Default() should allow all origins
+	// it's important to set this before any routes are registered so that the middleware is applied to all routes
+	// ALL MY HOMIES HATE CORS
 
 	// endpoints
 	Router.GET("/mytimeline", getTimeline)
@@ -38,15 +40,6 @@ func Start() {
 	Router.GET("/logout", logout)
 	Router.GET("/RESET", init_db)
 	Router.GET("/AmIFollowing/:username", amIFollowing)
-	/* config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://138.68.93.147"}
-	config.AllowAllOrigins = true
-	config.AllowMethods = []string{"PUT", "PATCH", "GET", "POST", "DELETE"}
-	config.AllowHeaders = []string{"*"}
-	config.ExposeHeaders = []string{"Content-Length"}
-	config.AllowCredentials = true
-	config.MaxAge = 12 * time.Hour */
-	// middleware
 	Router.Run(":8080")
 }
 
