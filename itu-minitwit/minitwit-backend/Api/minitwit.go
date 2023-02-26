@@ -35,18 +35,16 @@ func Start() {
 	Router.GET("/logout", logout)
 	Router.GET("/RESET", init_db)
 	Router.GET("/AmIFollowing/:username", amIFollowing)
-
+	/* config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://138.68.93.147"}
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"PUT", "PATCH", "GET", "POST", "DELETE"}
+	config.AllowHeaders = []string{"*"}
+	config.ExposeHeaders = []string{"Content-Length"}
+	config.AllowCredentials = true
+	config.MaxAge = 12 * time.Hour */
+	Router.Use(cors.Default())
 	// middleware
-	Router.Use(cors.New(cors.Config{
-		AllowAllOrigins:  true,
-		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
-		AllowHeaders:     []string{"*"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
-	Router.Use(DisableCors())
-
 	Router.Run(":8080")
 }
 
