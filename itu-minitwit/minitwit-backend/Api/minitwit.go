@@ -23,6 +23,9 @@ func SetUpRouter() *gin.Engine {
 func Start() {
 	Router = SetUpRouter()
 
+	// router config 
+	Router.Use(cors.Default()) // cors.Default() should allow all origins
+
 	// endpoints
 	Router.GET("/mytimeline", getTimeline)
 	Router.GET("/public", getPublicTimeline)
@@ -43,7 +46,6 @@ func Start() {
 	config.ExposeHeaders = []string{"Content-Length"}
 	config.AllowCredentials = true
 	config.MaxAge = 12 * time.Hour */
-	Router.Use(cors.Default())
 	// middleware
 	Router.Run(":8080")
 }

@@ -9,21 +9,11 @@ services:
     # service_name: frontend
     ports:
       - "3000:3000"
-  
-  proxy:
-    image: proxy
-    container_name: proxy
-    # service_name: proxy
-    ports:
-      - "3001:3001"
-    depends_on:
-      - frontend
-      - backend
 
   backend:
-    image: cicdont/backend
-    # service_name: api
+    image: backend
     container_name: api
+    # service_name: api
     ports:
       - "8080:8080"
       - "8081:8081"
