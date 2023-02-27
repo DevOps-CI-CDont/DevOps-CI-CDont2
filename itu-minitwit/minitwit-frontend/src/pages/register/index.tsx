@@ -64,7 +64,7 @@ export default function RegisterPage() {
 
     if (res.message) {
       alert(res.message);
-      router.push("/");
+      router.push('/')
     } else {
       alert("Something went wrong");
     }

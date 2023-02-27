@@ -21,6 +21,7 @@ export async function postSignUp({
     `${process.env.NEXT_PUBLIC_API_URL}/register`,
     {
       method: "POST",
+      cache: "no-cache",
       redirect: "follow",
       body: formdata,
     }

@@ -2,12 +2,19 @@ import { TweetContainer } from "@/components/Message/TweetContainer";
 import DefaultLayout from "@/layouts/DefaultLayout";
 import { getPublicTweets } from "@/server/getPublicTweets";
 import { Tweet } from "@/types/tweet.type";
+import { useEffect, useState } from "react";
 
 interface HomePageProps {
   tweets: Tweet[];
 }
 
-export default function PublicTimelinePage({ tweets }: HomePageProps) {
+export default function PublicTimelinePage() {
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+
+  useEffect(() => {
+    getPublicTweets().then((res) => setTweets(res.tweets));
+  }, []);
+  
   return (
     <DefaultLayout>
       <div className='mt-4'>
@@ -18,7 +25,7 @@ export default function PublicTimelinePage({ tweets }: HomePageProps) {
   );
 }
 
-export async function getServerSideProps() {
+async function getServerSideProps() {
   try {
     const messages = await getPublicTweets();
 

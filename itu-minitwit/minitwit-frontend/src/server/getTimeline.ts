@@ -3,6 +3,7 @@
       `${process.env.NEXT_PUBLIC_API_URL}/mytimeline`,
       {
         mode: "no-cors",
+        cache: "no-cache",
         method: "GET",
         headers: {
           "Cookie": `user_id=${cookie}`,

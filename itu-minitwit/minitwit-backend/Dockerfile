@@ -9,9 +9,10 @@ COPY . .
 COPY ./tmp /usr/local/bin/tmp
 
 WORKDIR /user/src/app
-RUN go build -v -o /usr/local/bin/app ./Api
+RUN go build -v -o /usr/local/bin/app ./Main
 
 EXPOSE 8080
+EXPOSE 8081
 
 ENV PORT 8080
 

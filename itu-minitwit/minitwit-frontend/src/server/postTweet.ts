@@ -7,6 +7,7 @@ export async function postTweet(message: string) {
     {
       mode: "no-cors",
       method: "POST",
+      cache: "no-cache",
       headers: {
         "Content-Type": "application/json",
         origin: "http://localhost:3000",

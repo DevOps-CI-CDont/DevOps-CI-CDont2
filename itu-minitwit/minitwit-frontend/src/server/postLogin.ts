@@ -16,6 +16,7 @@ export async function postLogin(username: string, password: string) {
     {
       method: "POST",
       mode: "no-cors",
+      cache: "no-cache",
       headers: myHeaders,
       body: formdata,
     }

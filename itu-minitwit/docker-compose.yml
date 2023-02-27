@@ -4,20 +4,16 @@
 # "docker-compose up"
 services:
   frontend:
-    image: cicdont/frontend
+    image: frontend
+    container_name: frontend
+    # service_name: frontend
     ports:
       - "3000:3000"
-    networks:
-      - outside
 
   backend:
-    image: cicdont/backend
+    image: backend
+    container_name: api
+    # service_name: api
     ports:
       - "8080:8080"
-    networks:
-      - outside
-
-networks:
-  outside:
-    external:
-      name: minitwit-network
+      - "8081:8081"
