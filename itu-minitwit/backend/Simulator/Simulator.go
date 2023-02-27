@@ -38,6 +38,11 @@ func SetUpRouter() *gin.Engine {
 func Start() {
 	Router := SetUpRouter()
 
+	// router config 
+	Router.Use(cors.Default()) // cors.Default() should allow all origins
+	// it's important to set this before any routes are registered so that the middleware is applied to all routes
+	// ALL MY HOMIES HATE CORS
+
 	// endpoints
 	Router.GET("/latest", getLatest)
 	Router.POST("/register", register)
@@ -47,17 +52,7 @@ func Start() {
 	Router.GET("/fllws/:username", follow)
 	Router.POST("/fllws/:username", follow)
 
-	// middleware
-	Router.Use(cors.New(cors.Config{
-		AllowAllOrigins:  true,
-		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
-		AllowHeaders:     []string{"*"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
-
-	Router.Run("0.0.0.0:8081")
+	Router.Run(":8081")
 }
 
 func getLatest(c *gin.Context) {
