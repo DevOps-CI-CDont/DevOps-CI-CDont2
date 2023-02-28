@@ -105,6 +105,19 @@ func register(c *gin.Context) {
 	}
 
 	defer resp.Body.Close()
+
+	// read the response body
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	// convert the response body to a string
+	bodyString := string(bodyBytes)
+	c.JSON(200, gin.H{
+		"status": 200,
+		"msg":    bodyString,
+	})
 }
 
 func getMsgs(c *gin.Context) {
