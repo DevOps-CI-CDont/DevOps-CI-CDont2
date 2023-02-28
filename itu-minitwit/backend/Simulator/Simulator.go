@@ -1,10 +1,12 @@
 package simulator
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	main "minitwit-backend/init/Api"
+	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -38,7 +40,7 @@ func SetUpRouter() *gin.Engine {
 func Start() {
 	Router := SetUpRouter()
 
-	// router config 
+	// router config
 	Router.Use(cors.Default()) // cors.Default() should allow all origins
 	// it's important to set this before any routes are registered so that the middleware is applied to all routes
 	// ALL MY HOMIES HATE CORS
@@ -68,30 +70,41 @@ func register(c *gin.Context) {
 	body := make(map[string]string)
 	json.Unmarshal(bytes, &body)
 
-	var err string
-	if body["username"] == "" {
-		err = "You have to enter a username"
-	} else if body["email"] == "" || strings.Contains(body["email"], "@") {
-		err = "You have to enter a valid email address"
-	} else if body["pwd"] == "" {
-		err = "You have to enter a password"
-	} else if main.GetUserIdByName(body["username"]) == "" {
-		err = "The username is already taken"
-	} else {
-		main.Connect_db()
+	// retrieve data from request
+	username := body["username"]
+	email := body["email"]
+	password := body["pwd"]
+	password2 := body["pwd"]
 
-		passwordHash := sha256.Sum256([]byte(body["pwd"]))
-		main.DB.Exec("INSERT INTO user (username, email, pw_hash) VALUES (?, ?, ?)", body["username"], body["email"], passwordHash)
+	// create a new HTTP client
+	client := &http.Client{}
+
+	// create a new request with formData
+	req, err := http.NewRequest("POST", "http://138.68.93.147:8080/register", nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	if err != "" {
-		c.JSON(400, gin.H{
-			"status:": 400,
-			"err":     err,
-		})
-	} else {
-		c.JSON(204, gin.H{})
+	// add formData to the request body
+	data := url.Values{}
+	data.Set("username", username)
+	data.Set("email", email)
+	data.Set("password", password)
+	data.Set("password2", password2)
+	req.Body = ioutil.NopCloser(strings.NewReader(data.Encode()))
+
+	// set the content-type header
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// send the request
+	resp, err := client.Do(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
+
+	defer resp.Body.Close()
 }
 
 func getMsgs(c *gin.Context) {
