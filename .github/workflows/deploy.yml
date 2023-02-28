@@ -16,7 +16,6 @@ jobs:
           registry: registry.digitalocean.com
           username: ${{ secrets.DIGITAL_OCEAN_REGISTRY }}
           password: ${{ secrets.DIGITAL_OCEAN_REGISTRY }}
-        description: Log in to the DigitalOcean Container Registry
 
   build_frontend:
     needs: login-digital-ocean
@@ -25,12 +24,10 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build the Docker image for frontend
         run: docker build -t frontend ./itu-minitwit/frontend
-        description: Build the Docker image for the frontend app
       - name: Tag and push Docker image to DigitalOcean Container Registry
         run: |
           docker tag frontend:latest registry.digitalocean.com/cicdont-images/frontend:latest
           docker push registry.digitalocean.com/cicdont-images/frontend:latest
-        description: Tag and push the Docker image for the frontend app to the DigitalOcean Container Registry
 
   build_backend:
     needs: login-digital-ocean
@@ -39,10 +36,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build the Docker image for backend
         run: docker build -t backend ./itu-minitwit/backend
-        description: Build the Docker image for the backend app
       - name: Tag and push Docker image to DigitalOcean Container Registry
         run: |
           docker tag backend:latest registry.digitalocean.com/cicdont-images/backend:latest
           docker push registry.digitalocean.com/cicdont-images/backend:latest
-        description: Tag and push the Docker image for the backend app to the DigitalOcean Container Registry
 
