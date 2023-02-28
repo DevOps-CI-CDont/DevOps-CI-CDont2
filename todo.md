@@ -9,6 +9,7 @@
 - [] : # Implement a Vagrant file for Digital ocean droplet
 - [] : # Consider what to do with the reset endpoint
 - [] : # Fix the login page not setting users cookie
+- [] : # consider if we want to make a Database abstraction layer
 
 ### In Progress
 
