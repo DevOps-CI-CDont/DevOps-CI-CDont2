@@ -20,7 +20,12 @@ var LATEST = 0
 
 func update_latest(c *gin.Context) {
 	try_latest := c.Param("latest")
+
+
 	int_val, err := strconv.Atoi(try_latest)
+	if err != nil{
+		console.log("Error: ", err)
+	}
 	if try_latest != "" && err == nil {
 		LATEST = int_val
 	}
