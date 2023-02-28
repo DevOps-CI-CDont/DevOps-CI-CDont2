@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,9 @@ var LATEST = 0
 func update_latest(c *gin.Context) {
 	try_latest := c.Param("latest")
 	int_val, err := strconv.Atoi(try_latest)
+	if err != nil{
+		fmt.Println(err)
+	}
 	if try_latest != "" && err == nil {
 		LATEST = int_val
 	}
