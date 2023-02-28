@@ -20,7 +20,7 @@ import (
 var LATEST = 0
 
 func update_latest(c *gin.Context) {
-	try_latest := c.Param("latest")
+	try_latest := c.Request.URL.Query().Get("latest")
 	int_val, err := strconv.Atoi(try_latest)
 	if err != nil{
 		fmt.Println(err)
