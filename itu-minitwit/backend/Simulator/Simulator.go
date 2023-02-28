@@ -20,7 +20,7 @@ import (
 var LATEST = 0
 
 func update_latest(c *gin.Context) {
-	try_latest := c.Param("latest")
+	try_latest := c.Request.URL.Query().Get("latest")
 	int_val, err := strconv.Atoi(try_latest)
 	if err != nil{
 		fmt.Println(err)
@@ -298,8 +298,11 @@ func follow(c *gin.Context) {
 			followers.Scan(&username)
 			followers_names = append(followers_names, username)
 		}
+		
 
-		c.JSON(200, followers_names)
+		c.JSON(200, gin.H{
+			"follows": followers_names,
+		})
 	}
 
 }

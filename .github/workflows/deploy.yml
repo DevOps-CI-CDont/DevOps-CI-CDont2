@@ -1,0 +1,43 @@
+name: Docker Image CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  login-digital-ocean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to DigitalOcean Container Registry
+        uses: docker/login-action@v1   
+        with:
+          registry: registry.digitalocean.com
+          username: ${{ secrets.DIGITAL_OCEAN_REGISTRY }}
+          password: ${{ secrets.DIGITAL_OCEAN_REGISTRY }}
+
+  build_frontend:
+    needs: login-digital-ocean
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image for frontend
+        run: docker build -t frontend ./itu-minitwit/frontend
+      - name: Tag and push Docker image to DigitalOcean Container Registry
+        run: |
+          docker tag frontend:latest registry.digitalocean.com/cicdont-images/frontend:latest
+          docker push registry.digitalocean.com/cicdont-images/frontend:latest
+
+  build_backend:
+    needs: login-digital-ocean
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image for backend
+        run: docker build -t backend ./itu-minitwit/backend
+      - name: Tag and push Docker image to DigitalOcean Container Registry
+        run: |
+          docker tag backend:latest registry.digitalocean.com/cicdont-images/backend:latest
+          docker push registry.digitalocean.com/cicdont-images/backend:latest
+
