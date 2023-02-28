@@ -21,6 +21,7 @@ jobs:
         run: docker build -t backend ./itu-minitwit/backend
 
   digital-ocean:
+    needs: [build-frontend-image, build-backend-image] 
     runs-on: ubuntu-latest
     steps:
       - name: Install doctl
