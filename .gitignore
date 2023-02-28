@@ -1,0 +1,27 @@
+# Go backend
+*.exe
+*.test
+*.prof
+*.out
+*.test
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.lz4
+*.tar.sz
+/vendor/
+/bin/
+/pkg/
+
+# Next.js frontend
+.next/
+node_modules/
+
+# Shared folders
+logs/
+tmp/
+
+# IDEs
+.idea/
+.vscode/
