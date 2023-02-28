@@ -298,8 +298,11 @@ func follow(c *gin.Context) {
 			followers.Scan(&username)
 			followers_names = append(followers_names, username)
 		}
+		
 
-		c.JSON(200, followers_names)
+		c.JSON(200, gin.H{
+			"followers": followers_names,
+		})
 	}
 
 }
