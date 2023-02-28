@@ -7,33 +7,31 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-frontend-image:
+  build-tag-push-images:
     runs-on: ubuntu-latest
     steps:
+    
       - uses: actions/checkout@v3
       - name: Build the Docker image for frontend
         run: docker build -t frontend ./itu-minitwit/frontend
-  build-backend-image:
-    runs-on: ubuntu-latest
-    steps:
+
       - uses: actions/checkout@v3
       - name: Build the Docker image for backend
         run: docker build -t backend ./itu-minitwit/backend
 
-  digital-ocean:
-    needs: [build-frontend-image, build-backend-image] 
-    runs-on: ubuntu-latest
-    steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITAL_OCEAN_REGISTRY }}
+          
       - name: doctl registry login
         run: doctl registry login
+        
       - name: Tag and push frontend Docker image to DigitalOcean Container Registry
         run: |
           docker tag frontend:latest registry.digitalocean.com/cicdont-images/frontend:latest
           docker push registry.digitalocean.com/cicdont-images/frontend:latest
+          
       - name: Tag and push backend Docker image to DigitalOcean Container Registry
         run: |
           docker tag backend:latest registry.digitalocean.com/cicdont-images/backend:latest
