@@ -301,7 +301,7 @@ func follow(c *gin.Context) {
 		
 
 		c.JSON(200, gin.H{
-			"followers": followers_names,
+			"follows": followers_names,
 		})
 	}
 
