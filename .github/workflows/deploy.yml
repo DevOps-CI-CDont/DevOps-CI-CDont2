@@ -7,14 +7,20 @@ on:
     branches: [ "main" ]
 
 jobs:
-  login-digital-ocean:
+  install-doctl:
     runs-on: ubuntu-latest
     steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITAL_OCEAN_REGISTRY }}
-
+  
+  login-digital-ocean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: doctl registry login
+        run: doctl registry login
+      
   build_frontend:
     needs: login-digital-ocean
     runs-on: ubuntu-latest
