@@ -25,3 +25,19 @@ tmp/
 # IDEs
 .idea/
 .vscode/
+
+# pytest stuff
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+.tox/
+.nox/
+.mypy_cache/
+.hypothesis/
+pytestdebug.log
+pytest.ini
+coverage.xml
+.cpython-*
+itu-minitwit/backend/test/__pycache__/*
+.pyc
