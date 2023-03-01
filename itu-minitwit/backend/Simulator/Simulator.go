@@ -86,10 +86,9 @@ func register(c *gin.Context) {
 	// create a new request with formData
 	req, err := http.NewRequest("POST", "http://138.68.93.147:8080/register", nil)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{"error_msg": err.Error()})
 		return
 	}
-
 	// add formData to the request body
 	data := url.Values{}
 	data.Set("username", username)
@@ -104,24 +103,16 @@ func register(c *gin.Context) {
 	// send the request
 	resp, err := client.Do(req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(400 gin.H{"error_msg": err.Error()})
 		return
 	}
 
+	if resp.StatusCode != 200 {
+		c.JSON(400, gin.H{"error_msg": "Something went wrong with the registration!"})
+		return
+	} 
 	defer resp.Body.Close()
-
-	// read the response body
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	// convert the response body to a string
-	bodyString := string(bodyBytes)
-	c.JSON(200, gin.H{
-		"status": 200,
-		"msg":    bodyString,
-	})
+	c.JSON(204, {}) // no content
 }
 
 func getMsgs(c *gin.Context) {
