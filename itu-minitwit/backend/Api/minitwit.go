@@ -468,5 +468,7 @@ func getAllUsers(c *gin.Context) {
 		errorCheck(err)
 		users = append(users, user)
 	}
-	c.JSON(200, users)
+	c.JSON(200, gin.H{
+		"users": users,
+		})
 }
