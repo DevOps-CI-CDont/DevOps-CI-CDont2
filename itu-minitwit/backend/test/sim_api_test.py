@@ -1,9 +1,6 @@
-import os
 import json
 import base64
-import sqlite3
 import requests
-from contextlib import closing
 
 
 BASE_URL = 'http://138.68.93.147:8081'
