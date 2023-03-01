@@ -216,7 +216,7 @@ func msgsPerUser(c *gin.Context) {
 
 		currentTime := time.Now()
 		pub_date := currentTime.Format("2006-01-02 15:04:05")
-		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
+		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], pub_date)
 		fmt.Println("DB Insertion completed!")
 		// select the last inserted message
 		query = `SELECT message.*, user.* FROM message, user `
