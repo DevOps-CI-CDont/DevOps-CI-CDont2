@@ -214,6 +214,10 @@ func msgsPerUser(c *gin.Context) {
 					VALUES (?, ?, ?, 0)`
 
 		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
+		fmt.Println("DB Insertion completed!")
+		// select the last inserted message
+		query = `SELECT message.*, user.* FROM message, user `
+
 
 		c.JSON(204, gin.H{})
 	}

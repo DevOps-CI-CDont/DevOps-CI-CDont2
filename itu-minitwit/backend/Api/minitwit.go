@@ -40,17 +40,8 @@ func Start() {
 	Router.GET("/logout", logout)
 	Router.GET("/RESET", init_db)
 	Router.GET("/AmIFollowing/:username", amIFollowing)
+	Router.GET("/allUsers", getAllUsers)
 	Router.Run(":8080")
-}
-
-func DisableCors() gin.HandlerFunc {
-    return func(c *gin.Context) {
-        c.Header("Access-Control-Allow-Origin", "*")
-        c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        c.Header("Access-Control-Allow-Credentials", "true")
-        c.Next()
-    }
 }
 
 // Capitalized names are public, lowercase are privat
@@ -462,4 +453,20 @@ func GetUserIdByName(username string) string {
 
 func logout(c *gin.Context) {
 	c.SetCookie("user_id", "", -1, "/", "localhost", false, false)
+}
+
+func getAllUsers(c *gin.Context) {
+	Connect_db()
+	rows, err := DB.Query(`select * from user`)
+	errorCheck(err)
+	defer rows.Close()
+
+	users := []User{}
+	for rows.Next() {
+		user := User{}
+		err := rows.Scan(&user.User_id, &user.Username, &user.Email, &user.Pw_hash)
+		errorCheck(err)
+		users = append(users, user)
+	}
+	c.JSON(200, users)
 }
