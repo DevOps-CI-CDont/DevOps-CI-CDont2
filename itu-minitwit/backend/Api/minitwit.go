@@ -23,7 +23,7 @@ func SetUpRouter() *gin.Engine {
 func Start() {
 	Router = SetUpRouter()
 
-	// router config 
+	// router config
 	Router.Use(cors.Default()) // cors.Default() should allow all origins
 	// it's important to set this before any routes are registered so that the middleware is applied to all routes
 	// ALL MY HOMIES HATE CORS
@@ -326,8 +326,6 @@ func postMessage(c *gin.Context) {
 
 	text := c.PostForm("text")
 	authorid := userid
-	currentTime := time.Now()
-	pub_date := currentTime.Format("2006-01-02 15:04:05")
 	flagged := 0
 	log.Println("text:" + text)
 
@@ -335,7 +333,7 @@ func postMessage(c *gin.Context) {
 	errorCheck(err)
 	defer stmt.Close()
 
-	_, err = stmt.Exec(authorid, text, pub_date, flagged)
+	_, err = stmt.Exec(authorid, text, time.Now().Unix(), flagged)
 	errorCheck(err)
 
 	c.JSON(200, gin.H{"message": "message posted"})
@@ -471,5 +469,5 @@ func getAllUsers(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{
 		"users": users,
-		})
+	})
 }

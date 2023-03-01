@@ -2,6 +2,7 @@ package simulator
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	main "minitwit-backend/init/Api"
@@ -10,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -22,7 +22,7 @@ var LATEST = 0
 func update_latest(c *gin.Context) {
 	try_latest := c.Request.URL.Query().Get("latest")
 	int_val, err := strconv.Atoi(try_latest)
-	if err != nil{
+	if err != nil {
 		fmt.Println(err)
 	}
 	if try_latest != "" && err == nil {
@@ -110,7 +110,7 @@ func register(c *gin.Context) {
 	if resp.StatusCode != 200 {
 		c.JSON(400, gin.H{"error_msg": "Something went wrong with the registration!"})
 		return
-	} 
+	}
 	defer resp.Body.Close()
 	c.JSON(204, gin.H{}) // no content
 }
@@ -213,14 +213,10 @@ func msgsPerUser(c *gin.Context) {
 		query := `INSERT INTO message (author_id, text, pub_date, flagged)
 					VALUES (?, ?, ?, 0)`
 
-
-		currentTime := time.Now()
-		pub_date := currentTime.Format("2006-01-02 15:04:05")
-		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], pub_date)
+		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
 		fmt.Println("DB Insertion completed!")
 		// select the last inserted message
 		query = `SELECT message.*, user.* FROM message, user `
-
 
 		c.JSON(204, gin.H{})
 	}
@@ -296,7 +292,6 @@ func follow(c *gin.Context) {
 			followers.Scan(&username)
 			followers_names = append(followers_names, username)
 		}
-		
 
 		c.JSON(200, gin.H{
 			"follows": followers_names,
