@@ -326,7 +326,8 @@ func postMessage(c *gin.Context) {
 
 	text := c.PostForm("text")
 	authorid := userid
-	pub_date := time.Now().Unix()
+	currentTime := time.Now()
+	pub_date := currentTime.Format("2006-01-02 15:04:05")
 	flagged := 0
 	log.Println("text:" + text)
 
