@@ -112,7 +112,7 @@ func register(c *gin.Context) {
 		return
 	} 
 	defer resp.Body.Close()
-	c.JSON(204, {}) // no content
+	c.JSON(204, gin.H{}) // no content
 }
 
 func getMsgs(c *gin.Context) {
