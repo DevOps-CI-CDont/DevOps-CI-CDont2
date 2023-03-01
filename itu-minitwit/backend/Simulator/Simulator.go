@@ -103,7 +103,7 @@ func register(c *gin.Context) {
 	// send the request
 	resp, err := client.Do(req)
 	if err != nil {
-		c.JSON(400 gin.H{"error_msg": err.Error()})
+		c.JSON(400, gin.H{"error_msg": err.Error()})
 		return
 	}
 
