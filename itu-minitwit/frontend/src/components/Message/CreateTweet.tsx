@@ -42,10 +42,11 @@ export function CreateMessage() {
     e.preventDefault();
 
     try {
-      await postTweet(message);
+      await postTweet({
+        message,
+        userId: cookies.user_id,
+      });
       setMessage("");
-    } catch (e) {
-      alert("Something went wrong");
-    }
+    } catch (e) {}
   }
 }

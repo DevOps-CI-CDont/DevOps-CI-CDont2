@@ -1,4 +1,9 @@
-export async function postTweet(message: string) {
+interface PostTweetProps {
+  message: string;
+  userId: string;
+}
+
+export async function postTweet({ message, userId }: PostTweetProps) {
   let formData = new FormData();
   formData.append("text", message);
   return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/add_message`, {
@@ -6,6 +11,7 @@ export async function postTweet(message: string) {
     method: "POST",
     cache: "no-cache",
     headers: {
+      Cookie: `user_id=${userId}`,
       "Content-Type": "application/json",
       origin: "http://localhost:3000",
     },
