@@ -1,8 +1,20 @@
 import { postTweet } from "@/server/postTweet";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
 
 export function CreateMessage() {
   const [message, setMessage] = useState("");
+  const [cookies] = useCookies(["user_id"]);
+
+  const [hasCookie, setHasCookie] = useState(false);
+
+  useEffect(() => {
+    if (cookies.user_id) {
+      setHasCookie(true);
+    }
+  }, [cookies]);
+
+  if (!hasCookie) return <></>;
 
   return (
     <div className='w-full mt-2 bg-gray-300 shadow-md px-1 py-1 rounded-md'>

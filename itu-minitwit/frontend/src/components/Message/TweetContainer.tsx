@@ -7,7 +7,7 @@ interface TweetContainerProps {
 
 export function TweetContainer({ tweets }: TweetContainerProps) {
   return (
-    <div className='w-full mt-2 bg-gray-200 shadow-md px-1 py-1 rounded-md'>
+    <div className='w-full mt-2 bg-gray-200 shadow-md px-1 py-1 mb-4 rounded-md'>
       {!tweets ? (
         <span>No tweets found</span>
       ) : (

@@ -13,7 +13,7 @@ export function Header() {
   const nextRouter = useRouter();
 
   return (
-    <div className='border-b shadow-md w-screen fixed top-0 left-0 right-0'>
+    <div className='border-b shadow-md w-screen fixed top-0 left-0 right-0 bg-white'>
       <nav className='flex justify-between items-center h-20 max-w-7xl mx-auto px-2'>
         <h2 className='font-bold text-lg'>ITU Minitwit</h2>
         <ul className='flex justify-center items-center'>
@@ -22,7 +22,9 @@ export function Header() {
               {authenticatedRouter.map((route) => {
                 return (
                   <li key={route.id} className='mx-2 hover:underline'>
-                    <Link href={route.path || ""} prefetch={false} >{route.text}</Link>
+                    <Link href={route.path || ""} prefetch={false}>
+                      {route.text}
+                    </Link>
                   </li>
                 );
               })}
@@ -36,7 +38,9 @@ export function Header() {
             router.map((route) => {
               return (
                 <li key={route.id} className='mx-2 hover:underline'>
-                  <Link href={route.path || ""} prefetch={false}>{route.text}</Link>
+                  <Link href={route.path || ""} prefetch={false}>
+                    {route.text}
+                  </Link>
                 </li>
               );
             })
@@ -48,7 +52,7 @@ export function Header() {
 
   async function handleSignOut() {
     await getLogout();
-    removeUserIdCookie('user_id');
+    removeUserIdCookie("user_id");
     nextRouter.push("/public");
   }
 }
