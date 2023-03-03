@@ -25,7 +25,7 @@ def init_db():
             db.cursor().executescript(fp.read())
         db.commit()
 
-# Empty the database and initialize the schema again
+# Empty the database and initialize the schema again 
 os.system(f'rm {dbPath}')
 init_db()
 
