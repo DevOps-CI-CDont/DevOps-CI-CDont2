@@ -34,10 +34,12 @@ jobs:
       - name: Build and run Go api
         run: |
           (cd itu-minitwit/backend/Main && go build)
-          (cd itu-minitwit/backend/Main && ./Main)
+          (cd itu-minitwit/backend/Main && ./Main &)
+          MAIN_PID=$!
       - name: Test with pytest
         run: |
           pytest
+          kill $MAIN_PID
   go_tests:
     runs-on: ubuntu-latest
     steps:
@@ -53,6 +55,9 @@ jobs:
           (cd itu-minitwit/backend/ && go mod tidy)
           (cd itu-minitwit/backend/ && go build -v ./...)
           (cd itu-minitwit/backend/Main && go build)
-          (cd itu-minitwit/backend/Main && ./Main)
+          (cd itu-minitwit/backend/Main && ./Main &)
+          MAIN_PID=$!
       - name: Test
-        run: (cd itu-minitwit/backend/ && go test -v ./...)
+        run: |
+          (cd itu-minitwit/backend/ && go test -v ./...)
+          kill $MAIN_PID
