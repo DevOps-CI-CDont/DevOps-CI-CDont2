@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -14,6 +15,7 @@ import (
 )
 
 var Router *gin.Engine
+var dbPath, is_present = os.LookupEnv("DBPATH")
 
 func SetUpRouter() *gin.Engine {
 	r := gin.Default()
@@ -22,6 +24,10 @@ func SetUpRouter() *gin.Engine {
 
 func Start() {
 	Router = SetUpRouter()
+
+	if !is_present {
+		dbPath = "./../tmp/minitwit.db"
+	}
 
 	// router config
 	Router.Use(cors.Default()) // cors.Default() should allow all origins
@@ -66,12 +72,6 @@ type Message struct {
 	Author     User   `json:"author"`
 }
 
-// TODO: path should be decided at run time (perhaps by an environment variable)
-// var dbPath = "../tmp/minitwit.db"
-
-var dbPath = "/user/src/app/tmp/minitwit.db"
-
-// var dbPath = "./../tmp/minitwit.db"
 var DB *sql.DB // global DB variable
 var PER_PAGE = 30
 var DEBUG = true
