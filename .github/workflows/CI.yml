@@ -2,9 +2,6 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   python_tests:
@@ -34,7 +31,7 @@ jobs:
       - name: Build and run Go api
         run: |
           (cd itu-minitwit/backend/Main && go build)
-          (cd itu-minitwit/backend/Main && ./Main)
+          (cd itu-minitwit/backend/Main && ./Main &)
       - name: Test with pytest
         run: |
           pytest
@@ -53,6 +50,7 @@ jobs:
           (cd itu-minitwit/backend/ && go mod tidy)
           (cd itu-minitwit/backend/ && go build -v ./...)
           (cd itu-minitwit/backend/Main && go build)
-          (cd itu-minitwit/backend/Main && ./Main)
+          (cd itu-minitwit/backend/Main && ./Main &)
       - name: Test
-        run: (cd itu-minitwit/backend/ && go test -v ./...)
+        run: |
+          (cd itu-minitwit/backend/ && go test -v ./...)
