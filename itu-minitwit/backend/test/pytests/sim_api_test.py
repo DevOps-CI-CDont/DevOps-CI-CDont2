@@ -1,9 +1,12 @@
+from contextlib import closing
 import json
 import base64
+import os
+import sqlite3
 import requests
 
 
-BASE_URL = 'http://138.68.93.147:8081'
+BASE_URL = 'http://0.0.0.0:8081'
 USERNAME = 'simulator'
 PWD = 'super_safe!'
 CREDENTIALS = ':'.join([USERNAME, PWD]).encode('ascii')
@@ -11,6 +14,20 @@ ENCODED_CREDENTIALS = base64.b64encode(CREDENTIALS).decode()
 HEADERS = {'Connection': 'close',
            'Content-Type': 'application/json',
            f'Authorization': f'Basic {ENCODED_CREDENTIALS}'}
+
+dbPath = "./itu-minitwit/backend/tmp/minitwit.db"
+schemaPath = "./itu-minitwit/backend/tmp/schema.sql"
+
+def init_db():
+    """Creates the database tables."""
+    with closing(sqlite3.connect(dbPath)) as db:
+        with open(schemaPath) as fp:
+            db.cursor().executescript(fp.read())
+        db.commit()
+
+# Empty the database and initialize the schema again
+os.system(f'rm {dbPath}')
+init_db()
 
 def test_latest():
     # post something to updaet LATEST

@@ -8,6 +8,7 @@ import (
 	main "minitwit-backend/init/Api"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -41,8 +42,14 @@ func SetUpRouter() *gin.Engine {
 	return r
 }
 
+var api_base_url, is_present = os.LookupEnv("API_BASE_URL")
+
 func Start() {
 	Router := SetUpRouter()
+
+	if !is_present {
+		api_base_url = "http://0.0.0.0:8080"
+	}
 
 	// router config
 	Router.Use(cors.Default()) // cors.Default() should allow all origins
@@ -84,7 +91,7 @@ func register(c *gin.Context) {
 	client := &http.Client{}
 
 	// create a new request with formData
-	req, err := http.NewRequest("POST", "http://138.68.93.147:8080/register", nil)
+	req, err := http.NewRequest("POST", api_base_url+"/register", nil)
 	if err != nil {
 		c.JSON(400, gin.H{"error_msg": err.Error()})
 		return
