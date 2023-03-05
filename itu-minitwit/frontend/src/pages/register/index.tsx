@@ -1,10 +1,13 @@
 import { Input } from "@/components/Input/Input";
 import DefaultLayout from "@/layouts/DefaultLayout";
+import { postLogin } from "@/server/postLogin";
 import { postSignUp } from "@/server/postSignUp";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { useCookies } from "react-cookie";
 
 export default function RegisterPage() {
+  const [userIdCookie, setUserIdCookie] = useCookies(["user_id"]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
@@ -62,8 +65,13 @@ export default function RegisterPage() {
 
     const res = await postSignUp({ username, password, password2, email });
 
+    console.log(res);
+
     if (res.message) {
-      alert(res.message);
+      const res = await postLogin({ username, password });
+
+      setUserIdCookie("user_id", res["user_id"]);
+
       router.push("/");
     } else {
       alert("Something went wrong");

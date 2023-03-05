@@ -1,6 +1,5 @@
 import DefaultLayout from "@/layouts/DefaultLayout";
 import { postLogin } from "@/server/postLogin";
-import useAuthStore from "@/store/authStore";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useCookies } from "react-cookie";
@@ -9,7 +8,6 @@ export default function LoginPage() {
   const [userIdCookie, setUserIdCookie] = useCookies(["user_id"]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const setIsAuth = useAuthStore((state) => state.setIsAuth)
   const router = useRouter();
 
   return (
@@ -46,13 +44,13 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const res = await postLogin(username, password);
+      const res = await postLogin({ username, password });
 
       setUserIdCookie("user_id", res["user_id"]);
 
-      setIsAuth(true)
-
       router.push("/");
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
