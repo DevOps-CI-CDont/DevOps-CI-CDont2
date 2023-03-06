@@ -35,21 +35,7 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
-    # If the python_tests job succeeds, trigger the CD workflow
-    # by calling the GitHub API with a POST request.
-    # The 'if' statement checks that the job was successful.
-    # Replace the values in the URL with the appropriate values
-    # for your repository and workflow.
-    # Also replace 'secrets.GITHUB_TOKEN' with the name of the secret
-    # containing your personal access token.
-      - name: Trigger deployment workflow
-        if: ${{ job.status == 'success' }}
-        run: |
-          curl -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: Bearer ${{ secrets.GH_secret }}" \
-            https://api.github.com/repos/kjaerb/DevOps-CI-CDont/actions/workflows/deploy/dispatches \
-            -d '{"ref":"main", "inputs":{}}'
+
 
   go_tests:
     runs-on: ubuntu-latest
