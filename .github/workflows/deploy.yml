@@ -1,7 +1,15 @@
 name: Docker Image CD
 
 on:
-  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Continuous Integration"
+    types:
+      - completed
+    branches:
+      - main
+    result: success
+
 
 jobs:
   build-tag-push-images:
