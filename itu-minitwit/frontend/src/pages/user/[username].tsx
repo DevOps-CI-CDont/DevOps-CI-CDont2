@@ -19,6 +19,7 @@ export default function UserProfilePage({
   isFollowing,
 }: UserProfileProps) {
   const [userIdCookie] = useCookies(["user_id"]);
+  const [canFollow] = useState<boolean>(userIdCookie.user_id ? true : false);
   const [follow, setFollow] = useState<boolean>(isFollowing);
 
   return (
@@ -27,8 +28,9 @@ export default function UserProfilePage({
         <div className='flex items-center justify-between'>
           <h1 className='text-lg'>{username}&apos;s profile</h1>
           <button
+            disabled={!canFollow}
             onClick={handleFollow}
-            className='ml-2 font-bold px-2 py-1 border bg-blue-500 shadow-md text-white rounded-md'>
+            className='ml-2 font-bold px-2 py-1 border bg-blue-500 shadow-md text-white rounded-md disabled:bg-gray-200'>
             {follow ? "Unfollow" : "Follow"}
           </button>
         </div>
@@ -51,39 +53,44 @@ export default function UserProfilePage({
 }
 
 export async function getServerSideProps(context: any) {
-  try {
-    const { username } = context.query;
+  const { username } = context.query;
 
-    const cookie = context.req.headers.cookie;
+  const cookie = context.req.headers.cookie;
+  const messages = await getPublicTweets();
 
-    if (!cookie) {
-      throw new Error("Not signed in");
-    }
-
-    const userId = cookie[8];
-
-    const messages = await getPublicTweets();
-
-    const isFollowing = await getIsFollowing({ userId, username });
-
-    if (!messages.tweets) {
-      throw new Error("No tweets found");
-    }
-
-    const filteredTweets = messages.tweets.filter(
-      (tweet: Tweet) => tweet.author.username === username
-    );
-
+  if (!messages) {
     return {
       props: {
         username,
-        tweets: filteredTweets,
-        isFollowing: isFollowing,
+        tweets: [],
+        isFollowing: false,
       },
     };
-  } catch (e) {
+  }
+
+  const filteredTweets = messages.tweets.filter(
+    (tweet: Tweet) => tweet.author.username === username
+  );
+
+  const userId = cookie && cookie[8];
+
+  if (!userId) {
     return {
-      notFound: true,
+      props: {
+        username,
+        tweets: messages.tweets,
+        isFollowing: false,
+      },
     };
   }
+
+  const isFollowing = await getIsFollowing({ userId, username });
+
+  return {
+    props: {
+      username,
+      tweets: filteredTweets,
+      isFollowing: isFollowing,
+    },
+  };
 }
