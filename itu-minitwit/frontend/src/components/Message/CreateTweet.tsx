@@ -42,6 +42,8 @@ export function CreateMessage() {
     e.preventDefault();
 
     try {
+      if (!hasCookie) return;
+
       await postTweet({
         message,
         userId: cookies.user_id,
