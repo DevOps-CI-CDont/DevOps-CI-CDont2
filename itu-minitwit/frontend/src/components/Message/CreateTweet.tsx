@@ -57,6 +57,8 @@ export function CreateMessage({ setTweets }: CreateMessageProps) {
       });
       setMessage("");
       getPublicTweets().then((res) => setTweets(res.tweets));
-    } catch (e) {}
+    } catch (e) {
+      console.log("Error: ", e)
+    }
   }
 }
