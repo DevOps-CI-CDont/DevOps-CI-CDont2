@@ -1,8 +1,15 @@
+import { getPublicTweets } from "@/server/getPublicTweets";
 import { postTweet } from "@/server/postTweet";
+import { Tweet } from "@/types/tweet.type";
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 
-export function CreateMessage() {
+interface CreateMessageProps {
+  setTweets: (tweets: Tweet[]) => void;
+}
+
+
+export function CreateMessage({ setTweets }: CreateMessageProps) {
   const [message, setMessage] = useState("");
   const [cookies] = useCookies(["user_id"]);
 
@@ -49,6 +56,7 @@ export function CreateMessage() {
         userId: cookies.user_id,
       });
       setMessage("");
+      getPublicTweets().then((res) => setTweets(res.tweets));
     } catch (e) {}
   }
 }
