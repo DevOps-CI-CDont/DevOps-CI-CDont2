@@ -23,3 +23,16 @@ The Minitwit application has a user authentication system. With Next.js we can c
 We chose Go with Gin to make a RESTful API because:
 It is a new language for all group members, so we can learn it together. We thought it would be an interesting language to build an API in. 
 We first expected to use Go with Gorilla Mux, but we found out that that library has been archived.
+
+## Database choice
+_to be described_ 
+
+# DigitalOcean  
+Droplet setup .. 
+Container registry ..
+
+## CI/CD choice
+We chose to use GitHub Actions for our CI/CD pipeline, because it is free and is what the course says to use.
+Pytest .. 
+go test ..
+Watchtower ..
