@@ -32,7 +32,7 @@ func Start() {
 	// router config
 	Router.Use(cors.Default()) // cors.Default() should allow all origins
 	// it's important to set this before any routes are registered so that the middleware is applied to all routes
-	// ALL MY HOMIES HATE CORS
+	// ALL MY HOMIES HATE CORS :D
 
 	// endpoints
 	Router.GET("/mytimeline", getTimeline)
