@@ -3,6 +3,8 @@ package Api
 import (
 	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -11,7 +13,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 var Router *gin.Engine
@@ -77,8 +79,23 @@ var PER_PAGE = 30
 var DEBUG = true
 var SECRET_KEY = "development key"
 
+func HashPassword(password string) string {
+	hash := sha256.Sum256([]byte(password))
+	hexString := hex.EncodeToString(hash[:])
+	return hexString
+}
+
 func Connect_db() error {
-	db, err := sql.Open("sqlite3", dbPath)
+	dbinfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s TimeZone=%s client_encoding=%s",
+		"cicdont-do-user-13570987-0.b.db.ondigitalocean.com",
+		25060,
+		"doadmin",
+		"AVNS_FeRFl5bSz6UNMVF6Llx",
+		"minitwit",
+		"require",
+		"Europe/Berlin",
+		"UTF8")
+	db, err := sql.Open("postgres", dbinfo)
 	errorCheck(err)
 
 	DB = db
@@ -92,50 +109,118 @@ func init_db(c *gin.Context) {
 	const Silaspass = "password"
 	const Januspass = "Janus"
 
-	passwordHashB := sha256.Sum256([]byte(Benjapass)) //hash password1
-	passwordHashString := string(passwordHashB[:])
-	passwordHashO := sha256.Sum256([]byte(Oliverpass)) //hash password1
-	passwordHashStringO := string(passwordHashO[:])
-	passwordHashS := sha256.Sum256([]byte(Silaspass)) //hash password1
-	passwordHashStringS := string(passwordHashS[:])
-	passwordHashJ := sha256.Sum256([]byte(Januspass)) //hash password1
-	passwordHashStringJ := string(passwordHashJ[:])
+	passwordHashString := HashPassword(Benjapass)
+	passwordHashStringO := HashPassword(Oliverpass)
+	passwordHashStringS := HashPassword(Silaspass)
+	passwordHashStringJ := HashPassword(Januspass)
 
 	// create tables
-	sqlStmt2 := `
-	drop table if exists user;
-	drop table if exists message;
-	drop table if exists follower;
-	create table if not exists user (user_id integer not null primary key, username text, email text, pw_hash text);
-	create table if not exists message (message_id integer not null primary key, author_id integer, text text, pub_date integer, flagged integer);
-	create table if not exists follower (who_id integer, whom_id integer);
-	INSERT INTO user (username, email, pw_hash)
-	VALUES
-	("Benjamin", "bekj@itu.dk", ?),
-	("Oliver", "ojoe@itu.dk", ?),
-	("Silas", "sipn@itu.dk", ?),
-	("Janus", "januh@itu.dk", ?);
-	INSERT INTO message (author_id, text, pub_date, flagged)
-	VALUES
-	(1, "I like apples", 123456789, 0),
-	(2, "I like tarteletter", 123456789, 0),
-	(3, "I like Pizza", 123456789, 0),
-	(4, "I like bananas ", 123456789, 0);
-	INSERT INTO follower (who_id, whom_id)
-	VALUES
-	(1, 2),
-	(1, 3),
-	(1, 4),
-	(2, 1),
-	(2, 3),
-	(2, 4),
-	(3, 1),
-	(3, 2),
-	(3, 4),
-	(4, 1),
-	(4, 2);
+	_, err := DB.Exec(`
+		drop table if exists users;
+	`)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		drop table if exists messages;
+	`)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		drop table if exists followers;
+	`)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		CREATE TABLE IF NOT EXISTS users (
+			user_id serial,
+			username text,
+			email text,
+			pw_hash text,
+			PRIMARY KEY (user_id)
+		);
+	`)
+	errorCheck(err)
+	_, err = DB.Exec(`
+		CREATE TABLE IF NOT EXISTS messages (
+			message_id serial,
+			author_id integer,
+			text text,
+			pub_date integer,
+			flagged integer,
+			PRIMARY KEY (message_id)
+		);
+	`)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		create table if not exists followers (who_id integer, whom_id integer);
+	`)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		INSERT INTO users (username, email, pw_hash)
+		VALUES ('Benjamin', 'bekj@itu.dk', $1);
+	`, passwordHashString)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		INSERT INTO users (username, email, pw_hash)
+		VALUES ('Oliver', 'ojoe@itu.dk', $1);
+	`, passwordHashStringO)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		INSERT INTO users (username, email, pw_hash)
+		VALUES ('Silas', 'sipn@itu.dk', $1);
+	`, passwordHashStringS)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		INSERT INTO users (username, email, pw_hash)
+		VALUES ('Janus', 'januh@itu.dk', $1);
+	`, passwordHashStringJ)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		INSERT INTO messages (author_id, text, pub_date, flagged)
+		VALUES (1, 'I like apples', 123456789, 0);
+	`)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		INSERT INTO messages (author_id, text, pub_date, flagged)
+		VALUES (2, 'I like tarteletter', 123456789, 0);
+	`)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		INSERT INTO messages (author_id, text, pub_date, flagged)
+		VALUES (3, 'I like Pizza', 123456789, 0);
+	`)
+	errorCheck(err)
+
+	_, err = DB.Exec(`
+		INSERT INTO messages (author_id, text, pub_date, flagged)
+		VALUES (4, 'I like bananas ', 123456789, 0);
+	`)
+	errorCheck(err)
+
+	sqlStmt9 := `
+		INSERT INTO followers (who_id, whom_id)
+		VALUES
+		(1, 2),
+		(1, 3),
+		(1, 4),
+		(2, 1),
+		(2, 3),
+		(2, 4),
+		(3, 1),
+		(3, 2),
+		(3, 4),
+		(4, 1),
+		(4, 2);
 	`
-	_, err := DB.Exec(sqlStmt2, passwordHashString, passwordHashStringO, passwordHashStringS, passwordHashStringJ)
+	_, err = DB.Exec(sqlStmt9)
 	errorCheck(err)
 
 }
@@ -153,7 +238,7 @@ func amIFollowing(c *gin.Context) {
 	username := c.Param("username")
 	userID := getUserIdIfLoggedIn(c)
 	rows, err := DB.Query(`select * from follower
-		where who_id = ? and whom_id = (select user_id from user where username = ?)`, userID, username)
+		where who_id = $1 and whom_id = (select user_id from users where username = $2)`, userID, username)
 	errorCheck(err)
 	defer rows.Close()
 	following := false
@@ -169,12 +254,12 @@ func getTimeline(c *gin.Context) {
 	// check cookie for session,
 	userID := getUserIdIfLoggedIn(c)
 
-	rows, err := DB.Query(`select message.*, user.* from message, user
-		where message.flagged = 0 and message.author_id = user.user_id and (
-		user.user_id = ? or
-		user.user_id in (select whom_id from follower
-		where who_id = ?))
-		order by message.pub_date desc limit ?`, userID, userID, PER_PAGE)
+	rows, err := DB.Query(`select messages.*, users.* from message, user
+		where messages.flagged = 0 and messages.author_id = users.user_id and (
+		users.user_id = $1 or
+		users.user_id in (select whom_id from follower
+		where who_id = $2))
+		order by messages.pub_date desc limit $3`, userID, userID, PER_PAGE)
 	errorCheck(err)
 	defer rows.Close()
 	messages := make([]Message, 0)
@@ -194,9 +279,17 @@ func getTimeline(c *gin.Context) {
 func getPublicTimeline(c *gin.Context) {
 	Connect_db()
 	log.Println("Connect_db done")
-	rows, err := DB.Query(`select message.*, user.* from message, user
-	where message.flagged = 0 and message.author_id = user.user_id
-	order by message.pub_date desc limit ?`, PER_PAGE)
+	num_msgs := c.Request.URL.Query().Get("num_msgs")
+	int_num_msgs, err := strconv.Atoi(num_msgs)
+	if num_msgs == "" || err != nil {
+		int_num_msgs = 30
+	}
+
+	fmt.Println("int_num_msgs", int_num_msgs)
+
+	rows, err := DB.Query(`select messages.*, users.* from messages, users
+	where messages.flagged = 0 and messages.author_id = users.user_id
+	order by messages.pub_date desc limit $1`, int_num_msgs)
 	errorCheck(err)
 
 	// make a empty slice of messages
@@ -211,8 +304,6 @@ func getPublicTimeline(c *gin.Context) {
 
 		messages = append(messages, msg)
 	}
-	log.Println("printing messages")
-	log.Println(messages)
 
 	errorCheck(err)
 
@@ -220,6 +311,8 @@ func getPublicTimeline(c *gin.Context) {
 	if len(messages) == 0 {
 		c.JSON(401, gin.H{"message": "no messages"})
 	}
+
+	fmt.Println("messages", messages)
 
 	c.JSON(200, gin.H{"tweets": messages})
 
@@ -234,7 +327,14 @@ func getUsersTweets(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "user does not exist"})
 		return
 	}
-	rows, err := DB.Query(`select message.*, user.* from message, user where message.author_id = ? and message.author_id = user.user_id order by message.pub_date desc limit ?`, userID, PER_PAGE)
+
+	num_msgs := c.Request.URL.Query().Get("num_msgs")
+	int_num_msgs, err := strconv.Atoi(num_msgs)
+	if num_msgs == "" || err != nil {
+		int_num_msgs = 30
+	}
+
+	rows, err := DB.Query(`select messages.*, users.* from messages, users where messages.author_id = $1 and messages.author_id = users.user_id order by messages.pub_date desc limit $2`, userID, int_num_msgs)
 	errorCheck(err)
 	defer rows.Close()
 	messages := make([]Message, 0)
@@ -266,7 +366,7 @@ func followUser(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "user does not exist"})
 		return
 	}
-	stmt, err := DB.Prepare(`insert into follower (who_id, whom_id) values (?, ?)`)
+	stmt, err := DB.Prepare(`insert into followers (who_id, whom_id) values ($1, $2)`)
 	errorCheck(err)
 	defer stmt.Close()
 
@@ -279,7 +379,7 @@ func followUser(c *gin.Context) {
 func doesUsersFollow(who_id string, whom_id string) bool {
 	Connect_db()
 
-	row := DB.QueryRow(`select * from follower where who_id = ? and whom_id = ?`, who_id, whom_id)
+	row := DB.QueryRow(`select * from followers where who_id = $1 and whom_id = $2`, who_id, whom_id)
 
 	follower := follower{}
 	err := row.Scan(&follower.Who_id, &follower.Whom_id)
@@ -294,16 +394,16 @@ func unfollowUser(c *gin.Context) {
 	whom_name := c.Param("username")
 	whom_id := GetUserIdByName(whom_name)
 	if !doesUsersFollow(userid, whom_id) {
-		c.JSON(200, gin.H{"message": "user dosent follow the target"})
+		c.JSON(200, gin.H{"message": "user doesn't follow the target"})
 		return
 	}
 	log.Println(whom_id)
 	if whom_id == "-1" {
-		c.JSON(200, gin.H{"message": "user does not exist"})
+		c.JSON(200, gin.H{"message": "user you are trying to follow does not exist"})
 		return
 	}
 
-	stmt, err := DB.Prepare(`Delete FROM follower WHERE who_id = ? and whom_id = ?`)
+	stmt, err := DB.Prepare(`Delete FROM followers WHERE who_id = $1 and whom_id = $2`)
 	errorCheck(err)
 	defer stmt.Close()
 
@@ -329,7 +429,7 @@ func postMessage(c *gin.Context) {
 	flagged := 0
 	log.Println("text:" + text)
 
-	stmt, err := DB.Prepare(`insert into message (author_id, text, pub_date, flagged) values (?, ?, ?, ?)`)
+	stmt, err := DB.Prepare(`insert into messages (author_id, text, pub_date, flagged) values ($1, $2, $3, $4)`)
 	errorCheck(err)
 	defer stmt.Close()
 
@@ -356,7 +456,7 @@ func login(c *gin.Context) {
 		return
 	}
 
-	userid := DB.QueryRow(`select user_id from user where user.Username = ? and user.pw_hash = ?`, username, passwordHashString)
+	userid := DB.QueryRow(`select user_id from users where users.Username = $1 and users.pw_hash = $2`, username, passwordHashString)
 
 	var userIdAsInt int
 	err := userid.Scan(&userIdAsInt)
@@ -398,12 +498,10 @@ func register(c *gin.Context) {
 		return
 	}
 
-	passwordHash := sha256.Sum256([]byte(password))
-	//convert back to string
-	passwordHashString := string(passwordHash[:])
+	passwordHashString := HashPassword(password)
 	log.Println(passwordHashString)
 
-	stmt, err := DB.Prepare(`insert into user (username, email, pw_hash) values (?, ?, ?)`)
+	stmt, err := DB.Prepare(`insert into users (username, email, pw_hash) values ($1, $2, $3)`)
 	errorCheck(err)
 	defer stmt.Close()
 	_, err = stmt.Exec(username, email, passwordHashString)
@@ -414,7 +512,7 @@ func register(c *gin.Context) {
 
 func getUserByName(userName string) *sql.Row {
 	Connect_db()
-	row := DB.QueryRow(`select * from user where user.username = ?`, userName)
+	row := DB.QueryRow(`select * from users where users.username = $1`, userName)
 	user := User{}
 	err := row.Scan(&user.User_id, &user.Username, &user.Email, &user.Pw_hash)
 	if err != nil {
@@ -439,15 +537,14 @@ func getUserIdIfLoggedIn(c *gin.Context) string {
 
 func GetUserIdByName(username string) string {
 	Connect_db()
-	row := DB.QueryRow(`select * from user where user.username = ?`, username)
-
-	user := User{}
-	err := row.Scan(&user.User_id, &user.Username, &user.Email, &user.Pw_hash)
-	if err != nil {
-		return "-1"
-	}
-
-	return strconv.Itoa(user.User_id)
+	stmt, err := DB.Prepare("SELECT user_id FROM users WHERE username = $1")
+	errorCheck(err)
+	defer stmt.Close()
+	var userId string
+	err = stmt.QueryRow(username).Scan(&userId)
+	errorCheck(err)
+	fmt.Println("userId: " + userId)
+	return userId
 }
 
 func logout(c *gin.Context) {
@@ -456,7 +553,7 @@ func logout(c *gin.Context) {
 
 func getAllUsers(c *gin.Context) {
 	Connect_db()
-	rows, err := DB.Query(`select * from user`)
+	rows, err := DB.Query(`select * from users`)
 	errorCheck(err)
 	defer rows.Close()
 

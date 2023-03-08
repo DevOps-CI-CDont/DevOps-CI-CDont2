@@ -15,7 +15,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 var LATEST = 0
@@ -134,33 +134,50 @@ func getMsgs(c *gin.Context) {
 	}
 
 	// default
-	no_msgs := 100
-	if c.Param("no") != "" {
-		no, _ := strconv.Atoi(c.Param("no"))
-		no_msgs = no
+	fmt.Println("getMsgs")
+	num_msgs := getNumMsgs(c)
+	fmt.Println("num_msgs: ", num_msgs)
+
+	// create a new HTTP client
+	client := &http.Client{}
+
+	url := api_base_url + "/public?num_msgs=" + strconv.Itoa(num_msgs)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		c.JSON(400, gin.H{"error_msg": err.Error()})
+		return
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		c.JSON(400, gin.H{"error_msg": err.Error()})
+		return
 	}
 
-	query := `SELECT message.*, user.* FROM message, user WHERE message.flagged = 0
-			 AND message.author_id = user.user_id ORDER BY message.pub_date DESC LIMIT ?`
-
-	messages, _ := main.DB.Query(query, no_msgs)
-
-	var filtered_msgs []map[string]string
-
-	for messages.Next() {
-		entry := make(map[string]string)
-		var msg main.Message
-		var user main.User
-		messages.Scan(&msg.Message_id, &msg.Author_id, &msg.Text, &msg.Pub_date, &msg.Flagged, &user.User_id, &user.Username, &user.Email, &user.Pw_hash)
-		msg.Author = user
-
-		entry["content"] = msg.Text
-		entry["pub_date"] = strconv.Itoa(msg.Pub_date)
-		entry["user"] = msg.Author.Username
-		filtered_msgs = append(filtered_msgs, entry)
+	// Read the response body as JSON
+	var data map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	c.JSON(200, filtered_msgs)
+	// Return the JSON response with status code 200
+	c.JSON(http.StatusOK, gin.H{"messages": data["tweets"]})
+}
+
+func getNumMsgs(c *gin.Context) int {
+	// default
+	num_msgs := c.Request.URL.Query().Get("no")
+	int_num_msgs, err := strconv.Atoi(num_msgs)
+	if num_msgs == "" || err != nil {
+		int_num_msgs = 30
+	}
+
+	return int_num_msgs
 }
 
 func msgsPerUser(c *gin.Context) {
@@ -175,55 +192,56 @@ func msgsPerUser(c *gin.Context) {
 	}
 
 	// default
-	no_msgs := 100
-	if c.Param("no") != "" {
-		no, _ := strconv.Atoi(c.Param("no"))
-		no_msgs = no
-	}
+	num_msgs := getNumMsgs(c)
 
 	if c.Request.Method == "GET" {
-		user_id := main.GetUserIdByName(c.Param("username"))
+		user_name := c.Param("username")
 
-		if user_id == "" {
+		if user_name == "" {
 			c.AbortWithStatus(404)
 			return
 		}
 
-		query := `SELECT message.*, user.* FROM message, user 
-					WHERE message.flagged = 0 AND
-					user.user_id = message.author_id AND user.user_id = ?
-					ORDER BY message.pub_date DESC LIMIT ?`
+		//CREATE NEW CLIENT
+		client := &http.Client{}
 
-		messages, _ := main.DB.Query(query, user_id, no_msgs)
+		// create get request
+		url := api_base_url + "/user/" + user_name + "?num_msgs=" + strconv.Itoa(num_msgs)
 
-		var filtered_msgs []map[string]string
-
-		for messages.Next() {
-			entry := make(map[string]string)
-			var msg main.Message
-			var user main.User
-			messages.Scan(&msg.Message_id, &msg.Author_id, &msg.Text, &msg.Pub_date, &msg.Flagged, &user.User_id, &user.Username, &user.Email, &user.Pw_hash)
-			msg.Author = user
-
-			entry["content"] = msg.Text
-			entry["pub_date"] = strconv.Itoa(msg.Pub_date)
-			entry["user"] = msg.Author.Username
-			filtered_msgs = append(filtered_msgs, entry)
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
 		}
 
-		c.JSON(200, filtered_msgs)
+		// send the request
+		resp, err := client.Do(req)
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+
+		// Read the response body as JSON
+		var data map[string]interface{}
+		err = json.NewDecoder(resp.Body).Decode(&data)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{"messages": data["tweets"]})
+
 	} else if c.Request.Method == "POST" {
 		bytes, _ := io.ReadAll(c.Request.Body)
 		body := make(map[string]string)
 		json.Unmarshal(bytes, &body)
 
-		query := `INSERT INTO message (author_id, text, pub_date, flagged)
-					VALUES (?, ?, ?, 0)`
+		query := `INSERT INTO messages (author_id, text, pub_date, flagged)
+					VALUES ($1, $2, $3, 0)`
 
 		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
 		// fmt.Println("DB Insertion completed!")
 		// select the last inserted message
-		query = `SELECT message.*, user.* FROM message, user `
+		query = `SELECT messages.*, users.* FROM messages, users `
 
 		c.JSON(204, gin.H{})
 	}
@@ -261,7 +279,7 @@ func follow(c *gin.Context) {
 			return
 		}
 
-		query := "INSERT INTO follower (who_id, whom_id) VALUES (?, ?)"
+		query := "INSERT INTO followers (who_id, whom_id) VALUES ($1, $2)"
 		main.DB.Exec(query, user_id, follows_user_id)
 
 		c.JSON(204, gin.H{})
@@ -274,24 +292,19 @@ func follow(c *gin.Context) {
 			return
 		}
 
-		query := "DELETE FROM follower WHERE who_id=? and WHOM_ID=?"
+		query := "DELETE FROM followers WHERE who_id=$1 and WHOM_ID=$2"
 		main.DB.Exec(query, user_id, unfollows_user_id)
 
 		c.JSON(204, gin.H{})
 	} else if c.Request.Method == "GET" {
 		// default
-		no_followers := 100
-		if c.Param("no") != "" {
-			no, _ := strconv.Atoi(c.Param("no"))
-			no_followers = no
-		}
+		num_followers := getNumMsgs(c)
+		query := `SELECT users.username FROM users
+					INNER JOIN followers ON followers.whom_id=users.user_id
+					WHERE followers.who_id=$1
+					LIMIT $2`
 
-		query := `SELECT user.username FROM user
-					INNER JOIN follower ON follower.whom_id=user.user_id
-					WHERE follower.who_id=?
-					LIMIT ?`
-
-		followers, _ := main.DB.Query(query, user_id, no_followers)
+		followers, _ := main.DB.Query(query, user_id, num_followers)
 		followers_names := []string{}
 
 		for followers.Next() {
