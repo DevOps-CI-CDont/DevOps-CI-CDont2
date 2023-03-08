@@ -1,4 +1,4 @@
-interface PostTweetProps {
+export interface PostTweetProps {
   message: string;
   userId: string;
 }

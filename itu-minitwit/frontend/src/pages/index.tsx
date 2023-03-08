@@ -1,71 +1,68 @@
-import { CreateMessage } from "@/components/Message/CreateTweet";
 import { TweetContainer } from "@/components/Message/TweetContainer";
 import DefaultLayout from "@/layouts/DefaultLayout";
-import { getPublicTweets } from "@/server/getPublicTweets";
 import { Tweet } from "@/types/tweet.type";
 import { useCookies } from "react-cookie";
-import { useEffect, useState } from "react";
+import { getTimeline } from "@/server/getTimeline";
+import { CreateMessage } from "@/components/Message/CreateTweet";
+import { useGetTimeline } from "@/hooks/useGetTimeline";
 
-export default function MyTimelinePage() {
+interface MyTimeLinePageProps {
+  tweets: Tweet[];
+}
+
+export default function MyTimelinePage({ tweets }: MyTimeLinePageProps) {
   const [cookies] = useCookies(["user_id"]);
-
-  const [isLogged, setIsLogged] = useState(false);
-  const [tweets, setTweets] = useState<Tweet[]>([]);
-
-  useEffect(() => {
-    getPublicTweets().then((res) => setTweets(res.tweets));
-  }, []);
-
-  useEffect(() => {
-    if (cookies.user_id) {
-      setIsLogged(true);
-    }
-  }, [cookies]);
-
-  if (!isLogged) return <></>;
 
   return (
     <DefaultLayout>
       <div className='wrapper mt-4'>
         <h1 className='font-bold'>My timeline</h1>
-        <CreateMessage setTweets={setTweets} />
+        <CreateMessage />
         {tweets && <TweetContainer tweets={tweets} />}
       </div>
     </DefaultLayout>
   );
 }
 
-async function getServerSideProps(context: any) {}
-//   try {
-//     const cookie = context.req.headers.cookie
+export async function getServerSideProps(context: any) {
+  try {
+    const cookie = context.req.headers.cookie;
 
-//     if(!cookie) {
-//       throw new Error("Not signed in")
-//     }
+    const cookies = String(context.req.headers?.cookie).split(";");
 
-//     const userId = cookie[8]
+    let messages = [];
 
-//     const messages = await getTimeline(parseInt(userId));
+    if (cookies) {
+      const userId = cookies.find((cookie: string) =>
+        cookie.includes("user_id")
+      );
 
-//     if (!messages.tweets) {
-//       return {
-//         props: {
-//           tweets: [],
-//         },
-//       }
-//     }
+      if (userId) {
+        const userIdValue = userId.split("=")[1];
 
-//     return {
-//       props: {
-//         tweets: messages.tweets,
-//       },
-//     };
-//   } catch (e) {
-//     console.error(e);
-//     return {
-//       props: {
-//         tweets: [],
-//       },
-//     };
-//   }
-// }
+        messages = await getTimeline({ userId: userIdValue });
+      }
+    }
+
+    if (!messages.tweets) {
+      return {
+        props: {
+          tweets: [],
+        },
+      };
+    }
+
+    return {
+      props: {
+        tweets: messages.tweets,
+      },
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      props: {
+        tweets: [],
+      },
+    };
+  }
+}

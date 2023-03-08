@@ -1,19 +1,17 @@
 import { getPublicTweets } from "@/server/getPublicTweets";
 import { postTweet } from "@/server/postTweet";
 import { Tweet } from "@/types/tweet.type";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 
-interface CreateMessageProps {
-  setTweets: (tweets: Tweet[]) => void;
-}
-
-
-export function CreateMessage({ setTweets }: CreateMessageProps) {
+export function CreateMessage() {
   const [message, setMessage] = useState("");
   const [cookies] = useCookies(["user_id"]);
 
   const [hasCookie, setHasCookie] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (cookies.user_id) {
@@ -56,9 +54,12 @@ export function CreateMessage({ setTweets }: CreateMessageProps) {
         userId: cookies.user_id,
       });
       setMessage("");
-      getPublicTweets().then((res) => setTweets(res.tweets));
+      router.reload();
     } catch (e) {
-      console.log("Error: ", e)
+      console.log("Error: ", e);
+    } finally {
+      setMessage("");
+      router.reload();
     }
   }
 }
