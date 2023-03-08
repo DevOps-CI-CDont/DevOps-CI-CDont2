@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -17,7 +16,6 @@ import (
 )
 
 var Router *gin.Engine
-var dbPath, is_present = os.LookupEnv("DBPATH")
 
 func SetUpRouter() *gin.Engine {
 	r := gin.Default()
@@ -27,9 +25,7 @@ func SetUpRouter() *gin.Engine {
 func Start() {
 	Router = SetUpRouter()
 
-	if !is_present {
-		dbPath = "./../tmp/minitwit.db"
-	}
+	Connect_db()
 
 	// router config
 	Router.Use(cors.Default()) // cors.Default() should allow all origins
@@ -99,11 +95,11 @@ func Connect_db() error {
 	errorCheck(err)
 
 	DB = db
+
 	return nil
 }
 
 func init_db(c *gin.Context) {
-	Connect_db()
 	const Benjapass = "12345678"
 	const Oliverpass = "1234"
 	const Silaspass = "password"
@@ -234,7 +230,6 @@ func errorCheck(err error) {
 // endpoints
 
 func amIFollowing(c *gin.Context) {
-	Connect_db()
 	username := c.Param("username")
 	userID := getUserIdIfLoggedIn(c)
 	rows, err := DB.Query(`select * from follower
@@ -249,7 +244,6 @@ func amIFollowing(c *gin.Context) {
 }
 
 func getTimeline(c *gin.Context) {
-	Connect_db()
 	//query database
 	// check cookie for session,
 	userID := getUserIdIfLoggedIn(c)
@@ -277,8 +271,6 @@ func getTimeline(c *gin.Context) {
 }
 
 func getPublicTimeline(c *gin.Context) {
-	Connect_db()
-	log.Println("Connect_db done")
 	num_msgs := c.Request.URL.Query().Get("num_msgs")
 	int_num_msgs, err := strconv.Atoi(num_msgs)
 	if num_msgs == "" || err != nil {
@@ -321,7 +313,6 @@ func getPublicTimeline(c *gin.Context) {
 
 func getUsersTweets(c *gin.Context) {
 	name := c.Param("username")
-	Connect_db()
 	userID := GetUserIdByName(name)
 	if userID == "-1" {
 		c.JSON(200, gin.H{"message": "user does not exist"})
@@ -352,7 +343,6 @@ func getUsersTweets(c *gin.Context) {
 }
 
 func followUser(c *gin.Context) {
-	Connect_db()
 
 	userid := getUserIdIfLoggedIn(c)
 	whom_name := c.Param("username")
@@ -377,8 +367,6 @@ func followUser(c *gin.Context) {
 }
 
 func doesUsersFollow(who_id string, whom_id string) bool {
-	Connect_db()
-
 	row := DB.QueryRow(`select * from followers where who_id = $1 and whom_id = $2`, who_id, whom_id)
 
 	follower := follower{}
@@ -388,7 +376,6 @@ func doesUsersFollow(who_id string, whom_id string) bool {
 }
 
 func unfollowUser(c *gin.Context) {
-	Connect_db()
 
 	userid := getUserIdIfLoggedIn(c)
 	whom_name := c.Param("username")
@@ -415,7 +402,6 @@ func unfollowUser(c *gin.Context) {
 }
 
 func postMessage(c *gin.Context) {
-	Connect_db()
 
 	userid := getUserIdIfLoggedIn(c)
 
@@ -441,7 +427,6 @@ func postMessage(c *gin.Context) {
 }
 
 func login(c *gin.Context) {
-	Connect_db()
 
 	username := c.PostForm("username")
 	password := c.PostForm("password")
@@ -476,7 +461,6 @@ func login(c *gin.Context) {
 }
 
 func register(c *gin.Context) {
-	Connect_db()
 
 	username := c.PostForm("username")
 	email := c.PostForm("email")
@@ -511,7 +495,6 @@ func register(c *gin.Context) {
 }
 
 func getUserByName(userName string) *sql.Row {
-	Connect_db()
 	row := DB.QueryRow(`select * from users where users.username = $1`, userName)
 	user := User{}
 	err := row.Scan(&user.User_id, &user.Username, &user.Email, &user.Pw_hash)
@@ -536,7 +519,6 @@ func getUserIdIfLoggedIn(c *gin.Context) string {
 }
 
 func GetUserIdByName(username string) string {
-	Connect_db()
 	stmt, err := DB.Prepare("SELECT user_id FROM users WHERE username = $1")
 	errorCheck(err)
 	defer stmt.Close()
@@ -552,7 +534,6 @@ func logout(c *gin.Context) {
 }
 
 func getAllUsers(c *gin.Context) {
-	Connect_db()
 	rows, err := DB.Query(`select * from users`)
 	errorCheck(err)
 	defer rows.Close()
