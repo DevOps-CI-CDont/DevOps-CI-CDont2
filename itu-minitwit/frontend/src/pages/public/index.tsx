@@ -8,13 +8,11 @@ interface HomePageProps {
   tweets: Tweet[];
 }
 
-export default function PublicTimelinePage() {
-  const [tweets, setTweets] = useState<Tweet[]>([]);
+export default function PublicTimelinePage({ tweets }: HomePageProps) {
+  // useEffect(() => {
+  //   getPublicTweets().then((res) => setTweets(res.tweets));
+  // }, []);
 
-  useEffect(() => {
-    getPublicTweets().then((res) => setTweets(res.tweets));
-  }, []);
-  
   return (
     <DefaultLayout>
       <div className='mt-4'>
@@ -25,30 +23,20 @@ export default function PublicTimelinePage() {
   );
 }
 
-async function getServerSideProps() {
-  try {
-    const messages = await getPublicTweets();
+export async function getServerSideProps() {
+  const messages = await getPublicTweets();
 
-    if (!messages.tweets) {
-      return {
-        props: {
-          tweets: [],
-        },
-      };
-    }
-
-    return {
-      props: {
-        tweets: messages.tweets,
-      },
-    };
-  } catch (e) {
-    console.error(e);
-
+  if (!messages.tweets) {
     return {
       props: {
         tweets: [],
       },
     };
   }
+
+  return {
+    props: {
+      tweets: messages.tweets,
+    },
+  };
 }

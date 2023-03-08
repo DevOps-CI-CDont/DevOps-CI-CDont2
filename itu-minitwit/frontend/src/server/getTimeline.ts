@@ -1,19 +1,14 @@
-  export async function getTimeline(cookie: number) {
-    return await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/mytimeline`,
-      {
-        mode: "no-cors",
-        cache: "no-cache",
-        method: "GET",
-        headers: {
-          "Cookie": `user_id=${cookie}`,
-          "Content-Type": "application/json",
-          origin: "http://localhost:3000",
-        },
-        credentials: 'same-origin',
-        redirect: "follow",
-        
-      }
-    ).then((response) => response.json());
-  }
+interface GetIsFollowingProps {
+  userId: string;
+}
 
+export async function getTimeline({ userId }: GetIsFollowingProps) {
+  var myHeaders = new Headers();
+  myHeaders.append("Cookie", `user_id=${userId}`);
+
+  return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/mytimeline`, {
+    method: "GET",
+    headers: myHeaders,
+    redirect: "follow",
+  }).then((response) => response.json());
+}

@@ -4,7 +4,7 @@ import { getIsFollowing } from "@/server/getIsFollowing";
 import { getPublicTweets } from "@/server/getPublicTweets";
 import { postIsFollowing } from "@/server/postFollow";
 import { Tweet } from "@/types/tweet.type";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 
 interface UserProfileProps {
@@ -19,8 +19,13 @@ export default function UserProfilePage({
   isFollowing,
 }: UserProfileProps) {
   const [userIdCookie] = useCookies(["user_id"]);
-  const [canFollow] = useState<boolean>(userIdCookie.user_id ? true : false);
-  const [follow, setFollow] = useState<boolean>(isFollowing);
+  const [followDisabled, setFollowDisabled] = useState<boolean>(false);
+  const [isFollowingState, setIsFollowingState] =
+    useState<boolean>(isFollowing);
+
+  useEffect(() => {
+    setFollowDisabled(userIdCookie.user_id == undefined ? false : true);
+  }, [userIdCookie]);
 
   return (
     <DefaultLayout>
@@ -28,10 +33,10 @@ export default function UserProfilePage({
         <div className='flex items-center justify-between'>
           <h1 className='text-lg'>{username}&apos;s profile</h1>
           <button
-            disabled={!canFollow}
+            disabled={!followDisabled}
             onClick={handleFollow}
             className='ml-2 font-bold px-2 py-1 border bg-blue-500 shadow-md text-white rounded-md disabled:bg-gray-200'>
-            {follow ? "Unfollow" : "Follow"}
+            {isFollowingState ? "Unfollow" : "Follow"}
           </button>
         </div>
         <TweetContainer tweets={tweets} />
@@ -44,18 +49,36 @@ export default function UserProfilePage({
       await postIsFollowing({
         userId: userIdCookie.user_id,
         username: username,
-        isFollowing: follow,
+        isFollowing: isFollowingState,
       });
 
-      setFollow(!follow);
-    } catch (e) {}
+      setIsFollowingState(!isFollowingState);
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
 
 export async function getServerSideProps(context: any) {
   const { username } = context.query;
 
-  const cookie = context.req.headers.cookie;
+  const cookies = String(context.req.headers?.cookie).split(";");
+
+  let isFollowing = false;
+
+  if (cookies) {
+    const userId = cookies.find((cookie: string) => cookie.includes("user_id"));
+
+    if (userId) {
+      const userIdValue = userId.split("=")[1];
+
+      isFollowing = await getIsFollowing({
+        userId: userIdValue,
+        username,
+      });
+    }
+  }
+
   const messages = await getPublicTweets();
 
   if (!messages) {
@@ -63,7 +86,7 @@ export async function getServerSideProps(context: any) {
       props: {
         username,
         tweets: [],
-        isFollowing: false,
+        isFollowing,
       },
     };
   }
@@ -72,25 +95,11 @@ export async function getServerSideProps(context: any) {
     (tweet: Tweet) => tweet.author.username === username
   );
 
-  const userId = cookie && cookie[8];
-
-  if (!userId) {
-    return {
-      props: {
-        username,
-        tweets: messages.tweets,
-        isFollowing: false,
-      },
-    };
-  }
-
-  const isFollowing = await getIsFollowing({ userId, username });
-
   return {
     props: {
       username,
       tweets: filteredTweets,
-      isFollowing: isFollowing,
+      isFollowing,
     },
   };
 }
