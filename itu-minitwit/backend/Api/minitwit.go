@@ -248,7 +248,7 @@ func getTimeline(c *gin.Context) {
 	// check cookie for session,
 	userID := getUserIdIfLoggedIn(c)
 
-	rows, err := DB.Query(`select messages.*, users.* from message, user
+	rows, err := DB.Query(`select messages.*, users.* from messages, users
 		where messages.flagged = 0 and messages.author_id = users.user_id and (
 		users.user_id = $1 or
 		users.user_id in (select whom_id from follower
