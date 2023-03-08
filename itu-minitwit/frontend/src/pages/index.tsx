@@ -28,7 +28,7 @@ export default function MyTimelinePage() {
     <DefaultLayout>
       <div className='wrapper mt-4'>
         <h1 className='font-bold'>My timeline</h1>
-        <CreateMessage />
+        <CreateMessage setTweets={setTweets} />
         {tweets && <TweetContainer tweets={tweets} />}
       </div>
     </DefaultLayout>
