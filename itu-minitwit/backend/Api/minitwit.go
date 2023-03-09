@@ -232,7 +232,7 @@ func errorCheck(err error) {
 func amIFollowing(c *gin.Context) {
 	username := c.Param("username")
 	userID := getUserIdIfLoggedIn(c)
-	rows, err := DB.Query(`select * from follower
+	rows, err := DB.Query(`select * from followers
 		where who_id = $1 and whom_id = (select user_id from users where username = $2)`, userID, username)
 	errorCheck(err)
 	defer rows.Close()
