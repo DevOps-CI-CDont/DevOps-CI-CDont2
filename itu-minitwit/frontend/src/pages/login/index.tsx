@@ -46,6 +46,8 @@ export default function LoginPage() {
     try {
       const res = await postLogin({ username, password });
 
+      if (res.error) return alert(res.error);
+
       setUserIdCookie("user_id", res["user_id"]);
 
       router.push("/");
