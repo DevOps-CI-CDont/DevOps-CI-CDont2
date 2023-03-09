@@ -6,7 +6,7 @@ import sqlite3
 import requests
 
 
-BASE_URL = 'http://0.0.0.0:8081'
+BASE_URL = 'http://localhost:8081'
 USERNAME = 'simulator'
 PWD = 'super_safe!'
 CREDENTIALS = ':'.join([USERNAME, PWD]).encode('ascii')
