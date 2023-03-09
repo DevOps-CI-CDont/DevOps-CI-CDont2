@@ -251,7 +251,7 @@ func getTimeline(c *gin.Context) {
 	rows, err := DB.Query(`select messages.*, users.* from messages, users
 		where messages.flagged = 0 and messages.author_id = users.user_id and (
 		users.user_id = $1 or
-		users.user_id in (select whom_id from follower
+		users.user_id in (select whom_id from followers
 		where who_id = $2))
 		order by messages.pub_date desc limit $3`, userID, userID, PER_PAGE)
 	errorCheck(err)
