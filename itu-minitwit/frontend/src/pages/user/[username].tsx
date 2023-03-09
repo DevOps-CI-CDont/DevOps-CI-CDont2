@@ -2,6 +2,7 @@ import { TweetContainer } from "@/components/Message/TweetContainer";
 import DefaultLayout from "@/layouts/DefaultLayout";
 import { getIsFollowing } from "@/server/getIsFollowing";
 import { getPublicTweets } from "@/server/getPublicTweets";
+import { getUserTweets } from "@/server/getUserTweets";
 import { postIsFollowing } from "@/server/postFollow";
 import { Tweet } from "@/types/tweet.type";
 import { useEffect, useState } from "react";
@@ -79,7 +80,7 @@ export async function getServerSideProps(context: any) {
     }
   }
 
-  const messages = await getPublicTweets();
+  const messages = await getUserTweets({ username });
 
   if (!messages) {
     return {
@@ -91,14 +92,10 @@ export async function getServerSideProps(context: any) {
     };
   }
 
-  const filteredTweets = messages.tweets.filter(
-    (tweet: Tweet) => tweet.author.username === username
-  );
-
   return {
     props: {
       username,
-      tweets: filteredTweets,
+      tweets: messages.tweets,
       isFollowing,
     },
   };
