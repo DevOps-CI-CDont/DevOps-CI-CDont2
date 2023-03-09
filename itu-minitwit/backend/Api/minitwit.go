@@ -432,16 +432,15 @@ func login(c *gin.Context) {
 	password := c.PostForm("password")
 	//convert password to byte[]
 
-	passwordHash := sha256.Sum256([]byte(password)) //hash password1
-	passwordHashString := string(passwordHash[:])
+	passwordHash := HashPassword(password)
 
-	//check if username and password are empty
+	//check if username and password are pty
 	if username == "" || password == "" {
 		c.JSON(400, gin.H{"error": "username or password is empty"})
 		return
 	}
 
-	userid := DB.QueryRow(`select user_id from users where users.Username = $1 and users.pw_hash = $2`, username, passwordHashString)
+	userid := DB.QueryRow(`select user_id from users where users.Username = $1 and users.pw_hash = $2`, username, passwordHash)
 
 	var userIdAsInt int
 	err := userid.Scan(&userIdAsInt)
