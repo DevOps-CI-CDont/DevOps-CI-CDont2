@@ -1,0 +1,43 @@
+# Go backend
+*.exe
+*.test
+*.prof
+*.out
+*.test
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.lz4
+*.tar.sz
+/vendor/
+/bin/
+/pkg/
+
+# Next.js frontend
+.next/
+node_modules/
+
+# Shared folders
+logs/
+tmp/
+
+# IDEs
+.idea/
+.vscode/
+
+# pytest stuff
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+.tox/
+.nox/
+.mypy_cache/
+.hypothesis/
+pytestdebug.log
+pytest.ini
+coverage.xml
+.cpython-*
+itu-minitwit/backend/test/__pycache__/*
+.pyc

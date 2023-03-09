@@ -4,20 +4,22 @@
 # "docker-compose up"
 services:
   frontend:
-    image: cicdont/frontend
+    image: registry.digitalocean.com/cicdont-images/frontend
+    container_name: frontend
+    # service_name: frontend
     ports:
       - "3000:3000"
-    networks:
-      - outside
-
   backend:
-    image: cicdont/backend
+    image: registry.digitalocean.com/cicdont-images/backend
+    container_name: api
+    # service_name: api
     ports:
       - "8080:8080"
-    networks:
-      - outside
-
-networks:
-  outside:
-    external:
-      name: minitwit-network
+      - "8081:8081"
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --interval 60 --watchtower.listen=8082 # seconds between checks
