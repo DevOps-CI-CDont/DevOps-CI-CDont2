@@ -55,4 +55,4 @@ jobs:
           (cd itu-minitwit/backend/Main && ./Main &)
       - name: Test
         run: |
-          (cd itu-minitwit/backend/ && go test -v ./...)
+          (cd itu-minitwit/backend/test/gotest && go test -v ./...)
