@@ -21,7 +21,6 @@ node_modules/
 
 # Shared folders
 logs/
-tmp/
 
 # IDEs
 .idea/
