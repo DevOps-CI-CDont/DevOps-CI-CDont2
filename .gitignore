@@ -10,6 +10,7 @@
 *.tar.xz
 *.tar.lz4
 *.tar.sz
+*.pyc
 /vendor/
 /bin/
 /pkg/
