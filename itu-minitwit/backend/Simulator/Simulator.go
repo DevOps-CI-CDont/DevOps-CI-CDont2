@@ -18,6 +18,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type FilteredMessage struct {
+	Content  string  `json:"content"`
+	Pub_date float64 `json:"pub_date"`
+	User     string  `json:"user"`
+}
+
 var LATEST = 0
 
 func update_latest(c *gin.Context) {
@@ -165,19 +171,43 @@ func getMsgs(c *gin.Context) {
 		return
 	}
 
-	// Return the JSON response with status code 200
-	c.JSON(http.StatusOK, gin.H{"messages": data["tweets"]})
+	// make filteredMsgs
+	filteredMsgs := make([]FilteredMessage, 0)
+	for _, msg := range data["tweets"].([]interface{}) {
+		msg := msg.(map[string]interface{})
+		author := msg["author"].(map[string]interface{})
+		filteredMsgs = append(filteredMsgs, FilteredMessage{
+			Content:  msg["text"].(string),
+			Pub_date: msg["pub_date"].(float64),
+			User:     author["username"].(string),
+		})
+	}
+
+	// Marshal the filteredMsgs slice into a JSON-encoded byte slice
+	jsonBytes, err := json.Marshal(filteredMsgs)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Set the response header and write the JSON-encoded byte slice to the response writer
+	c.Header("Content-Type", "application/json")
+	c.Writer.Write(jsonBytes)
 }
 
 func getNumMsgs(c *gin.Context) int {
 	// default
 	num_msgs := c.Request.URL.Query().Get("no")
-	int_num_msgs, err := strconv.Atoi(num_msgs)
-	if num_msgs == "" || err != nil {
-		int_num_msgs = 30
+	if num_msgs == "" {
+		int_num_msgs := 30
+		return int_num_msgs
+	} else {
+		int_num_msgs, err := strconv.Atoi(num_msgs)
+		if err != nil {
+			int_num_msgs = 30
+		}
+		return int_num_msgs
 	}
-
-	return int_num_msgs
 }
 
 func msgsPerUser(c *gin.Context) {
@@ -228,7 +258,29 @@ func msgsPerUser(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(200, gin.H{"messages": data["tweets"]})
+
+		// make filteredMsgs
+		filteredMsgs := make([]FilteredMessage, 0)
+		for _, msg := range data["tweets"].([]interface{}) {
+			msg := msg.(map[string]interface{})
+			author := msg["author"].(map[string]interface{})
+			filteredMsgs = append(filteredMsgs, FilteredMessage{
+				Content:  msg["text"].(string),
+				Pub_date: msg["pub_date"].(float64),
+				User:     author["username"].(string),
+			})
+		}
+
+		// Marshal the filteredMsgs slice into a JSON-encoded byte slice
+		jsonBytes, err := json.Marshal(filteredMsgs)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		// Set the response header and write the JSON-encoded byte slice to the response writer
+		c.Header("Content-Type", "application/json")
+		c.Writer.Write(jsonBytes)
 
 	} else if c.Request.Method == "POST" {
 		bytes, _ := io.ReadAll(c.Request.Body)
