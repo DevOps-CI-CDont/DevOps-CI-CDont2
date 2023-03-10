@@ -523,7 +523,10 @@ func GetUserIdByName(username string) string {
 	defer stmt.Close()
 	var userId string
 	err = stmt.QueryRow(username).Scan(&userId)
-	errorCheck(err)
+	if err != nil {
+		return "-1"
+	}
+
 	fmt.Println("userId: " + userId)
 	return userId
 }

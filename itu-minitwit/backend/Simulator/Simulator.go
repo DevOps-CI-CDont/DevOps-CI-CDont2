@@ -312,8 +312,8 @@ func follow(c *gin.Context) {
 	}
 
 	user_id := main.GetUserIdByName(c.Param("username"))
-	user_id2 := c.Request.URL.Query().Get("username")
-	fmt.Println("param user_id" + user_id2)
+	user_name := c.Param("username")
+	fmt.Println("username " + user_name)
 	fmt.Println("url query get user id " + user_id)
 	if user_id == "" {
 		c.AbortWithStatus(404)
