@@ -290,11 +290,14 @@ func msgsPerUser(c *gin.Context) {
 		query := `INSERT INTO messages (author_id, text, pub_date, flagged)
 					VALUES ($1, $2, $3, 0)`
 
-		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
-		// fmt.Println("DB Insertion completed!")
-		// select the last inserted message
-		query = `SELECT messages.*, users.* FROM messages, users `
+		author_id := main.GetUserIdByName(c.Param("username"))
+		if author_id == "-1" {
+			c.JSON(404, gin.H{})
+		}
 
+		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
+		fmt.Println("DB Insertion completed!")
+		// select the last inserted message
 		c.JSON(204, gin.H{})
 	}
 
