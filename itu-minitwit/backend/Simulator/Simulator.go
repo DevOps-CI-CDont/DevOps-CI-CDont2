@@ -312,7 +312,9 @@ func follow(c *gin.Context) {
 	}
 
 	user_id := main.GetUserIdByName(c.Param("username"))
-
+	user_id2 := c.Request.URL.Query().Get("username")
+	fmt.Println("param user_id" + user_id2)
+	fmt.Println("url query get user id " + user_id)
 	if user_id == "" {
 		c.AbortWithStatus(404)
 		return
@@ -326,6 +328,8 @@ func follow(c *gin.Context) {
 		follows_username := body["follow"]
 		follows_user_id := main.GetUserIdByName(follows_username)
 
+		fmt.Println("user " + user_id + " tries to follow " + follows_user_id)
+
 		if follows_user_id == "-1" {
 			c.AbortWithStatus(404)
 			return
@@ -338,6 +342,8 @@ func follow(c *gin.Context) {
 	} else if c.Request.Method == "POST" && body["unfollow"] != "" {
 		unfollows_username := body["unfollow"]
 		unfollows_user_id := main.GetUserIdByName(unfollows_username)
+
+		fmt.Println("user " + user_id + " tries to unfollow " + unfollows_user_id)
 
 		if unfollows_user_id == "-1" {
 			c.AbortWithStatus(404)
