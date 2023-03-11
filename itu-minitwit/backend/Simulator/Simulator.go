@@ -293,6 +293,7 @@ func msgsPerUser(c *gin.Context) {
 		author_id := main.GetUserIdByName(c.Param("username"))
 		if author_id == "-1" {
 			c.JSON(404, gin.H{})
+			return
 		}
 
 		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
