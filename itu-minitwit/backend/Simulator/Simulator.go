@@ -292,13 +292,13 @@ func msgsPerUser(c *gin.Context) {
 
 		author_id := main.GetUserIdByName(c.Param("username"))
 		if author_id == "-1" {
+			fmt.Println("non-existing user tried to post a message: " + body["content"])
 			c.JSON(404, gin.H{})
 			return
 		}
 
 		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
-		fmt.Println("DB Insertion completed!")
-		// select the last inserted message
+		fmt.Println("user " + c.Param("username") + " posted a message: " + body["content"])
 		c.JSON(204, gin.H{})
 	}
 
@@ -318,7 +318,6 @@ func follow(c *gin.Context) {
 	user_id := main.GetUserIdByName(c.Param("username"))
 	user_name := c.Param("username")
 	fmt.Println("username " + user_name)
-	fmt.Println("url query get user id " + user_id)
 	if user_id == "" {
 		c.AbortWithStatus(404)
 		return
