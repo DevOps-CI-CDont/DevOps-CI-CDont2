@@ -46,8 +46,6 @@ func login(username string, password string) *http.Response {
 }
 
 func TestRegister(t *testing.T) {
-	http.Get(base + "/RESET")
-
 	username := "testuser"
 	password := "testpassword"
 	email := "test@example.com"
