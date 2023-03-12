@@ -11,7 +11,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -287,8 +286,7 @@ func msgsPerUser(c *gin.Context) {
 		body := make(map[string]string)
 		json.Unmarshal(bytes, &body)
 
-		query := `INSERT INTO messages (author_id, text, pub_date, flagged)
-					VALUES ($1, $2, $3, 0)`
+		endpoint := api_base_url + "/add_message"
 
 		author_id := main.GetUserIdByName(c.Param("username"))
 		if author_id == "-1" {
@@ -297,7 +295,33 @@ func msgsPerUser(c *gin.Context) {
 			return
 		}
 
-		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
+		form := url.Values{}
+		form.Add("text", body["content"])
+
+		//Create a new POST request with a cookie set named "user_id" with value "author_id"
+		req, err := http.NewRequest("POST", endpoint, strings.NewReader(form.Encode()))
+
+		cookie := &http.Cookie{
+			Name:  "user_id",
+			Value: author_id,
+		}
+		req.AddCookie(cookie)
+
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		//create client
+		client := &http.Client{}
+		//send request
+		_, err = client.Do(req)
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+
 		fmt.Println("user " + c.Param("username") + " posted a message: " + body["content"])
 		c.JSON(204, gin.H{})
 	}
@@ -317,7 +341,7 @@ func follow(c *gin.Context) {
 
 	user_id := main.GetUserIdByName(c.Param("username"))
 	user_name := c.Param("username")
-	fmt.Println("username " + user_name)
+	fmt.Println("follow username from param" + user_name)
 	if user_id == "" {
 		c.AbortWithStatus(404)
 		return
@@ -338,8 +362,24 @@ func follow(c *gin.Context) {
 			return
 		}
 
-		query := "INSERT INTO followers (who_id, whom_id) VALUES ($1, $2)"
-		main.DB.Exec(query, user_id, follows_user_id)
+		url := api_base_url + "/user/" + follows_username + "/follow"
+
+		//Create a new POST request with a cookie set named "user_id" with value "user_id"
+		req, err := http.NewRequest("POST", url, strings.NewReader("user_id="+user_id))
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		//create client
+		client := &http.Client{}
+		//send request
+		_, err = client.Do(req)
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
 
 		c.JSON(204, gin.H{})
 	} else if c.Request.Method == "POST" && body["unfollow"] != "" {
@@ -353,29 +393,73 @@ func follow(c *gin.Context) {
 			return
 		}
 
-		query := "DELETE FROM followers WHERE who_id=$1 and WHOM_ID=$2"
-		main.DB.Exec(query, user_id, unfollows_user_id)
+		url := api_base_url + "/user/" + unfollows_username + "/unfollow"
 
+		//Create a new POST request with a cookie set named "user_id" with value "user_id"
+		req, err := http.NewRequest("POST", url, strings.NewReader("user_id="+user_id))
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		//create client
+		client := &http.Client{}
+		//send request
+		_, err = client.Do(req)
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
 		c.JSON(204, gin.H{})
 	} else if c.Request.Method == "GET" {
 		// default
 		num_followers := getNumMsgs(c)
-		query := `SELECT users.username FROM users
-					INNER JOIN followers ON followers.whom_id=users.user_id
-					WHERE followers.who_id=$1
-					LIMIT $2`
+		//converto num_followers to string
+		num_followers_str := strconv.Itoa(num_followers)
 
-		followers, _ := main.DB.Query(query, user_id, num_followers)
-		followers_names := []string{}
+		url := api_base_url + "/AllIAmFollowing"
 
-		for followers.Next() {
-			var username string
-			followers.Scan(&username)
-			followers_names = append(followers_names, username)
+		//Create a get request with cookie set named "user_id" with value "user_id"
+		req, err := http.NewRequest("GET", url, strings.NewReader("user_id="+user_id+"&num_followers="+num_followers_str))
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		//create client
+		client := &http.Client{}
+
+		//send request
+		resp, err := client.Do(req)
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+
+		//read the response body
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+
+		// get users from body
+		var followers []main.User
+		err = json.Unmarshal(body, &followers)
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+
+		usernames := []string{}
+		for _, user := range followers {
+			usernames = append(usernames, user.Username)
 		}
 
 		c.JSON(200, gin.H{
-			"follows": followers_names,
+			"follows": usernames,
 		})
 	}
 
