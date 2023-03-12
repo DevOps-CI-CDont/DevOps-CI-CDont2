@@ -28,7 +28,7 @@ func NewMetrics(reg prometheus.Registerer) *metrics {
 		funcCounter: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "function_calls_total",
 			Help: "Number of calls to each function",
-		}, []string{"method", "endpont", "code"}),
+		}, []string{"method", "endpoint", "code"}),
 	}
 	reg.MustRegister(m.funcCounter)
 	return m
@@ -67,7 +67,7 @@ func Start() {
 	Router.POST("/register", register, incrementCounter(m, "/register"))
 	Router.GET("/logout", logout, incrementCounter(m, "/logout"))
 	Router.GET("/RESET", init_db, incrementCounter(m, "/RESET"))
-	Router.GET("/AmIFollowing/:username", amIFollowing, incrementCounter(m, "AmIFollowing/:username"))
+	Router.GET("/AmIFollowing/:username", amIFollowing, incrementCounter(m, "/AmIFollowing/:username"))
 	Router.GET("/allUsers", getAllUsers, incrementCounter(m, "/allUsers"))
 	Router.Run(":8080")
 }
