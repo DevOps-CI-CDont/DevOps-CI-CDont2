@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const base = "http://0.0.0.0:8080"
+const base = "http://localhost:8080"
 
 func main() {
 	// run the test
@@ -46,8 +46,6 @@ func login(username string, password string) *http.Response {
 }
 
 func TestRegister(t *testing.T) {
-	http.Get(base + "/RESET")
-
 	username := "testuser"
 	password := "testpassword"
 	email := "test@example.com"

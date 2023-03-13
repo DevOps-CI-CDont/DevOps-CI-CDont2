@@ -18,6 +18,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type FilteredMessage struct {
+	Content  string  `json:"content"`
+	Pub_date float64 `json:"pub_date"`
+	User     string  `json:"user"`
+}
+
 var LATEST = 0
 
 func update_latest(c *gin.Context) {
@@ -165,19 +171,43 @@ func getMsgs(c *gin.Context) {
 		return
 	}
 
-	// Return the JSON response with status code 200
-	c.JSON(http.StatusOK, gin.H{"messages": data["tweets"]})
+	// make filteredMsgs
+	filteredMsgs := make([]FilteredMessage, 0)
+	for _, msg := range data["tweets"].([]interface{}) {
+		msg := msg.(map[string]interface{})
+		author := msg["author"].(map[string]interface{})
+		filteredMsgs = append(filteredMsgs, FilteredMessage{
+			Content:  msg["text"].(string),
+			Pub_date: msg["pub_date"].(float64),
+			User:     author["username"].(string),
+		})
+	}
+
+	// Marshal the filteredMsgs slice into a JSON-encoded byte slice
+	jsonBytes, err := json.Marshal(filteredMsgs)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Set the response header and write the JSON-encoded byte slice to the response writer
+	c.Header("Content-Type", "application/json")
+	c.Writer.Write(jsonBytes)
 }
 
 func getNumMsgs(c *gin.Context) int {
 	// default
 	num_msgs := c.Request.URL.Query().Get("no")
-	int_num_msgs, err := strconv.Atoi(num_msgs)
-	if num_msgs == "" || err != nil {
-		int_num_msgs = 30
+	if num_msgs == "" {
+		int_num_msgs := 30
+		return int_num_msgs
+	} else {
+		int_num_msgs, err := strconv.Atoi(num_msgs)
+		if err != nil {
+			int_num_msgs = 30
+		}
+		return int_num_msgs
 	}
-
-	return int_num_msgs
 }
 
 func msgsPerUser(c *gin.Context) {
@@ -228,7 +258,29 @@ func msgsPerUser(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(200, gin.H{"messages": data["tweets"]})
+
+		// make filteredMsgs
+		filteredMsgs := make([]FilteredMessage, 0)
+		for _, msg := range data["tweets"].([]interface{}) {
+			msg := msg.(map[string]interface{})
+			author := msg["author"].(map[string]interface{})
+			filteredMsgs = append(filteredMsgs, FilteredMessage{
+				Content:  msg["text"].(string),
+				Pub_date: msg["pub_date"].(float64),
+				User:     author["username"].(string),
+			})
+		}
+
+		// Marshal the filteredMsgs slice into a JSON-encoded byte slice
+		jsonBytes, err := json.Marshal(filteredMsgs)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		// Set the response header and write the JSON-encoded byte slice to the response writer
+		c.Header("Content-Type", "application/json")
+		c.Writer.Write(jsonBytes)
 
 	} else if c.Request.Method == "POST" {
 		bytes, _ := io.ReadAll(c.Request.Body)
@@ -238,11 +290,15 @@ func msgsPerUser(c *gin.Context) {
 		query := `INSERT INTO messages (author_id, text, pub_date, flagged)
 					VALUES ($1, $2, $3, 0)`
 
-		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
-		// fmt.Println("DB Insertion completed!")
-		// select the last inserted message
-		query = `SELECT messages.*, users.* FROM messages, users `
+		author_id := main.GetUserIdByName(c.Param("username"))
+		if author_id == "-1" {
+			fmt.Println("non-existing user tried to post a message: " + body["content"])
+			c.JSON(404, gin.H{})
+			return
+		}
 
+		main.DB.Exec(query, main.GetUserIdByName(c.Param("username")), body["content"], time.Now().Unix())
+		fmt.Println("user " + c.Param("username") + " posted a message: " + body["content"])
 		c.JSON(204, gin.H{})
 	}
 
@@ -260,7 +316,8 @@ func follow(c *gin.Context) {
 	}
 
 	user_id := main.GetUserIdByName(c.Param("username"))
-
+	user_name := c.Param("username")
+	fmt.Println("username " + user_name)
 	if user_id == "" {
 		c.AbortWithStatus(404)
 		return
@@ -274,6 +331,8 @@ func follow(c *gin.Context) {
 		follows_username := body["follow"]
 		follows_user_id := main.GetUserIdByName(follows_username)
 
+		fmt.Println("user " + user_id + " tries to follow " + follows_user_id)
+
 		if follows_user_id == "-1" {
 			c.AbortWithStatus(404)
 			return
@@ -286,6 +345,8 @@ func follow(c *gin.Context) {
 	} else if c.Request.Method == "POST" && body["unfollow"] != "" {
 		unfollows_username := body["unfollow"]
 		unfollows_user_id := main.GetUserIdByName(unfollows_username)
+
+		fmt.Println("user " + user_id + " tries to unfollow " + unfollows_user_id)
 
 		if unfollows_user_id == "-1" {
 			c.AbortWithStatus(404)

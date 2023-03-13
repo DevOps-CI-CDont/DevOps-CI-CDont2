@@ -10,6 +10,7 @@
 *.tar.xz
 *.tar.lz4
 *.tar.sz
+*.pyc
 /vendor/
 /bin/
 /pkg/
@@ -20,7 +21,6 @@ node_modules/
 
 # Shared folders
 logs/
-tmp/
 
 # IDEs
 .idea/
