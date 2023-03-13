@@ -4,6 +4,7 @@ import base64
 import os
 import sqlite3
 import requests
+import pytest
 
 
 BASE_URL = 'http://0.0.0.0:8081'
@@ -29,6 +30,7 @@ def init_db():
 os.system(f'rm {dbPath}')
 init_db()
 
+@pytest.mark.skip(reason="uses local db")
 def test_latest():
     # post something to updaet LATEST
     url = f"{BASE_URL}/register"
@@ -44,7 +46,7 @@ def test_latest():
     assert response.ok
     assert response.json()['latest'] == 1337
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_register():
     username = 'a'
     email = 'a@a.a'
@@ -60,7 +62,7 @@ def test_register():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 1
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_create_msg():
     username = 'a'
     data = {'content': 'Blub!'}
@@ -74,7 +76,7 @@ def test_create_msg():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 2
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_get_latest_user_msgs():
     username = 'a'
 
@@ -94,7 +96,7 @@ def test_get_latest_user_msgs():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 3
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_get_latest_msgs():
     username = 'a'
     query = {'no': 20, 'latest': 4}
@@ -113,7 +115,7 @@ def test_get_latest_msgs():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 4
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_register_b():
     username = 'b'
     email = 'b@b.b'
@@ -129,7 +131,7 @@ def test_register_b():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 5
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_register_c():
     username = 'c'
     email = 'c@c.c'
@@ -144,7 +146,7 @@ def test_register_c():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 6
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_follow_user():
     username = 'a'
     url = f'{BASE_URL}/fllws/{username}'
@@ -172,7 +174,7 @@ def test_follow_user():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 9
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_a_unfollows_b():
     username = 'a'
     url = f'{BASE_URL}/fllws/{username}'
