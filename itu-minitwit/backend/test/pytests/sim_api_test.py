@@ -28,7 +28,7 @@ def init_db():
         db.commit()
 
 # Empty the database and initialize the schema again
-os.system(f'rm {dbPath}')
+os.system(f'rm {dbPath}') # this test suite will delete and recreate the db
 init_db()
 
 @pytest.mark.skip(reason="uses local db")
