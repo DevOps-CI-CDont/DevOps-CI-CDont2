@@ -47,7 +47,7 @@ def test_latest():
 #     assert response.ok
 #     assert response.json()['latest'] == 1337
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_register():
     username = 'a'
     email = 'a@a.a'
