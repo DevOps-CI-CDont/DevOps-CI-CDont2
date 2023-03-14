@@ -1,4 +1,5 @@
 import useAuthStore from "@/store/authStore";
+import useUserStore from "@/store/userStore";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { useEffect } from "react";
@@ -11,12 +12,15 @@ export default function App({ Component, pageProps }: AppProps) {
   const [sessionCookie] = useCookies(["user_id"]);
 
   const setAuthStore = useAuthStore((state) => state.setIsAuth);
+  const setUserId = useUserStore((state) => state.setUserId);
 
   useEffect(() => {
     if (sessionCookie.user_id) {
       setAuthStore(true);
+      setUserId(sessionCookie.user_id);
     } else {
       setAuthStore(false);
+      setUserId(undefined);
     }
   }, [sessionCookie]);
 

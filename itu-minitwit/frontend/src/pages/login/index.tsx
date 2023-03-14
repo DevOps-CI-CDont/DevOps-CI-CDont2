@@ -1,11 +1,13 @@
 import DefaultLayout from "@/layouts/DefaultLayout";
 import { postLogin } from "@/server/postLogin";
+import useUserStore from "@/store/userStore";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useCookies } from "react-cookie";
 
 export default function LoginPage() {
   const [userIdCookie, setUserIdCookie] = useCookies(["user_id"]);
+  const setUserId = useUserStore((state) => state.setUserId);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
@@ -49,6 +51,7 @@ export default function LoginPage() {
       if (res.error) return alert(res.error);
 
       setUserIdCookie("user_id", res["user_id"]);
+      setUserId(res["user_id"]);
 
       router.push("/");
     } catch (e) {
