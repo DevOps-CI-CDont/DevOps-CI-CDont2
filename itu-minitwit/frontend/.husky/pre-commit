@@ -3,3 +3,4 @@
 
 npm tsc:skip
 npm lint-staged
+npm run lint
