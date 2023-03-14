@@ -15,7 +15,9 @@ export function Header() {
   return (
     <div className='border-b shadow-md w-screen fixed top-0 left-0 right-0 bg-white'>
       <nav className='flex justify-between items-center h-20 max-w-7xl mx-auto px-2'>
-        <h2 className='font-bold text-lg'>ITU Minitwit (now with CD)</h2>
+        <Link href={"/public"}>
+          <h2 className='font-bold text-lg'>ITU Minitwit (now with CD)</h2>
+        </Link>
         <ul className='flex justify-center items-center'>
           {isAuth ? (
             <>
