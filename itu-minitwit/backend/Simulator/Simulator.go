@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	main "minitwit-backend/init/Api"
+	"minitwit-backend/init/models"
 	"net/http"
 	"net/url"
 	"os"
@@ -446,7 +447,7 @@ func follow(c *gin.Context) {
 		}
 
 		// get users from body
-		var followers []main.User
+		var followers []models.User
 		err = json.Unmarshal(body, &followers)
 		if err != nil {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
