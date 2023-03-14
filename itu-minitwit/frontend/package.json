@@ -7,6 +7,7 @@
     "devnextjs": "next dev",
     "build": "next build",
     "start": "next start",
+    "nothing": "echo 'nothing to do'",
     "lint": "eslint . --cache --fix --ext .ts,.tsx",
     "prepare": "cd .. && cd .. && husky install itu-minitwit/frontend/.husky",
     "pretest": "npm run lint",
