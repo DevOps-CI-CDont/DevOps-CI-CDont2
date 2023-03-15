@@ -12,7 +12,7 @@ export function TweetContainer({ tweets }: TweetContainerProps) {
         <span>No tweets found</span>
       ) : (
         tweets?.map((tweets) => {
-          return <Tweet {...tweets} key={tweets.message_id} />;
+          return <Tweet {...tweets} key={tweets.ID} />;
         })
       )}
     </div>
