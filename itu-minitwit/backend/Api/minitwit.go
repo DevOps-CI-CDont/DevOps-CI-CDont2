@@ -71,10 +71,9 @@ func Start() {
 	Router.POST("/login", login, incrementCounter(m, "/login"))
 	Router.POST("/register", register, incrementCounter(m, "/register"))
 	Router.GET("/logout", logout, incrementCounter(m, "/logout"))
-	Router.GET("/RESET", init_db, incrementCounter(m, "/RESET"))
 	Router.GET("/AmIFollowing/:username", amIFollowing, incrementCounter(m, "/AmIFollowing/:username"))
 	Router.GET("/allUsers", getAllUsers, incrementCounter(m, "/allUsers"))
-  Router.GET("AllIAmFollowing", getAllFollowing)
+	Router.GET("AllIAmFollowing", getAllFollowing)
 
 	Router.Run(":8080")
 }
