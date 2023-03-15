@@ -31,7 +31,9 @@ jobs:
       - name: Build and run Go api
         run: |
           (cd itu-minitwit/backend/Main && go run main.go "test" &) # run the Go API in the background
-          ./wait-for-it.sh localhost:8080 --timeout=30 --strict -- echo "Go API is up and running" # wait for the Go API to start up
+      - name: Delay before running tests
+        run: |
+          sleep 10
       - name: Test with pytest
         run: |
           pytest
