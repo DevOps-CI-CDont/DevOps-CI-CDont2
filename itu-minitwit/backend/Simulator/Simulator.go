@@ -228,7 +228,7 @@ func msgsPerUser(c *gin.Context) {
 		user_name := c.Param("username")
 
 		if user_name == "" {
-			c.AbortWithStatus(404)
+			c.JSON(404, gin.H{"error_msg": "User not found!"})
 			return
 		}
 
@@ -344,8 +344,8 @@ func follow(c *gin.Context) {
 	user_name := c.Param("username")
 	fmt.Println("follow username from param: " + user_name)
 	fmt.Println("follow user_id from param: " + user_id)
-	if user_id == "" {
-		c.AbortWithStatus(404)
+	if user_id == "" || user_id == "-1" {
+		c.JSON(400, gin.H{"error_msg": "user_id is not valid"})
 		return
 	}
 
@@ -360,7 +360,7 @@ func follow(c *gin.Context) {
 		fmt.Println("user " + user_id + " tries to follow " + follows_user_id)
 
 		if follows_user_id == "-1" {
-			c.AbortWithStatus(404)
+			c.JSON(400, gin.H{"error_msg": "follows_user_id is not valid"})
 			return
 		}
 
@@ -398,7 +398,7 @@ func follow(c *gin.Context) {
 		fmt.Println("user " + user_id + " tries to unfollow " + unfollows_user_id)
 
 		if unfollows_user_id == "-1" {
-			c.AbortWithStatus(404)
+			c.JSON(400, gin.H{"error_msg": "unfollows_user_id is not valid"})
 			return
 		}
 

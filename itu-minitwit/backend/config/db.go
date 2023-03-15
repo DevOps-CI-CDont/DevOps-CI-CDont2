@@ -16,7 +16,7 @@ func Connect_db() {
 		25060,
 		"doadmin",
 		"AVNS_FeRFl5bSz6UNMVF6Llx",
-		"minitwit_test",
+		"minitwit",
 		"require",
 		"Europe/Berlin",
 		"UTF8")
