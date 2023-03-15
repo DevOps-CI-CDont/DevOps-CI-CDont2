@@ -2,13 +2,18 @@ package Api
 
 import (
 	"crypto/sha256"
-	"database/sql"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log"
+	"minitwit-backend/init/config"
+	"minitwit-backend/init/models"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -42,7 +47,7 @@ func SetUpRouter() *gin.Engine {
 func Start() {
 	Router = SetUpRouter()
 
-	Connect_db()
+	config.Connect_db()
 
 	// router config
 	Router.Use(cors.Default()) // cors.Default() should allow all origins
@@ -69,6 +74,8 @@ func Start() {
 	Router.GET("/RESET", init_db, incrementCounter(m, "/RESET"))
 	Router.GET("/AmIFollowing/:username", amIFollowing, incrementCounter(m, "/AmIFollowing/:username"))
 	Router.GET("/allUsers", getAllUsers, incrementCounter(m, "/allUsers"))
+  Router.GET("AllIAmFollowing", getAllFollowing)
+
 	Router.Run(":8080")
 }
 
@@ -79,177 +86,13 @@ func incrementCounter(m *metrics, endpointName string) gin.HandlerFunc {
 	return fn
 }
 
-// Capitalized names are public, lowercase are privat
-type User struct {
-	User_id  int    `json:"user_id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Pw_hash  string `json:"pw_hash"`
-}
-
-type follower struct {
-	Who_id  int `json:"who_id"`
-	Whom_id int `json:"whom_id"`
-}
-
-type Message struct {
-	Message_id int    `json:"message_id"`
-	Author_id  int    `json:"author_id"`
-	Text       string `json:"text"`
-	Pub_date   int    `json:"pub_date"`
-	Flagged    int    `json:"flagged"`
-	Author     User   `json:"author"`
-}
-
-var DB *sql.DB // global DB variable
 var PER_PAGE = 30
 var DEBUG = true
-var SECRET_KEY = "development key"
 
 func HashPassword(password string) string {
 	hash := sha256.Sum256([]byte(password))
 	hexString := hex.EncodeToString(hash[:])
 	return hexString
-}
-
-func Connect_db() error {
-	dbinfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s TimeZone=%s client_encoding=%s",
-		"cicdont-do-user-13570987-0.b.db.ondigitalocean.com",
-		25060,
-		"doadmin",
-		"AVNS_FeRFl5bSz6UNMVF6Llx",
-		"minitwit",
-		"require",
-		"Europe/Berlin",
-		"UTF8")
-	db, err := sql.Open("postgres", dbinfo)
-	errorCheck(err)
-
-	DB = db
-
-	return nil
-}
-
-func init_db(c *gin.Context) {
-	const Benjapass = "12345678"
-	const Oliverpass = "1234"
-	const Silaspass = "password"
-	const Januspass = "Janus"
-
-	passwordHashString := HashPassword(Benjapass)
-	passwordHashStringO := HashPassword(Oliverpass)
-	passwordHashStringS := HashPassword(Silaspass)
-	passwordHashStringJ := HashPassword(Januspass)
-
-	// create tables
-	_, err := DB.Exec(`
-		drop table if exists users;
-	`)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		drop table if exists messages;
-	`)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		drop table if exists followers;
-	`)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		CREATE TABLE IF NOT EXISTS users (
-			user_id serial,
-			username text,
-			email text,
-			pw_hash text,
-			PRIMARY KEY (user_id)
-		);
-	`)
-	errorCheck(err)
-	_, err = DB.Exec(`
-		CREATE TABLE IF NOT EXISTS messages (
-			message_id serial,
-			author_id integer,
-			text text,
-			pub_date integer,
-			flagged integer,
-			PRIMARY KEY (message_id)
-		);
-	`)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		create table if not exists followers (who_id integer, whom_id integer);
-	`)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		INSERT INTO users (username, email, pw_hash)
-		VALUES ('Benjamin', 'bekj@itu.dk', $1);
-	`, passwordHashString)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		INSERT INTO users (username, email, pw_hash)
-		VALUES ('Oliver', 'ojoe@itu.dk', $1);
-	`, passwordHashStringO)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		INSERT INTO users (username, email, pw_hash)
-		VALUES ('Silas', 'sipn@itu.dk', $1);
-	`, passwordHashStringS)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		INSERT INTO users (username, email, pw_hash)
-		VALUES ('Janus', 'januh@itu.dk', $1);
-	`, passwordHashStringJ)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		INSERT INTO messages (author_id, text, pub_date, flagged)
-		VALUES (1, 'I like apples', 123456789, 0);
-	`)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		INSERT INTO messages (author_id, text, pub_date, flagged)
-		VALUES (2, 'I like tarteletter', 123456789, 0);
-	`)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		INSERT INTO messages (author_id, text, pub_date, flagged)
-		VALUES (3, 'I like Pizza', 123456789, 0);
-	`)
-	errorCheck(err)
-
-	_, err = DB.Exec(`
-		INSERT INTO messages (author_id, text, pub_date, flagged)
-		VALUES (4, 'I like bananas ', 123456789, 0);
-	`)
-	errorCheck(err)
-
-	sqlStmt9 := `
-		INSERT INTO followers (who_id, whom_id)
-		VALUES
-		(1, 2),
-		(1, 3),
-		(1, 4),
-		(2, 1),
-		(2, 3),
-		(2, 4),
-		(3, 1),
-		(3, 2),
-		(3, 4),
-		(4, 1),
-		(4, 2);
-	`
-	_, err = DB.Exec(sqlStmt9)
-	errorCheck(err)
-
 }
 
 func errorCheck(err error) {
@@ -261,43 +104,59 @@ func errorCheck(err error) {
 // endpoints
 
 func amIFollowing(c *gin.Context) {
-	username := c.Param("username")
+	nameTryingToFollow := c.Param("username")
 	userID := getUserIdIfLoggedIn(c)
-	rows, err := DB.Query(`select * from followers
-		where who_id = $1 and whom_id = (select user_id from users where username = $2)`, userID, username)
-	errorCheck(err)
-	defer rows.Close()
-	following := false
-	for rows.Next() {
-		following = true
+
+	var follower models.Follower
+	var whom models.User
+
+	err := config.DB.Table("users").
+		Where("username = ?", nameTryingToFollow).
+		First(&whom).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(400, false)
+			return
+		}
+		fmt.Println("error", err)
+		c.AbortWithStatusJSON(500, gin.H{"error": "internal server error"})
+		return
 	}
-	c.JSON(200, following)
+
+	err = config.DB.Table("followers").
+		Where("who_id = ? AND whom_id = ?", userID, whom.ID).
+		First(&follower).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(200, false)
+			return
+		}
+		fmt.Println("error", err)
+		c.AbortWithStatusJSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	c.JSON(200, true)
 }
 
 func getTimeline(c *gin.Context) {
-	//query database
-	// check cookie for session,
 	userID := getUserIdIfLoggedIn(c)
 
-	rows, err := DB.Query(`select messages.*, users.* from messages, users
-		where messages.flagged = 0 and messages.author_id = users.user_id and (
-		users.user_id = $1 or
-		users.user_id in (select whom_id from followers
-		where who_id = $2))
-		order by messages.pub_date desc limit $3`, userID, userID, PER_PAGE)
-	errorCheck(err)
-	defer rows.Close()
-	messages := make([]Message, 0)
-	for rows.Next() {
-		msg := Message{}
-		user := User{}
-		err = rows.Scan(&msg.Message_id, &msg.Author_id, &msg.Text, &msg.Pub_date, &msg.Flagged, &user.User_id, &user.Username, &user.Email, &user.Pw_hash)
-		errorCheck(err)
-		log.Println(msg)
-		msg.Author = user
+	var messages []models.Message
+	result := config.DB.Table("messages").
+		Select("messages.*, users.*").
+		Joins("JOIN users ON messages.author_id = users.id").
+		Where("messages.flagged = ? AND (users.id = ? OR users.id IN (?))",
+			0, userID, config.DB.Table("followers").Select("whom_id").Where("who_id = ?", userID)).
+		Order("messages.pub_date DESC").
+		Limit(PER_PAGE).
+		Scan(&messages)
 
-		messages = append(messages, msg)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving messages"})
+		return
 	}
+
 	c.JSON(200, gin.H{"tweets": messages})
 }
 
@@ -310,42 +169,36 @@ func getPublicTimeline(c *gin.Context) {
 
 	fmt.Println("int_num_msgs", int_num_msgs)
 
-	rows, err := DB.Query(`select messages.*, users.* from messages, users
-	where messages.flagged = 0 and messages.author_id = users.user_id
-	order by messages.pub_date desc limit $1`, int_num_msgs)
-	errorCheck(err)
+	var messages []models.Message
+	err = config.DB.
+		Table("messages").
+		Select("messages.*, users.*").
+		Joins("JOIN users ON messages.author_id = users.id").
+		Where("messages.flagged = ?", 0).
+		Order("messages.pub_date desc").
+		Limit(int_num_msgs).
+		Find(&messages).Error
 
-	// make a empty slice of messages
-	messages := make([]Message, 0)
-
-	for rows.Next() {
-		msg := Message{}
-		user := User{}
-		err = rows.Scan(&msg.Message_id, &msg.Author_id, &msg.Text, &msg.Pub_date, &msg.Flagged, &user.User_id, &user.Username, &user.Email, &user.Pw_hash)
-		log.Println(msg)
-		msg.Author = user
-
-		messages = append(messages, msg)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to retrieve messages"})
+		return
 	}
-
-	errorCheck(err)
 
 	// if no messages, return 401
 	if len(messages) == 0 {
 		c.JSON(401, gin.H{"message": "no messages"})
+		return
 	}
 
 	fmt.Println("messages", messages)
 
 	c.JSON(200, gin.H{"tweets": messages})
-
-	defer rows.Close()
 }
 
 func getUsersTweets(c *gin.Context) {
 	name := c.Param("username")
-	userID := GetUserIdByName(name)
-	if userID == "-1" {
+	user := models.User{}
+	if err := config.DB.Where("username = ?", name).First(&user).Error; err != nil {
 		c.JSON(200, gin.H{"message": "user does not exist"})
 		return
 	}
@@ -356,142 +209,156 @@ func getUsersTweets(c *gin.Context) {
 		int_num_msgs = 30
 	}
 
-	rows, err := DB.Query(`select messages.*, users.* from messages, users where messages.author_id = $1 and messages.author_id = users.user_id order by messages.pub_date desc limit $2`, userID, int_num_msgs)
-	errorCheck(err)
-	defer rows.Close()
-	messages := make([]Message, 0)
-	for rows.Next() {
-		msg := Message{}
-		user := User{}
-		err = rows.Scan(&msg.Message_id, &msg.Author_id, &msg.Text, &msg.Pub_date, &msg.Flagged, &user.User_id, &user.Username, &user.Email, &user.Pw_hash)
+	var messages []models.Message
+	if err := config.DB.Where("author_id = ?", user.ID).Order("pub_date desc").Limit(int_num_msgs).Preload("Author").Find(&messages).Error; err != nil {
 		errorCheck(err)
-		msg.Author = user
-
-		messages = append(messages, msg)
 	}
-	c.JSON(200, gin.H{"tweets": messages})
 
+	c.JSON(200, gin.H{"tweets": messages})
 }
 
 func followUser(c *gin.Context) {
+	userID := getUserIdIfLoggedIn(c)
+	whomName := c.Param("username")
+	whomID := GetUserIdByName(whomName)
 
-	userid := getUserIdIfLoggedIn(c)
-	whom_name := c.Param("username")
-	whom_id := GetUserIdByName(whom_name)
-	if doesUsersFollow(userid, whom_id) {
+	if doesUsersFollow(userID, whomID) {
 		c.JSON(200, gin.H{"message": "user already followed"})
 		return
 	}
 
-	if whom_id == "-1" {
-		c.JSON(200, gin.H{"message": "user does not exist"})
+	if whomID == "-1" {
+		c.JSON(400, gin.H{"message": "user does not exist"})
 		return
 	}
-	stmt, err := DB.Prepare(`insert into followers (who_id, whom_id) values ($1, $2)`)
-	errorCheck(err)
-	defer stmt.Close()
 
-	_, err = stmt.Exec(userid, whom_id)
+	//convert userid and whomid to int
+	userIDInt, err := strconv.Atoi(userID)
 	errorCheck(err)
+	whomIDInt, err := strconv.Atoi(whomID)
+	errorCheck(err)
+
+	Follower := models.Follower{
+		Who_id:  userIDInt,
+		Whom_id: whomIDInt,
+	}
+
+	if err := config.DB.Create(&Follower).Error; err != nil {
+		c.JSON(500, gin.H{"error": "failed to follow user"})
+		return
+	}
 
 	c.JSON(200, gin.H{"message": "followed user"})
 }
 
-func doesUsersFollow(who_id string, whom_id string) bool {
-	row := DB.QueryRow(`select * from followers where who_id = $1 and whom_id = $2`, who_id, whom_id)
-
-	follower := follower{}
-	err := row.Scan(&follower.Who_id, &follower.Whom_id)
-	return err == nil
-
+func doesUsersFollow(whoID string, whomID string) bool {
+	var follower models.Follower
+	if err := config.DB.Where("who_id = ? and whom_id = ?", whoID, whomID).First(&follower).Error; err != nil {
+		return false
+	}
+	return true
 }
 
 func unfollowUser(c *gin.Context) {
-
-	userid := getUserIdIfLoggedIn(c)
-	whom_name := c.Param("username")
-	whom_id := GetUserIdByName(whom_name)
-	if !doesUsersFollow(userid, whom_id) {
+	userID := getUserIdIfLoggedIn(c)
+	whomName := c.Param("username")
+	whomID := GetUserIdByName(whomName)
+	if !doesUsersFollow(userID, whomID) {
 		c.JSON(200, gin.H{"message": "user doesn't follow the target"})
 		return
 	}
-	log.Println(whom_id)
-	if whom_id == "-1" {
+	log.Println(whomID)
+	if whomID == "-1" {
 		c.JSON(200, gin.H{"message": "user you are trying to follow does not exist"})
 		return
 	}
 
-	stmt, err := DB.Prepare(`Delete FROM followers WHERE who_id = $1 and whom_id = $2`)
-	errorCheck(err)
-	defer stmt.Close()
-
-	_, err = stmt.Exec(userid, whom_id)
-	errorCheck(err)
+	result := config.DB.Where("who_id = ? AND whom_id = ?", userID, whomID).Delete(&models.Follower{})
+	if result.Error != nil {
+		errorCheck(result.Error)
+	}
 
 	c.JSON(200, gin.H{"message": "unfollowed user"})
-
 }
 
 func postMessage(c *gin.Context) {
-
-	userid := getUserIdIfLoggedIn(c)
-
-	if userid == "-1" {
+	userID := getUserIdIfLoggedIn(c)
+	if userID == "-1" {
 		c.JSON(401, gin.H{"message": "user not logged in"})
 		return
 	}
 
 	text := c.PostForm("text")
-	authorid := userid
+	//Convert userid to int
+	authorID, err := strconv.Atoi(userID)
+	errorCheck(err)
+
 	flagged := 0
-	log.Println("text:" + text)
+	log.Println("tweet attempting to be posted:" + text)
+	//convert time.Now().Unix() to int
+	pubDate := int(time.Now().Unix())
 
-	stmt, err := DB.Prepare(`insert into messages (author_id, text, pub_date, flagged) values ($1, $2, $3, $4)`)
-	errorCheck(err)
-	defer stmt.Close()
+	message := models.Message{
+		Author_id:   authorID,
+		Author_name: GetUsernameByID(userID),
+		Text:        text,
+		Pub_date:    pubDate,
+		Flagged:     flagged,
+	}
 
-	_, err = stmt.Exec(authorid, text, time.Now().Unix(), flagged)
-	errorCheck(err)
+	/* result := config.DB.Create(message)
+	if result.Error != nil {
+		c.JSON(500, gin.H{"message": "error creating message"})
+		return
+	} */
+
+	if err := config.DB.Create(&message).Error; err != nil {
+		c.JSON(400, gin.H{"error": "unable to create message"})
+		return
+	}
 
 	c.JSON(200, gin.H{"message": "message posted"})
+}
 
+func GetUsernameByID(id string) string {
+	var user models.User
+	if err := config.DB.Where("id = ?", id).First(&user).Error; err != nil {
+		return "-1"
+	}
+	return user.Username
 }
 
 func login(c *gin.Context) {
 
 	username := c.PostForm("username")
 	password := c.PostForm("password")
-	//convert password to byte[]
 
-	passwordHash := HashPassword(password)
-
-	//check if username and password are pty
 	if username == "" || password == "" {
 		c.JSON(400, gin.H{"error": "username or password is empty"})
 		return
 	}
 
-	userid := DB.QueryRow(`select user_id from users where users.Username = $1 and users.pw_hash = $2`, username, passwordHash)
+	var user models.User
+	err := config.DB.Where("username = ? AND pw_hash = ?", username, HashPassword(password)).First(&user).Error
 
-	var userIdAsInt int
-	err := userid.Scan(&userIdAsInt)
-	if userIdAsInt == 0 {
-		c.SetCookie("user_id", "", -1, "/", "localhost", false, false)
-		c.JSON(401, gin.H{"error": "username or password is incorrect"})
-		return
-	}
 	if err != nil {
-		c.SetCookie("user_id", "", -1, "/", "localhost", false, false)
-		c.JSON(401, gin.H{"error": "username or password is incorrect"})
-		return
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.SetCookie("user_id", "", -1, "/", "localhost", false, false)
+			c.JSON(401, gin.H{"error": "username or password is incorrect"})
+			return
+		} else {
+			errorCheck(err)
+		}
 	}
-	// succes: set cookie
-	c.SetCookie("user_id", strconv.Itoa(userIdAsInt), 3600, "/", "localhost", false, false)
-	c.JSON(200, gin.H{"user_id": userIdAsInt})
+
+	//convert user.ID as uint to string
+	userID := strconv.Itoa(int(user.ID))
+
+	c.SetCookie("user_id", userID, 3600, "/", "localhost", false, false)
+	c.JSON(200, gin.H{"user_id": user.ID})
 }
 
 func register(c *gin.Context) {
-
 	username := c.PostForm("username")
 	email := c.PostForm("email")
 	password := c.PostForm("password")
@@ -515,25 +382,28 @@ func register(c *gin.Context) {
 	passwordHashString := HashPassword(password)
 	log.Println(passwordHashString)
 
-	stmt, err := DB.Prepare(`insert into users (username, email, pw_hash) values ($1, $2, $3)`)
-	errorCheck(err)
-	defer stmt.Close()
-	_, err = stmt.Exec(username, email, passwordHashString)
-	errorCheck(err)
+	user := models.User{
+		Username: username,
+		Email:    email,
+		Pw_hash:  passwordHashString,
+	}
+
+	if err := config.DB.Create(&user).Error; err != nil {
+		c.JSON(400, gin.H{"error": "unable to create user"})
+		return
+	}
 
 	c.JSON(200, gin.H{"message": "user registered"})
 }
 
-func getUserByName(userName string) *sql.Row {
-	row := DB.QueryRow(`select * from users where users.username = $1`, userName)
-	user := User{}
-	err := row.Scan(&user.User_id, &user.Username, &user.Email, &user.Pw_hash)
-	if err != nil {
+func getUserByName(userName string) *models.User {
+	user := &models.User{}
+	result := config.DB.Where("username = ?", userName).First(user)
+	if result.Error != nil {
+		fmt.Println("didn't find user with username: " + userName + ": this is expected for new users")
 		return nil
 	}
-	return row
-	// if user exists, return user, else return nil
-
+	return user
 }
 
 func getUserIdIfLoggedIn(c *gin.Context) string {
@@ -549,17 +419,41 @@ func getUserIdIfLoggedIn(c *gin.Context) string {
 }
 
 func GetUserIdByName(username string) string {
-	stmt, err := DB.Prepare("SELECT user_id FROM users WHERE username = $1")
-	errorCheck(err)
-	defer stmt.Close()
-	var userId string
-	err = stmt.QueryRow(username).Scan(&userId)
+	var user models.User
+	err := config.DB.Where("username = ?", username).First(&user).Error
 	if err != nil {
 		return "-1"
 	}
+	return strconv.Itoa(int(user.ID))
+}
 
-	fmt.Println("userId: " + userId)
-	return userId
+func getAllFollowing(c *gin.Context) {
+	num_followers := c.Request.URL.Query().Get("num_followers")
+	int_followers, err := strconv.Atoi(num_followers)
+	if num_followers == "" || err != nil {
+		int_followers = 30
+	}
+	userID := getUserIdIfLoggedIn(c)
+	if userID == "-1" {
+		c.JSON(401, gin.H{"error": "user not logged in"})
+		return
+	}
+
+	following := []models.User{}
+	err = config.DB.Table("users").
+		Select("users.*").
+		Joins("JOIN followers ON users.id = followers.whom_id").
+		Where("followers.who_id = ?", userID).
+		Limit(int_followers).
+		Scan(&following).
+		Error
+
+	if err != nil {
+		c.JSON(500, gin.H{"error": "unable to retrieve following"})
+		return
+	}
+	c.JSON(200, gin.H{"following": following})
+
 }
 
 func logout(c *gin.Context) {
@@ -567,18 +461,11 @@ func logout(c *gin.Context) {
 }
 
 func getAllUsers(c *gin.Context) {
-	rows, err := DB.Query(`select * from users`)
-	errorCheck(err)
-	defer rows.Close()
-
-	users := []User{}
-	for rows.Next() {
-		user := User{}
-		err := rows.Scan(&user.User_id, &user.Username, &user.Email, &user.Pw_hash)
-		errorCheck(err)
-		users = append(users, user)
+	users := []models.User{}
+	err := config.DB.Find(&users).Error
+	if err != nil {
+		c.JSON(500, gin.H{"error": "unable to retrieve users"})
+		return
 	}
-	c.JSON(200, gin.H{
-		"users": users,
-	})
+	c.JSON(200, gin.H{"users": users})
 }
