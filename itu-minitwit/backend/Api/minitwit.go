@@ -44,11 +44,14 @@ func SetUpRouter() *gin.Engine {
 	return r
 }
 
-func Start() {
+func Start(mode string) {
 	Router = SetUpRouter()
 
-	config.Connect_db()
-
+	if mode == "test" {
+		config.Connect_test_db()
+	} else {
+		config.Connect_prod_db()
+	}
 	// router config
 	Router.Use(cors.Default()) // cors.Default() should allow all origins
 	// it's important to set this before any routes are registered so that the middleware is applied to all routes
@@ -73,7 +76,7 @@ func Start() {
 	Router.GET("/logout", logout, incrementCounter(m, "/logout"))
 	Router.GET("/AmIFollowing/:username", amIFollowing, incrementCounter(m, "/AmIFollowing/:username"))
 	Router.GET("/allUsers", getAllUsers, incrementCounter(m, "/allUsers"))
-	Router.GET("AllIAmFollowing", getAllFollowing)
+	Router.GET("/AllIAmFollowing", getAllFollowing)
 
 	Router.Run(":8080")
 }
@@ -209,7 +212,7 @@ func getUsersTweets(c *gin.Context) {
 	}
 
 	var messages []models.Message
-	if err := config.DB.Where("author_id = ?", user.ID).Order("pub_date desc").Limit(int_num_msgs).Preload("Author").Find(&messages).Error; err != nil {
+	if err := config.DB.Where("author_id = ?", user.ID).Order("pub_date desc").Limit(int_num_msgs).Find(&messages).Error; err != nil {
 		errorCheck(err)
 	}
 
@@ -260,15 +263,19 @@ func doesUsersFollow(whoID string, whomID string) bool {
 
 func unfollowUser(c *gin.Context) {
 	userID := getUserIdIfLoggedIn(c)
+	if userID == "-1" {
+		c.JSON(401, gin.H{"message": "user not logged in"})
+		return
+	}
 	whomName := c.Param("username")
 	whomID := GetUserIdByName(whomName)
 	if !doesUsersFollow(userID, whomID) {
 		c.JSON(200, gin.H{"message": "user doesn't follow the target"})
 		return
 	}
-	log.Println(whomID)
+	log.Println("user id" + userID + " trying to unfollow " + whomID)
 	if whomID == "-1" {
-		c.JSON(200, gin.H{"message": "user you are trying to follow does not exist"})
+		c.JSON(400, gin.H{"message": "user you are trying to unfollow does not exist"})
 		return
 	}
 
@@ -442,7 +449,7 @@ func getAllFollowing(c *gin.Context) {
 	err = config.DB.Table("users").
 		Select("users.*").
 		Joins("JOIN followers ON users.id = followers.whom_id").
-		Where("followers.who_id = ?", userID).
+		Where("followers.who_id = ? AND followers.deleted_at IS NULL", userID).
 		Limit(int_followers).
 		Scan(&following).
 		Error
@@ -451,7 +458,7 @@ func getAllFollowing(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "unable to retrieve following"})
 		return
 	}
-	c.JSON(200, gin.H{"following": following})
+	c.JSON(200, following)
 
 }
 

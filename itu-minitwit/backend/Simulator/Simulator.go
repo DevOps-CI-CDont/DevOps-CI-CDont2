@@ -175,11 +175,10 @@ func getMsgs(c *gin.Context) {
 	filteredMsgs := make([]FilteredMessage, 0)
 	for _, msg := range data["tweets"].([]interface{}) {
 		msg := msg.(map[string]interface{})
-		author := msg["author"].(map[string]interface{})
 		filteredMsgs = append(filteredMsgs, FilteredMessage{
 			Content:  msg["text"].(string),
 			Pub_date: msg["pub_date"].(float64),
-			User:     author["username"].(string),
+			User:     msg["author_name"].(string),
 		})
 	}
 
@@ -263,11 +262,10 @@ func msgsPerUser(c *gin.Context) {
 		filteredMsgs := make([]FilteredMessage, 0)
 		for _, msg := range data["tweets"].([]interface{}) {
 			msg := msg.(map[string]interface{})
-			author := msg["author"].(map[string]interface{})
 			filteredMsgs = append(filteredMsgs, FilteredMessage{
 				Content:  msg["text"].(string),
 				Pub_date: msg["pub_date"].(float64),
-				User:     author["username"].(string),
+				User:     msg["author_name"].(string),
 			})
 		}
 
@@ -433,18 +431,24 @@ func follow(c *gin.Context) {
 	} else if c.Request.Method == "GET" {
 		// default
 		num_followers := getNumMsgs(c)
-		//converto num_followers to string
+
+		//convert num_followers to string
 		num_followers_str := strconv.Itoa(num_followers)
 
-		url := api_base_url + "/AllIAmFollowing"
+		url := api_base_url + "/AllIAmFollowing" + "?num_followers=" + num_followers_str
 
 		//Create a get request with cookie set named "user_id" with value "user_id"
-		req, err := http.NewRequest("GET", url, strings.NewReader("user_id="+user_id+"&num_followers="+num_followers_str))
+		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		cookie := &http.Cookie{ // this is the cookie that seems to work
+			Name:  "user_id",
+			Value: user_id,
+		}
+		req.AddCookie(cookie)
 
 		//create client
 		client := &http.Client{}
@@ -457,22 +461,22 @@ func follow(c *gin.Context) {
 		}
 
 		//read the response body
-		body, err := ioutil.ReadAll(resp.Body)
+		resp_body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
 
-		// get users from body
-		var followers []models.User
-		err = json.Unmarshal(body, &followers)
+		var usersList []models.User
+		err = json.Unmarshal(resp_body, &usersList)
 		if err != nil {
+			// handle error
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
 
 		usernames := []string{}
-		for _, user := range followers {
+		for _, user := range usersList {
 			usernames = append(usernames, user.Username)
 		}
 

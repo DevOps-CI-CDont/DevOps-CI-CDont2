@@ -6,6 +6,7 @@ import sqlite3
 import requests
 import pytest
 import tempfile
+from psycopg2 import connect # postgres database adapter
 
 
 BASE_URL = 'http://localhost:8081'
@@ -17,22 +18,35 @@ HEADERS = {'Connection': 'close',
            'Content-Type': 'application/json',
            f'Authorization': f'Basic {ENCODED_CREDENTIALS}'}
 
-dbPath = "./itu-minitwit/backend/tmp/minitwit.db"
-schemaPath = "./itu-minitwit/backend/tmp/schema.sql"
 
-def init_db():
-    """Creates the database tables."""
-    with closing(sqlite3.connect(dbPath)) as db:
-        with open(schemaPath) as fp:
-            db.cursor().executescript(fp.read())
-        db.commit()
+@pytest.fixture(scope="session")
+def postgresql():
+    conn = connect(
+        dbname="minitwit_test",
+        user="doadmin",
+        password="AVNS_FeRFl5bSz6UNMVF6Llx",
+        host="cicdont-do-user-13570987-0.b.db.ondigitalocean.com",
+        port="25060"
+    )
 
-# Empty the database and initialize the schema again
-os.system(f'rm {dbPath}') # this test suite will delete and recreate the db
-init_db()
+    yield conn
 
-@pytest.mark.skip(reason="uses local db")
-def test_latest():
+    conn.close()
+
+@pytest.fixture(scope="session")
+def reset_db_rows(postgresql):
+    cursor = postgresql.cursor()
+    cursor.execute("DELETE FROM messages;")
+    cursor.execute("DELETE FROM followers;")
+    cursor.execute("DELETE FROM users;")
+    cursor.execute("ALTER SEQUENCE messages_id_seq RESTART WITH 1;")
+    cursor.execute("ALTER SEQUENCE users_id_seq RESTART WITH 1;")
+    cursor.execute("ALTER SEQUENCE followers_id_seq RESTART WITH 1;")
+    
+    
+    postgresql.commit()
+
+def test_latest(reset_db_rows):
     # post something to updaet LATEST
     url = f"{BASE_URL}/register"
     data = {'username': 'test', 'email': 'test@test', 'pwd': 'foo'}
@@ -41,14 +55,13 @@ def test_latest():
                              params=params, headers=HEADERS)
     assert response.ok
 
-#     # verify that latest was updated
-#     url = f'{BASE_URL}/latest'
-#     response = requests.get(url, headers=HEADERS)
-#     assert response.ok
-#     assert response.json()['latest'] == 1337
+    # verify that latest was updated
+    url = f'{BASE_URL}/latest'
+    response = requests.get(url, headers=HEADERS)
+    assert response.ok
+    assert response.json()['latest'] == 1337
 
-@pytest.mark.skip(reason="uses local db")
-def test_register():
+def test_register(reset_db_rows):
     username = 'a'
     email = 'a@a.a'
     pwd = 'a'
@@ -59,12 +72,12 @@ def test_register():
     assert response.ok
     # TODO: add another assertion that it is really there
 
-#     # verify that latest was updated
-#     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
-#     assert response.json()['latest'] == 1
+    # verify that latest was updated
+    response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 1
 
-@pytest.mark.skip(reason="uses local db")
-def test_create_msg():
+
+def test_create_msg(reset_db_rows):
     username = 'a'
     data = {'content': 'Blub!'}
     url = f'{BASE_URL}/msgs/{username}'
@@ -77,8 +90,7 @@ def test_create_msg():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 2
 
-@pytest.mark.skip(reason="uses local db")
-def test_get_latest_user_msgs():
+def test_get_latest_user_msgs(reset_db_rows):
     username = 'a'
 
     query = {'no': 20, 'latest': 3}
@@ -97,8 +109,7 @@ def test_get_latest_user_msgs():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 3
 
-@pytest.mark.skip(reason="uses local db")
-def test_get_latest_msgs():
+def test_get_latest_msgs(reset_db_rows):
     username = 'a'
     query = {'no': 20, 'latest': 4}
     url = f'{BASE_URL}/msgs'
@@ -116,8 +127,7 @@ def test_get_latest_msgs():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 4
 
-@pytest.mark.skip(reason="uses local db")
-def test_register_b():
+def test_register_b(reset_db_rows):
     username = 'b'
     email = 'b@b.b'
     pwd = 'b'
@@ -132,8 +142,7 @@ def test_register_b():
 #     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
 #     assert response.json()['latest'] == 5
 
-@pytest.mark.skip(reason="uses local db")
-def test_register_c():
+def test_register_c(reset_db_rows):
     username = 'c'
     email = 'c@c.c'
     pwd = 'c'
@@ -143,12 +152,11 @@ def test_register_c():
                              headers=HEADERS, params=params)
     assert response.ok
 
-#     # verify that latest was updated
-#     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
-#     assert response.json()['latest'] == 6
+    # verify that latest was updated
+    response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 6
 
-@pytest.mark.skip(reason="uses local db")
-def test_follow_user():
+def test_follow_user(reset_db_rows):
     username = 'a'
     url = f'{BASE_URL}/fllws/{username}'
     data = {'follow': 'b'}
@@ -175,8 +183,7 @@ def test_follow_user():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 9
 
-@pytest.mark.skip(reason="uses local db")
-def test_a_unfollows_b():
+def test_a_unfollows_b(reset_db_rows):
     username = 'a'
     url = f'{BASE_URL}/fllws/{username}'
 
