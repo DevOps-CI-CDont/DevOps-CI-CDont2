@@ -72,20 +72,38 @@ func errorCheck(err error) {
 // endpoints
 
 func amIFollowing(c *gin.Context) {
-	username := c.Param("username")
+	nameTryingToFollow := c.Param("username")
 	userID := getUserIdIfLoggedIn(c)
+
 	var follower models.Follower
-	var user models.User
-	err := config.DB.Table("followers").
-		Where("who_id = ? AND whom_id = ?", userID, config.DB.Table("users").Select("user_id").Where("username = ?", username).Find(&user)).First(&follower).Error
+	var whom models.User
+
+	err := config.DB.Table("users").
+		Where("username = ?", nameTryingToFollow).
+		First(&whom).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(400, false)
+			return
+		}
+		fmt.Println("error", err)
+		c.AbortWithStatusJSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	err = config.DB.Table("followers").
+		Where("who_id = ? AND whom_id = ?", userID, whom.ID).
+		First(&follower).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(200, false)
 			return
 		}
+		fmt.Println("error", err)
 		c.AbortWithStatusJSON(500, gin.H{"error": "internal server error"})
 		return
 	}
+
 	c.JSON(200, true)
 }
 
@@ -95,8 +113,8 @@ func getTimeline(c *gin.Context) {
 	var messages []models.Message
 	result := config.DB.Table("messages").
 		Select("messages.*, users.*").
-		Joins("JOIN users ON messages.author_id = users.user_id").
-		Where("messages.flagged = ? AND (users.user_id = ? OR users.user_id IN (?))",
+		Joins("JOIN users ON messages.author_id = users.id").
+		Where("messages.flagged = ? AND (users.id = ? OR users.id IN (?))",
 			0, userID, config.DB.Table("followers").Select("whom_id").Where("who_id = ?", userID)).
 		Order("messages.pub_date DESC").
 		Limit(PER_PAGE).
@@ -392,7 +410,7 @@ func getAllFollowing(c *gin.Context) {
 	following := []models.User{}
 	err = config.DB.Table("users").
 		Select("users.*").
-		Joins("JOIN followers ON users.user_id = followers.whom_id").
+		Joins("JOIN followers ON users.id = followers.whom_id").
 		Where("followers.who_id = ?", userID).
 		Limit(int_followers).
 		Scan(&following).
