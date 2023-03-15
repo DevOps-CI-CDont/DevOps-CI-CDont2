@@ -1,10 +1,8 @@
-import { Author } from "./author.type";
-
 export type Tweet = {
-  message_id: number;
+  ID: number;
   author_id: number;
+  author_name: string;
   text: string;
   pub_date: number;
   flagged: number;
-  author: Author;
 };

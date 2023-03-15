@@ -123,7 +123,7 @@ func getPublicTimeline(c *gin.Context) {
 	err = config.DB.
 		Table("messages").
 		Select("messages.*, users.*").
-		Joins("JOIN users ON messages.author_id = users.user_id").
+		Joins("JOIN users ON messages.author_id = users.id").
 		Where("messages.flagged = ?", 0).
 		Order("messages.pub_date desc").
 		Limit(int_num_msgs).
@@ -178,7 +178,7 @@ func followUser(c *gin.Context) {
 	}
 
 	if whomID == "-1" {
-		c.JSON(200, gin.H{"message": "user does not exist"})
+		c.JSON(400, gin.H{"message": "user does not exist"})
 		return
 	}
 
@@ -188,13 +188,12 @@ func followUser(c *gin.Context) {
 	whomIDInt, err := strconv.Atoi(whomID)
 	errorCheck(err)
 
-	follower := models.Follower{
+	Follower := models.Follower{
 		Who_id:  userIDInt,
 		Whom_id: whomIDInt,
 	}
 
-	result := config.DB.Create(&follower)
-	if result.Error != nil {
+	if err := config.DB.Create(&Follower).Error; err != nil {
 		c.JSON(500, gin.H{"error": "failed to follow user"})
 		return
 	}

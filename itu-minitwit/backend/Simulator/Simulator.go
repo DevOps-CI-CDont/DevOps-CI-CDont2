@@ -342,7 +342,8 @@ func follow(c *gin.Context) {
 
 	user_id := main.GetUserIdByName(c.Param("username"))
 	user_name := c.Param("username")
-	fmt.Println("follow username from param" + user_name)
+	fmt.Println("follow username from param: " + user_name)
+	fmt.Println("follow user_id from param: " + user_id)
 	if user_id == "" {
 		c.AbortWithStatus(404)
 		return
@@ -366,11 +367,18 @@ func follow(c *gin.Context) {
 		url := api_base_url + "/user/" + follows_username + "/follow"
 
 		//Create a new POST request with a cookie set named "user_id" with value "user_id"
-		req, err := http.NewRequest("POST", url, strings.NewReader("user_id="+user_id))
+		req, err := http.NewRequest("POST", url, nil)
 		if err != nil {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
+
+		cookie := &http.Cookie{ // this is the cookie that seems to work
+			Name:  "user_id",
+			Value: user_id,
+		}
+		req.AddCookie(cookie)
+
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 		//create client
@@ -402,6 +410,13 @@ func follow(c *gin.Context) {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
+
+		cookie := &http.Cookie{ // this is the cookie that seems to work
+			Name:  "user_id",
+			Value: user_id,
+		}
+		req.AddCookie(cookie)
+
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 		//create client
