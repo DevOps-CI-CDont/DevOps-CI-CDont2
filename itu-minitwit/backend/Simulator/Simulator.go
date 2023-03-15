@@ -357,7 +357,8 @@ func follow(c *gin.Context) {
 		follows_username := body["follow"]
 		follows_user_id := main.GetUserIdByName(follows_username)
 
-		fmt.Println("user " + user_id + " tries to follow " + follows_user_id)
+		fmt.Println("user " + user_name + " tries to follow username: " + follows_username)
+		fmt.Println("user " + user_id + " tries to follow userid: " + follows_user_id)
 
 		if follows_user_id == "-1" {
 			c.JSON(400, gin.H{"error_msg": "follows_user_id is not valid"})
@@ -395,7 +396,8 @@ func follow(c *gin.Context) {
 		unfollows_username := body["unfollow"]
 		unfollows_user_id := main.GetUserIdByName(unfollows_username)
 
-		fmt.Println("user " + user_id + " tries to unfollow " + unfollows_user_id)
+		fmt.Println("username: " + user_name + " tries to unfollow username: " + unfollows_username)
+		fmt.Println("userid: " + user_id + " tries to unfollow userid:" + unfollows_user_id)
 
 		if unfollows_user_id == "-1" {
 			c.JSON(400, gin.H{"error_msg": "unfollows_user_id is not valid"})
