@@ -1,5 +1,5 @@
 #!/bin/sh
-. "$(dirname -- "$0")/_/husky.sh"
+#. "$(dirname -- "$0")/_/husky.sh"
 
-cd itu-minitwit/frontend
+#cd itu-minitwit/frontend
 # npx --no-install commitlint --edit "$1"
