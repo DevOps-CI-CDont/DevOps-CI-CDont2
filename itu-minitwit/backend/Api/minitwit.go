@@ -18,9 +18,26 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var Router *gin.Engine
+
+type metrics struct {
+	funcCounter *prometheus.CounterVec
+}
+
+func NewMetrics(reg prometheus.Registerer) *metrics {
+	m := &metrics{
+		funcCounter: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "function_calls_total",
+			Help: "Number of calls to each function",
+		}, []string{"method", "endpoint", "code"}),
+	}
+	reg.MustRegister(m.funcCounter)
+	return m
+}
 
 func SetUpRouter() *gin.Engine {
 	r := gin.Default()
@@ -37,23 +54,38 @@ func Start() {
 	// it's important to set this before any routes are registered so that the middleware is applied to all routes
 	// ALL MY HOMIES HATE CORS :D
 
+	// metrics
+	reg := prometheus.NewRegistry()
+	m := NewMetrics(reg)
+
+	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
+
 	// endpoints
-	Router.GET("/mytimeline", getTimeline)
-	Router.GET("/public", getPublicTimeline)
-	Router.GET("/user/:username", getUsersTweets)
-	Router.POST("/user/:username/follow", followUser)
-	Router.POST("/user/:username/unfollow", unfollowUser)
-	Router.POST("/add_message", postMessage)
-	Router.POST("/login", login)
-	Router.POST("/register", register)
-	Router.GET("/logout", logout)
-	Router.GET("/AmIFollowing/:username", amIFollowing)
-	Router.GET("/allUsers", getAllUsers)
-	Router.GET("AllIAmFollowing", getAllFollowing)
+	Router.GET("/metrics", gin.WrapH(promHandler))
+	Router.GET("/mytimeline", getTimeline, incrementCounter(m, "/mytimeline"))
+	Router.GET("/public", getPublicTimeline, incrementCounter(m, "/public"))
+	Router.GET("/user/:username", getUsersTweets, incrementCounter(m, "/user/:username"))
+	Router.POST("/user/:username/follow", followUser, incrementCounter(m, "/user/:username/follow"))
+	Router.POST("/user/:username/unfollow", unfollowUser, incrementCounter(m, "/user/:username/unfollow"))
+	Router.POST("/add_message", postMessage, incrementCounter(m, "/add_message"))
+	Router.POST("/login", login, incrementCounter(m, "/login"))
+	Router.POST("/register", register, incrementCounter(m, "/register"))
+	Router.GET("/logout", logout, incrementCounter(m, "/logout"))
+	Router.GET("/RESET", init_db, incrementCounter(m, "/RESET"))
+	Router.GET("/AmIFollowing/:username", amIFollowing, incrementCounter(m, "/AmIFollowing/:username"))
+	Router.GET("/allUsers", getAllUsers, incrementCounter(m, "/allUsers"))
+  Router.GET("AllIAmFollowing", getAllFollowing)
+
 	Router.Run(":8080")
 }
 
-// Capitalized names are public, lowercase are private
+func incrementCounter(m *metrics, endpointName string) gin.HandlerFunc {
+	fn := func(c *gin.Context) {
+		m.funcCounter.WithLabelValues(c.Request.Method, endpointName, strconv.Itoa(c.Writer.Status())).Inc()
+	}
+	return fn
+}
+
 var PER_PAGE = 30
 var DEBUG = true
 

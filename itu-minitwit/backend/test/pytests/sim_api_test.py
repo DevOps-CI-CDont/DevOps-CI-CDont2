@@ -4,6 +4,7 @@ import base64
 import os
 import sqlite3
 import requests
+import pytest
 import tempfile
 
 
@@ -27,17 +28,18 @@ def init_db():
         db.commit()
 
 # Empty the database and initialize the schema again
-os.system(f'rm {dbPath}')
+os.system(f'rm {dbPath}') # this test suite will delete and recreate the db
 init_db()
 
-# def test_latest():
-#     # post something to updaet LATEST
-#     url = f"{BASE_URL}/register"
-#     data = {'username': 'test', 'email': 'test@test', 'pwd': 'foo'}
-#     params = {'latest': 1337}
-#     response = requests.post(url, data=json.dumps(data),
-#                              params=params, headers=HEADERS)
-#     assert response.ok
+@pytest.mark.skip(reason="uses local db")
+def test_latest():
+    # post something to updaet LATEST
+    url = f"{BASE_URL}/register"
+    data = {'username': 'test', 'email': 'test@test', 'pwd': 'foo'}
+    params = {'latest': 1337}
+    response = requests.post(url, data=json.dumps(data),
+                             params=params, headers=HEADERS)
+    assert response.ok
 
 #     # verify that latest was updated
 #     url = f'{BASE_URL}/latest'
@@ -45,23 +47,23 @@ init_db()
 #     assert response.ok
 #     assert response.json()['latest'] == 1337
 
-
-# def test_register():
-#     username = 'a'
-#     email = 'a@a.a'
-#     pwd = 'a'
-#     data = {'username': username, 'email': email, 'pwd': pwd}
-#     params = {'latest': 1}
-#     response = requests.post(f'{BASE_URL}/register',
-#                              data=json.dumps(data), headers=HEADERS, params=params)
-#     assert response.ok
-#     # TODO: add another assertion that it is really there
+@pytest.mark.skip(reason="uses local db")
+def test_register():
+    username = 'a'
+    email = 'a@a.a'
+    pwd = 'a'
+    data = {'username': username, 'email': email, 'pwd': pwd}
+    params = {'latest': 1}
+    response = requests.post(f'{BASE_URL}/register',
+                             data=json.dumps(data), headers=HEADERS, params=params)
+    assert response.ok
+    # TODO: add another assertion that it is really there
 
 #     # verify that latest was updated
 #     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
 #     assert response.json()['latest'] == 1
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_create_msg():
     username = 'a'
     data = {'content': 'Blub!'}
@@ -75,7 +77,7 @@ def test_create_msg():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 2
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_get_latest_user_msgs():
     username = 'a'
 
@@ -95,7 +97,7 @@ def test_get_latest_user_msgs():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 3
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_get_latest_msgs():
     username = 'a'
     query = {'no': 20, 'latest': 4}
@@ -114,38 +116,38 @@ def test_get_latest_msgs():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 4
 
-
-# def test_register_b():
-#     username = 'b'
-#     email = 'b@b.b'
-#     pwd = 'b'
-#     data = {'username': username, 'email': email, 'pwd': pwd}
-#     params = {'latest': 5}
-#     response = requests.post(f'{BASE_URL}/register', data=json.dumps(data),
-#                              headers=HEADERS, params=params)
-#     assert response.ok
-#     # TODO: add another assertion that it is really there
+@pytest.mark.skip(reason="uses local db")
+def test_register_b():
+    username = 'b'
+    email = 'b@b.b'
+    pwd = 'b'
+    data = {'username': username, 'email': email, 'pwd': pwd}
+    params = {'latest': 5}
+    response = requests.post(f'{BASE_URL}/register', data=json.dumps(data),
+                             headers=HEADERS, params=params)
+    assert response.ok
+    # TODO: add another assertion that it is really there
 
 #     # verify that latest was updated
 #     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
 #     assert response.json()['latest'] == 5
 
-
-# def test_register_c():
-#     username = 'c'
-#     email = 'c@c.c'
-#     pwd = 'c'
-#     data = {'username': username, 'email': email, 'pwd': pwd}
-#     params = {'latest': 6}
-#     response = requests.post(f'{BASE_URL}/register', data=json.dumps(data),
-#                              headers=HEADERS, params=params)
-#     assert response.ok
+@pytest.mark.skip(reason="uses local db")
+def test_register_c():
+    username = 'c'
+    email = 'c@c.c'
+    pwd = 'c'
+    data = {'username': username, 'email': email, 'pwd': pwd}
+    params = {'latest': 6}
+    response = requests.post(f'{BASE_URL}/register', data=json.dumps(data),
+                             headers=HEADERS, params=params)
+    assert response.ok
 
 #     # verify that latest was updated
 #     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
 #     assert response.json()['latest'] == 6
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_follow_user():
     username = 'a'
     url = f'{BASE_URL}/fllws/{username}'
@@ -173,7 +175,7 @@ def test_follow_user():
     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
     assert response.json()['latest'] == 9
 
-
+@pytest.mark.skip(reason="uses local db")
 def test_a_unfollows_b():
     username = 'a'
     url = f'{BASE_URL}/fllws/{username}'

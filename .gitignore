@@ -41,3 +41,6 @@ coverage.xml
 .cpython-*
 itu-minitwit/backend/test/__pycache__/*
 .pyc
+itu-minitwit/backend/tmp/minitwit.db
+itu-minitwit/backend/test/pytests/__pycache__/sim_api_test.cpython-311-pytest-7.2.1.pyc
+.gitignore

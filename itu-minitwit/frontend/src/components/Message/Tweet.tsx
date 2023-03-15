@@ -1,5 +1,7 @@
 import { getAvatarUrl } from "@/lib/dicebear";
-import { Tweet } from "@/types/tweet.type";
+import useUserStore from "@/store/userStore";
+import { Tweet as TweetType } from "@/types/tweet.type";
+import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 
