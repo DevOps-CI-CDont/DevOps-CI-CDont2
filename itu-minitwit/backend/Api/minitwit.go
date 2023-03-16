@@ -18,6 +18,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"github.com/mackerelio/go-osstat/memory"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -26,6 +27,7 @@ var Router *gin.Engine
 
 type metrics struct {
 	funcCounter *prometheus.CounterVec
+	memoryUsage prometheus.Gauge
 }
 
 func NewMetrics(reg prometheus.Registerer) *metrics {
@@ -34,8 +36,13 @@ func NewMetrics(reg prometheus.Registerer) *metrics {
 			Name: "function_calls_total",
 			Help: "Number of calls to each function",
 		}, []string{"method", "endpoint", "code"}),
+		memoryUsage: prometheus.NewGauge(prometheus.GaugeOpts{
+			Name: "Memory_usage_percentage",
+			Help: "Infrastructure monitoring",
+		}),
 	}
 	reg.MustRegister(m.funcCounter)
+	reg.MustRegister(m.memoryUsage)
 	return m
 }
 
@@ -60,6 +67,7 @@ func Start(mode string) {
 	// metrics
 	reg := prometheus.NewRegistry()
 	m := NewMetrics(reg)
+	go infrastructureGauge(10, m)
 
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 
@@ -86,6 +94,20 @@ func incrementCounter(m *metrics, endpointName string) gin.HandlerFunc {
 		m.funcCounter.WithLabelValues(c.Request.Method, endpointName, strconv.Itoa(c.Writer.Status())).Inc()
 	}
 	return fn
+}
+
+func infrastructureGauge(intervalInSeconds int, m *metrics) {
+	for {
+		memory, err := memory.Get()
+		if err != nil {
+			log.Printf("Error reading memory usage: %s", err)
+			return
+		}
+		memoryUsageInPercent := float64(memory.Used * 100 / memory.Total)
+
+		m.memoryUsage.Set(memoryUsageInPercent)
+		time.Sleep(time.Duration(intervalInSeconds) * time.Second)
+	}
 }
 
 var PER_PAGE = 30
