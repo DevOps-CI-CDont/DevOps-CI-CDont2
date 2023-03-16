@@ -29,7 +29,7 @@ async function unFollow({ userId, username }: GetIsFollowingProps) {
 
 	try {
 		var myHeaders = new Headers();
-		myHeaders.append("Cookie", "user_id=5");
+		myHeaders.append("Cookie", "user_id=" + userId);
 
 		var formdata = new FormData();
 
@@ -50,7 +50,7 @@ async function follow({ userId, username }: GetIsFollowingProps) {
 	}
 	try {
 		var myHeaders = new Headers();
-		myHeaders.append("Cookie", "user_id=5");
+		myHeaders.append("Cookie", "user_id=" + userId);
 
 		var formdata = new FormData();
 
