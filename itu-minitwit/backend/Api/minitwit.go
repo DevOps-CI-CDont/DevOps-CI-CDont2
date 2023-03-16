@@ -221,6 +221,10 @@ func getUsersTweets(c *gin.Context) {
 
 func followUser(c *gin.Context) {
 	userID := getUserIdIfLoggedIn(c)
+	if userID == "-1" {
+		c.JSON(401, gin.H{"message": "user not logged in"})
+		return
+	}
 	whomName := c.Param("username")
 	whomID := GetUserIdByName(whomName)
 
@@ -417,7 +421,6 @@ func getUserIdIfLoggedIn(c *gin.Context) string {
 	log.Println("cookie user_id: " + userid)
 	errorCheck(err)
 	if userid == "" || userid == "-1" {
-		c.JSON(401, gin.H{"error": "not logged in"})
 		return "-1"
 	}
 	return userid
