@@ -63,7 +63,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASS }}
         run: |    
-          (cd itu-minitwit/backend/Main && go run main.go "test")
+          (cd itu-minitwit/backend/Main && go run main.go "test" &) # run the Go API in the background
       - name: Delay before running tests
         run: |
           sleep 10
