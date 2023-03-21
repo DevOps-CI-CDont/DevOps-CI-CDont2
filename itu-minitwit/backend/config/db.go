@@ -16,10 +16,16 @@ import (
 var DB *gorm.DB
 
 func Connect_prod_db() {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		fmt.Println("err = ", err)
-		log.Fatal("Error loading .env file")
+	// check if .env file exists
+	_, err := os.Stat("../.env")
+	if os.IsNotExist(err) {
+		fmt.Println("no .env file found")
+	} else { // load .env file if it exists
+		err := godotenv.Load("../.env")
+		if err != nil {
+			fmt.Println("err = ", err)
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	dbHost := os.Getenv("DB_HOST")
@@ -53,10 +59,16 @@ func Connect_prod_db() {
 }
 
 func Connect_test_db() {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		fmt.Println("err = ", err)
-		log.Fatal("Error loading .env file")
+	// check if .env file exists
+	_, err := os.Stat("../.env")
+	if os.IsNotExist(err) {
+		fmt.Println("no .env file found")
+	} else { // load .env file if it exists
+		err := godotenv.Load("../.env")
+		if err != nil {
+			fmt.Println("err = ", err)
+			log.Fatal("Error loading .env file")
+		}
 	}
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
