@@ -34,7 +34,7 @@ func Connect_prod_db() {
 	if err != nil {
 		fmt.Println("failed to convert db port to int")
 	}
-	dbName := os.Getenv("DB_NAME")
+	dbName := os.Getenv("DB_NAME") // production database
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbinfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s TimeZone=%s client_encoding=%s",
@@ -76,7 +76,7 @@ func Connect_test_db() {
 	if err != nil {
 		fmt.Println("failed to convert db port to int")
 	}
-	dbName := os.Getenv("DB_TEST_NAME")
+	dbName := os.Getenv("DB_TEST_NAME") // test database
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 
