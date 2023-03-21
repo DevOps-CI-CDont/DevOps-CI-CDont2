@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -40,6 +40,8 @@ jobs:
       - name: Delay before running tests
         run: |
           sleep 10
+      - name: curl endpoint
+        run: curl localhost:8080/public
       - name: Test with pytest
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
