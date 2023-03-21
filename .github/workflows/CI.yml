@@ -37,11 +37,10 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASS }}
         run: |
           (cd itu-minitwit/backend/Main && go run main.go "test" &) # run the Go API in the background
+          curl http://127.0.0.1:8080/public
       - name: Delay before running tests
         run: |
           sleep 10
-      - name: curl endpoint
-        run: curl http://127.0.0.1:8080/public
       - name: Test with pytest
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
