@@ -36,7 +36,7 @@ func Connect_prod_db() {
 	}
 	dbName := os.Getenv("DB_NAME") // production database
 	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
+	dbPassword := os.Getenv("DB_PASS")
 	dbinfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s TimeZone=%s client_encoding=%s",
 		dbHost,
 		dbPortInt,
@@ -78,7 +78,7 @@ func Connect_test_db() {
 	}
 	dbName := os.Getenv("DB_TEST_NAME") // test database
 	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
+	dbPassword := os.Getenv("DB_PASS")
 
 	dbinfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s TimeZone=%s client_encoding=%s",
 		dbHost,

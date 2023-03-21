@@ -27,7 +27,7 @@ def postgresql():
     dbHost = os.environ.get("DB_HOST")
     dbPort = os.environ.get("DB_PORT")
     dbUser = os.environ.get("DB_USER")
-    dbPassword = os.environ.get("DB_PASSWORD")
+    dbPassword = os.environ.get("DB_PASS")
     dbName = os.environ.get("DB_TEST_NAME")
 
     conn = connect(
