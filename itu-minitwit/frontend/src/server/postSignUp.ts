@@ -1,29 +1,26 @@
 interface postSignUpProps {
-  username: string;
-  password: string;
-  password2: string;
-  email: string;
+	username: string;
+	password: string;
+	password2: string;
+	email: string;
 }
 
 export async function postSignUp({
-  username,
-  password,
-  password2,
-  email,
+	username,
+	password,
+	password2,
+	email,
 }: postSignUpProps) {
-  var formdata = new FormData();
-  formdata.append("username", username);
-  formdata.append("email", email);
-  formdata.append("password", password);
-  formdata.append("password2", password2);
+	var formdata = new FormData();
+	formdata.append("username", username);
+	formdata.append("email", email);
+	formdata.append("password", password);
+	formdata.append("password2", password2);
 
-  return await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/register`,
-    {
-      method: "POST",
-      cache: "no-cache",
-      redirect: "follow",
-      body: formdata,
-    }
-  ).then((response) => response.json());
+	return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
+		method: "POST",
+		cache: "no-cache",
+		redirect: "follow",
+		body: formdata,
+	}).then((response) => response.json());
 }

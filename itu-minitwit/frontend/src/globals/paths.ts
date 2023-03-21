@@ -1,1 +1,1 @@
-export const paths = {}
+export const paths = {};

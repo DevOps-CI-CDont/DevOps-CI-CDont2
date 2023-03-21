@@ -2,4 +2,5 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 cd itu-minitwit/frontend
-npm run nothing
+npm run tsc
+npm run lint 

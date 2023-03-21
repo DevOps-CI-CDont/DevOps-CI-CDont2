@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 * {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  text-decoration: none;
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+	text-decoration: none;
 }
 
 .wrapper {
-  @apply max-w-7xl mx-auto
+	@apply max-w-7xl mx-auto;
 }
