@@ -55,11 +55,17 @@ def reset_db_rows(postgresql):
     
     postgresql.commit()
 
+def test_basic_no_db():
+    url = f'{BASE_URL}/latest'
+    response = requests.get(url)
+    assert response.status_code == 200
+
 def test_latest(reset_db_rows):
     # post something to updaet LATEST
     url = f"{BASE_URL}/register"
     data = {'username': 'test', 'email': 'test@test', 'pwd': 'foo'}
     params = {'latest': 1337}
+    print("pre test_latest POST")
     response = requests.post(url, data=json.dumps(data),
                              params=params, headers=HEADERS)
     assert response.ok
@@ -147,9 +153,9 @@ def test_register_b(reset_db_rows):
     assert response.ok
     # TODO: add another assertion that it is really there
 
-#     # verify that latest was updated
-#     response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
-#     assert response.json()['latest'] == 5
+     # verify that latest was updated
+    response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 5
 
 def test_register_c(reset_db_rows):
     username = 'c'
