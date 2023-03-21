@@ -41,15 +41,20 @@ jobs:
         run: |
           sleep 10
       - name: Test with pytest
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASS }}
         run: |
           pytest
-
 
   go_tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
+  
       - name: Set up Go
         uses: actions/setup-go@v2
         with:

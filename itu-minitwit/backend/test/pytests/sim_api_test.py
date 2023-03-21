@@ -6,6 +6,7 @@ import sqlite3
 import requests
 import pytest
 import tempfile
+from dotenv import load_dotenv
 from psycopg2 import connect # postgres database adapter
 
 
@@ -21,12 +22,20 @@ HEADERS = {'Connection': 'close',
 
 @pytest.fixture(scope="session")
 def postgresql():
+    # if ../.env exists, load it
+    load_dotenv(override=False)
+    dbHost = os.environ.get("DB_HOST")
+    dbPort = os.environ.get("DB_PORT")
+    dbUser = os.environ.get("DB_USER")
+    dbPassword = os.environ.get("DB_PASSWORD")
+    dbName = os.environ.get("DB_TEST_NAME")
+
     conn = connect(
-        dbname="minitwit_test",
-        user="doadmin",
-        password="AVNS_FeRFl5bSz6UNMVF6Llx",
-        host="cicdont-do-user-13570987-0.b.db.ondigitalocean.com",
-        port="25060"
+        dbname=dbName,
+        user=dbUser,
+        password=dbPassword,
+        host=dbHost,
+        port=dbPort
     )
 
     yield conn
