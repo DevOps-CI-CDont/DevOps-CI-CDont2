@@ -11,6 +11,7 @@
 *.tar.lz4
 *.tar.sz
 *.pyc
+*.env
 /vendor/
 /bin/
 /pkg/
