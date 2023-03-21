@@ -33,7 +33,7 @@ jobs:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_USERNAME: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASS }}
         run: |
           (cd itu-minitwit/backend/Main && go run main.go "test" &) # run the Go API in the background
@@ -60,7 +60,7 @@ jobs:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_USERNAME: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASS }}
         run: |    
           (cd itu-minitwit/backend/Main && go run main.go "test")
