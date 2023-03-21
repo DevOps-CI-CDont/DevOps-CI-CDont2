@@ -41,7 +41,7 @@ jobs:
         run: |
           sleep 10
       - name: curl endpoint
-        run: curl http://localhost:8080/public
+        run: curl http://127.0.0.1:8080/public
       - name: Test with pytest
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
