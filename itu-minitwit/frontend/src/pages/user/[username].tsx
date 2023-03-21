@@ -55,7 +55,7 @@ export default function UserProfilePage({
 
 			setIsFollowingState(!isFollowingState);
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	}
 }

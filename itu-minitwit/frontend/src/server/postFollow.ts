@@ -40,6 +40,7 @@ async function unFollow({ userId, username }: GetIsFollowingProps) {
 			redirect: "follow",
 		}).then((response) => response.text());
 	} catch (e) {
+		// @eslint-ignore
 		console.error(e);
 	}
 }
@@ -61,6 +62,7 @@ async function follow({ userId, username }: GetIsFollowingProps) {
 			redirect: "follow",
 		}).then((response) => response.text());
 	} catch (e) {
+		// @eslint-ignore
 		console.error(e);
 	}
 }

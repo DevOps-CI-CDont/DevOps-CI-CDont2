@@ -67,8 +67,6 @@ export default function RegisterPage() {
 
 		const res = await postSignUp({ username, password, password2, email });
 
-		console.log(res);
-
 		if (res.message) {
 			const res = await postLogin({ username, password });
 

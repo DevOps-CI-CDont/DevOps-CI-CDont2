@@ -55,7 +55,7 @@ export function CreateMessage() {
 			setMessage("");
 			router.reload();
 		} catch (e) {
-			console.log("Error: ", e);
+			console.error("Error: ", e);
 		} finally {
 			setMessage("");
 			router.reload();

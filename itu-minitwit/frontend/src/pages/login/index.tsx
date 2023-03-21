@@ -57,6 +57,7 @@ export default function LoginPage() {
 
 			router.push("/");
 		} catch (e) {
+			// @eslint-ignore
 			console.error(e);
 		}
 	}
