@@ -10,9 +10,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      API_URL: http://138.68.93.147:8080
-    depends_on:
-      - backend
+      - NEXT_PUBLIC_API_URL=http://138.68.93.147:3000
   backend:
     image: registry.digitalocean.com/cicdont-images/backend
     container_name: api
