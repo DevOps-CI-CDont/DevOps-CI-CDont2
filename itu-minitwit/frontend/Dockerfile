@@ -2,6 +2,8 @@
 # npx create-next-app --example with-docker nextjs-docker
 FROM node:18-alpine AS base
 
+ARG API_URL
+
 RUN apk add --update curl
 
 # Install dependencies only when needed
@@ -63,6 +65,6 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV FRONTEND_PORT 3000 
+ENV API_URL ${API_URL}
 
 CMD ["node", "server.js"]

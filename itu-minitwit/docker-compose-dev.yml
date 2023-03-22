@@ -6,15 +6,19 @@ services:
 
   frontend:
     build:
-      context: ./frontend    
-    image: cicdont/frontend
+      context: ./frontend
+      dockerfile: Dockerfile  
     container_name: frontend
     ports:
       - "3000:3000"
+    environment:
+      API_URL: http://localhost:8080
+    depends_on:
+      - backend
   backend:
     build:
       context: ./backend
-    image: cicdont/backend
+      dockerfile: Dockerfile
     container_name: api
     ports:
       - "8080:8080"

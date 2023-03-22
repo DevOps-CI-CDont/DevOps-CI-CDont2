@@ -9,6 +9,10 @@ services:
     # service_name: frontend
     ports:
       - "3000:3000"
+    environment:
+      API_URL: http://138.68.93.147:8080
+    depends_on:
+      - backend
   backend:
     image: registry.digitalocean.com/cicdont-images/backend
     container_name: api
