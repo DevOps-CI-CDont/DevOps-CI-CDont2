@@ -11,8 +11,8 @@ export function TweetContainer({ tweets }: TweetContainerProps) {
 			{!tweets ? (
 				<span>No tweets found</span>
 			) : (
-				tweets?.map((tweets) => {
-					return <Tweet {...tweets} key={tweets.ID} />;
+				tweets?.map((tweets, i) => {
+					return <Tweet {...tweets} key={`${tweets.ID}+${i}`} />;
 				})
 			)}
 		</div>
