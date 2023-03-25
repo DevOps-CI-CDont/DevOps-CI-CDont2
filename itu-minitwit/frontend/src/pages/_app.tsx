@@ -1,6 +1,7 @@
 import useAuthStore from "@/store/authStore";
 import useUserStore from "@/store/userStore";
 import "@/styles/globals.css";
+import { ThemeProvider } from "next-themes";
 import type { AppProps } from "next/app";
 import { useEffect } from "react";
 import { useCookies } from "react-cookie";
@@ -26,7 +27,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<Component {...pageProps} />
+			<ThemeProvider attribute="class">
+				<Component {...pageProps} />
+			</ThemeProvider>
 		</QueryClientProvider>
 	);
 }

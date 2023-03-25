@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
+import { DarkModeToggle } from "../DarkModeToggle";
 
 export function Header() {
 	const isAuth = useAuthStore((state) => state.isAuth);
@@ -28,6 +29,7 @@ export function Header() {
 					{userId && <span>UserID: {userId}</span>}
 				</div>
 				<ul className="flex justify-center items-center">
+					<DarkModeToggle />
 					{isAuth ? (
 						<>
 							{authenticatedRouter.map((route) => {
