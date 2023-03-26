@@ -6,7 +6,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  python_tests:
+  python_lint:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,29 +28,6 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Build and run Go api
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
-          DB_USERNAME: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASS }}
-        run: |
-          (cd itu-minitwit/backend/Main && go run main.go "test" &) # run the Go API in the background
-          curl http://127.0.0.1:8080/public
-      - name: Delay before running tests
-        run: |
-          sleep 10
-      - name: Test with pytest
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASS: ${{ secrets.DB_PASS }}
-        run: |
-          pytest
-
   go_tests:
     runs-on: ubuntu-latest
     steps:
@@ -60,7 +37,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.20.x
-
       - name: Build and run Go api
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
@@ -73,6 +49,15 @@ jobs:
       - name: Delay before running tests
         run: |
           sleep 10
-      - name: Test
+      - name: go test (8080)
         run: |
           (cd itu-minitwit/backend/test/gotests && go test -v ./...)
+      - name: pytest (8081)
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+        run: |
+          pytest
