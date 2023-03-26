@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from psycopg2 import connect # postgres database adapter
 
 
-BASE_URL = 'http://127.0.0.1:8081'
+BASE_URL = 'http://localhost:8081'
 USERNAME = 'simulator'
 PWD = 'super_safe!'
 CREDENTIALS = ':'.join([USERNAME, PWD]).encode('ascii')
