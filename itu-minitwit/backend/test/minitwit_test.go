@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -33,14 +34,68 @@ func clearTestDB() {
 	fmt.Println("Test database tables & sequences reset")
 }
 
+func encodeJsonAndPOST(t *testing.T, endpoint string, data map[string]string) *http.Response { // utility function to encode data to JSON and POST to endpoint
+	// encode the data as a JSON string
+	jsonData, _ := json.Marshal(data)
+
+	// create the request with the JSON-encoded data
+	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonData))
+	req.Header.Add("Authorization", "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh")
+
+	// create client
+	client := &http.Client{}
+
+	// send request
+	resp, _ := client.Do(req)
+
+	return resp
+}
+
+func checkLatest(t *testing.T, expectedLatest int) { // utility function to check "latest"
+	endpoint := fmt.Sprintf("%s/latest", sim_url)
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		log.Fatalf("latest check failed")
+	}
+	// create client
+	client := &http.Client{}
+	// send request
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("latest check failed")
+	}
+	assert.Equal(t, 200, resp.StatusCode)
+	// read response body
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("latest check failed")
+	}
+
+	// parse JSON
+	var data map[string]interface{}
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		log.Fatalf("failed to parse JSON response")
+	}
+	log.Println("data parsed: ", data)
+
+	// extract "latest" value
+	latest, ok := data["latest"].(float64)
+	if !ok {
+		log.Fatalf("failed to extract latest value")
+	}
+	assert.Equal(t, expectedLatest, int(latest))
+}
+
 func TestMain(m *testing.M) {
 	// put your setup code here
 	clearTestDB()
 
 	// run the tests
-	code := m.Run()
+	exit_code := m.Run()
 
-	fmt.Println("code:", code)
+	fmt.Println("code:", exit_code)
 }
 
 func login(username string, password string) *http.Response {
@@ -159,110 +214,49 @@ func TestTimelines(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 }
 func TestSimLatest(t *testing.T) {
-	// t.Skip("not finished")
 	// post something to update LATEST
 	endpoint := fmt.Sprintf("%s/register?latest=1337", sim_url)
-	form := url.Values{}
-	form.Add("username", "test")
-	form.Add("email", "test@test.com")
-	form.Add("password", "foo")
-	form.Add("password2", "foo")
-	fmt.Println("pre TestLatest POST")
-	fmt.Println("endpoint", endpoint)
-	req, err := http.NewRequest("POST", endpoint, strings.NewReader(form.Encode()))
-	if err != nil {
-		t.Fatalf("TestLatest failed")
+	data := map[string]string{
+		"username": "test",
+		"email":    "test@test.com",
+		"pwd":      "foo",
 	}
-	// create client
-	client := &http.Client{}
-	// send request
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Fatalf("TestLatest failed")
-	}
-	assert.Equal(t, 200, resp.StatusCode)
-
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
 	checkLatest(t, 1337)
 }
 
+/* SIMULATOR TESTS BELOW */
+
 func TestSimRegister(t *testing.T) {
 	endpoint := fmt.Sprintf("%s/register?latest=1", sim_url)
-	form := url.Values{}
-	form.Add("username", "a")
-	form.Add("email", "a@a.a")
-	form.Add("pwd", "a")
-	req, err := http.NewRequest("POST", endpoint, strings.NewReader(form.Encode()))
-	if err != nil {
-		t.Fatalf("TestSimRegister failed")
+	data := map[string]string{
+		"username": "a",
+		"email":    "a@a.a",
+		"pwd":      "a",
 	}
-	// create client
-	client := &http.Client{}
-	// send request
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Fatalf("TestSimRegister failed")
-	}
-	assert.Equal(t, 200, resp.StatusCode)
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
 	checkLatest(t, 1)
+
+	// check if user exists
+	endpoint = fmt.Sprintf("%s/user/a", base)
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	resp, _ = client.Do(req)
+	assert.Equal(t, 200, resp.StatusCode)
+
 }
 func TestSimCreateMsg(t *testing.T) {
-	t.Skip("not finished")
-	endpoint := fmt.Sprintf("%s/msgs/?latest=2", sim_url)
-	form := url.Values{}
-	form.Add("username", "a")
-	form.Add("content", "Blub!")
-	req, err := http.NewRequest("POST", endpoint, strings.NewReader(form.Encode()))
-	if err != nil {
-		t.Fatalf("TestSimCreateMsg failed")
+	endpoint := fmt.Sprintf("%s/msgs/a?latest=2", sim_url)
+	data := map[string]string{
+		"content": "Blub!",
 	}
-	// create client
-	client := &http.Client{}
-	// send request
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Fatalf("TestSimCreateMsg failed")
-	}
-	assert.Equal(t, 200, resp.StatusCode)
-	// verify that latest is 2
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
 	checkLatest(t, 2)
 }
 
-func checkLatest(t *testing.T, expectedLatest int) {
-	endpoint := fmt.Sprintf("%s/latest", sim_url)
-	req, err := http.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		log.Fatalf("latest check failed")
-	}
-	// create client
-	client := &http.Client{}
-	// send request
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatalf("latest check failed")
-	}
-	assert.Equal(t, 200, resp.StatusCode)
-	// read response body
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("latest check failed")
-	}
-
-	// parse JSON
-	var data map[string]interface{}
-	err = json.Unmarshal(body, &data)
-	if err != nil {
-		log.Fatalf("failed to parse JSON response")
-	}
-	log.Println("data parsed: ", data)
-
-	// extract "latest" value
-	latest, ok := data["latest"].(float64)
-	if !ok {
-		log.Fatalf("failed to extract latest value")
-	}
-	assert.Equal(t, expectedLatest, int(latest))
-}
-
 func TestSimGetLatestUserMsgs(t *testing.T) {
+
 }
