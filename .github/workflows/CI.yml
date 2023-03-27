@@ -8,13 +8,20 @@ on:
 jobs:
   api_tests:
     runs-on: ubuntu-latest 
+    services:
+      api:
+        image: ubuntu:latest
+        ports:
+          - 8080/tcp
+          - 8081/tcp
+        options: --entrypoint "cd itu-minitwit/backend/Main && go run main.go test"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.20.x
-      - name: Build and run Go api
+      - name: Run Go APIs & test
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
@@ -22,5 +29,4 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASS: ${{ secrets.DB_PASS }}
         run: |    
-          (cd itu-minitwit/backend/Main && go run main.go "test" &) # run the Go API in the background
           (cd itu-minitwit/backend/test && go test -v ./...)
