@@ -1,5 +1,6 @@
 FROM golang:1.20 AS builder
 
+ARG IS_TEST # TODO use this to make a test image that the CI can use as a service
 ARG DB_HOST
 ARG DB_PORT
 ARG DB_TEST_NAME

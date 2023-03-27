@@ -10,11 +10,17 @@ jobs:
     runs-on: ubuntu-latest 
     services:
       api:
-        image: ubuntu:latest
+        image: golang:1.20 # TODO replace this with custom image
         ports:
-          - 8080/tcp
-          - 8081/tcp
-        options: --entrypoint "cd itu-minitwit/backend/Main && go run main.go test"
+          - 8080:8080
+          - 8081:8081
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+        options: --name=api
     steps:
       - uses: actions/checkout@v2
       - name: Set up Go
