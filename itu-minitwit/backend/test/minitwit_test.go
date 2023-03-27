@@ -16,8 +16,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const base = "http://localhost:8080"
-const sim_url = "http://localhost:8081"
+const base = "http://172.17.0.1:8080"
+const sim_url = "http://172.17.0.1:8081"
 const sim_token = "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh"
 
 func clearTestDB() {
