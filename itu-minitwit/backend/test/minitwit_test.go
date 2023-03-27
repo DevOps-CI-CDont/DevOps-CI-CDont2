@@ -325,4 +325,51 @@ func TestSimFollow(t *testing.T) {
 	resp := encodeJsonAndPOST(t, endpoint, data)
 	assert.Equal(t, 204, resp.StatusCode)
 	checkLatest(t, 7)
+
+	endpoint = fmt.Sprintf("%s/fllws/a?latest=8", sim_url)
+	data = map[string]string{
+		"follow": "c",
+	}
+	resp = encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 8)
+
+	endpoint = fmt.Sprintf("%s/fllws/a?latest=9", sim_url)
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	req.Header.Add("Authorization", sim_token)
+	client := &http.Client{}
+	resp, _ = client.Do(req)
+	assert.Equal(t, 200, resp.StatusCode)
+	body, _ := ioutil.ReadAll(resp.Body)
+	// make json out of body
+	json_like := make(map[string]interface{})
+	json.Unmarshal(body, &json_like)
+	assert.Contains(t, json_like["follows"], "b")
+	assert.Contains(t, json_like["follows"], "c")
+	checkLatest(t, 9)
+}
+
+func TestSimAUnfollowsB(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/fllws/a?latest=10", sim_url)
+	data := map[string]string{
+		"unfollow": "b",
+	}
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 10)
+
+	endpoint = fmt.Sprintf("%s/fllws/a?latest=11", sim_url)
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	req.Header.Add("Authorization", sim_token)
+	client := &http.Client{}
+	resp, _ = client.Do(req)
+	assert.Equal(t, 200, resp.StatusCode)
+	body, _ := ioutil.ReadAll(resp.Body)
+	// make json out of body
+	json_like := make(map[string]interface{})
+	json.Unmarshal(body, &json_like)
+	fmt.Println("json_like after unfollow: ", json_like)
+	assert.NotContains(t, json_like["follows"], "b")
+	assert.Contains(t, json_like["follows"], "c")
+	checkLatest(t, 11)
 }
