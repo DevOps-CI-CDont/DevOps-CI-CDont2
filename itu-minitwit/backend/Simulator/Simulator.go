@@ -121,7 +121,14 @@ func register(c *gin.Context) {
 	}
 
 	if resp.StatusCode != 200 {
-		c.JSON(400, gin.H{"error_msg": "Something went wrong with the registration!"})
+		// read resp body and return it
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+		bodyString := string(bodyBytes)
+		c.JSON(400, gin.H{"error_msg": bodyString})
 		return
 	}
 	defer resp.Body.Close()

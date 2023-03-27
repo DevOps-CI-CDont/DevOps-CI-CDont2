@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"minitwit-backend/init/config"
 	"net/http"
@@ -157,7 +159,7 @@ func TestTimelines(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 }
 func TestSimLatest(t *testing.T) {
-	t.Skip("not finished")
+	// t.Skip("not finished")
 	// post something to update LATEST
 	endpoint := fmt.Sprintf("%s/register?latest=1337", sim_url)
 	form := url.Values{}
@@ -178,14 +180,88 @@ func TestSimLatest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("TestLatest failed")
 	}
-	fmt.Println("resp", resp)
 	assert.Equal(t, 200, resp.StatusCode)
 
+	checkLatest(t, 1337)
 }
 
 func TestSimRegister(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/register?latest=1", sim_url)
+	form := url.Values{}
+	form.Add("username", "a")
+	form.Add("email", "a@a.a")
+	form.Add("pwd", "a")
+	req, err := http.NewRequest("POST", endpoint, strings.NewReader(form.Encode()))
+	if err != nil {
+		t.Fatalf("TestSimRegister failed")
+	}
+	// create client
+	client := &http.Client{}
+	// send request
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("TestSimRegister failed")
+	}
+	assert.Equal(t, 200, resp.StatusCode)
+	checkLatest(t, 1)
 }
 func TestSimCreateMsg(t *testing.T) {
+	t.Skip("not finished")
+	endpoint := fmt.Sprintf("%s/msgs/?latest=2", sim_url)
+	form := url.Values{}
+	form.Add("username", "a")
+	form.Add("content", "Blub!")
+	req, err := http.NewRequest("POST", endpoint, strings.NewReader(form.Encode()))
+	if err != nil {
+		t.Fatalf("TestSimCreateMsg failed")
+	}
+	// create client
+	client := &http.Client{}
+	// send request
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("TestSimCreateMsg failed")
+	}
+	assert.Equal(t, 200, resp.StatusCode)
+	// verify that latest is 2
+	checkLatest(t, 2)
+}
+
+func checkLatest(t *testing.T, expectedLatest int) {
+	endpoint := fmt.Sprintf("%s/latest", sim_url)
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		log.Fatalf("latest check failed")
+	}
+	// create client
+	client := &http.Client{}
+	// send request
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("latest check failed")
+	}
+	assert.Equal(t, 200, resp.StatusCode)
+	// read response body
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("latest check failed")
+	}
+
+	// parse JSON
+	var data map[string]interface{}
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		log.Fatalf("failed to parse JSON response")
+	}
+	log.Println("data parsed: ", data)
+
+	// extract "latest" value
+	latest, ok := data["latest"].(float64)
+	if !ok {
+		log.Fatalf("failed to extract latest value")
+	}
+	assert.Equal(t, expectedLatest, int(latest))
 }
 
 func TestSimGetLatestUserMsgs(t *testing.T) {
