@@ -18,3 +18,7 @@ The next.js project is setup to use hotreloading. Run the frontend using the fol
 ```zsh
 docker-compose up -d --build
 ```
+
+## Testing locally
+
+to test the backend locally, you need to run the backend via `go run main.go` from the backend/Main directory. When it is running you can run the test via `go test` from the backend/test directory.

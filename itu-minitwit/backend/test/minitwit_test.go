@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"minitwit-backend/init/config"
 	"net/http"
@@ -15,6 +18,7 @@ import (
 
 const base = "http://localhost:8080"
 const sim_url = "http://localhost:8081"
+const sim_token = "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh"
 
 func clearTestDB() {
 	config.Connect_test_db()
@@ -31,14 +35,77 @@ func clearTestDB() {
 	fmt.Println("Test database tables & sequences reset")
 }
 
+func encodeJsonAndPOST(t *testing.T, endpoint string, data map[string]string) *http.Response { // utility function to encode data to JSON and POST to endpoint
+	// encode the data as a JSON string
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("failed to encode data to JSON")
+	}
+
+	// create the request with the JSON-encoded data
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Fatalf("failed to create request")
+	}
+	req.Header.Add("Authorization", sim_token)
+
+	// create client
+	client := &http.Client{}
+
+	// send request
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("failed to send request")
+	}
+
+	return resp
+}
+
+func checkLatest(t *testing.T, expectedLatest int) { // utility function to check "latest"
+	endpoint := fmt.Sprintf("%s/latest", sim_url)
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		log.Fatalf("latest check failed")
+	}
+	// create client
+	client := &http.Client{}
+	// send request
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("latest check failed")
+	}
+	assert.Equal(t, 200, resp.StatusCode)
+	// read response body
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("latest check failed")
+	}
+
+	// parse JSON
+	var data map[string]interface{}
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		log.Fatalf("failed to parse JSON response")
+	}
+	log.Println("data parsed: ", data)
+
+	// extract "latest" value
+	latest, ok := data["latest"].(float64)
+	if !ok {
+		log.Fatalf("failed to extract latest value")
+	}
+	assert.Equal(t, expectedLatest, int(latest))
+}
+
 func TestMain(m *testing.M) {
 	// put your setup code here
 	clearTestDB()
 
 	// run the tests
-	code := m.Run()
+	exit_code := m.Run()
 
-	fmt.Println("code:", code)
+	fmt.Println("code:", exit_code)
 }
 
 func login(username string, password string) *http.Response {
@@ -157,36 +224,152 @@ func TestTimelines(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 }
 func TestSimLatest(t *testing.T) {
-	t.Skip("not finished")
 	// post something to update LATEST
 	endpoint := fmt.Sprintf("%s/register?latest=1337", sim_url)
-	form := url.Values{}
-	form.Add("username", "test")
-	form.Add("email", "test@test.com")
-	form.Add("password", "foo")
-	form.Add("password2", "foo")
-	fmt.Println("pre TestLatest POST")
-	fmt.Println("endpoint", endpoint)
-	req, err := http.NewRequest("POST", endpoint, strings.NewReader(form.Encode()))
-	if err != nil {
-		t.Fatalf("TestLatest failed")
+	data := map[string]string{
+		"username": "test",
+		"email":    "test@test.com",
+		"pwd":      "foo",
 	}
-	// create client
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 1337)
+}
+
+/* SIMULATOR TESTS BELOW */
+
+func TestSimRegisterA(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/register?latest=1", sim_url)
+	data := map[string]string{
+		"username": "a",
+		"email":    "a@a.a",
+		"pwd":      "a",
+	}
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 1)
+
+	// check if user exists
+	endpoint = fmt.Sprintf("%s/user/a", base)
 	client := &http.Client{}
-	// send request
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Fatalf("TestLatest failed")
-	}
-	fmt.Println("resp", resp)
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	resp, _ = client.Do(req)
 	assert.Equal(t, 200, resp.StatusCode)
 
 }
-
-func TestSimRegister(t *testing.T) {
-}
 func TestSimCreateMsg(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/msgs/a?latest=2", sim_url)
+	data := map[string]string{
+		"content": "Blub!",
+	}
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 2)
 }
 
 func TestSimGetLatestUserMsgs(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/msgs/a?no=20&latest=3", sim_url)
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	req.Header.Add("Authorization", sim_token)
+	client := &http.Client{}
+	resp, _ := client.Do(req)
+	assert.Equal(t, 200, resp.StatusCode)
+	// check if response content contains "Blub!"
+	body, _ := ioutil.ReadAll(resp.Body)
+	assert.Contains(t, string(body), "Blub!")
+	checkLatest(t, 3)
+}
+
+func TestSimGetLatestMsgs(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/msgs?latest=4", sim_url)
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	req.Header.Add("Authorization", sim_token)
+	client := &http.Client{}
+	resp, _ := client.Do(req)
+	assert.Equal(t, 200, resp.StatusCode)
+	// check if response content contains "Blub!"
+	body, _ := ioutil.ReadAll(resp.Body)
+	assert.Contains(t, string(body), "Blub!")
+	checkLatest(t, 4)
+}
+
+func TestSimRegisterB(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/register?latest=5", sim_url)
+	data := map[string]string{
+		"username": "b",
+		"email":    "b@b",
+		"pwd":      "b",
+	}
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 5)
+}
+
+func TestSimRegisterC(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/register?latest=6", sim_url)
+	data := map[string]string{
+		"username": "c",
+		"email":    "c@c",
+		"pwd":      "c",
+	}
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 6)
+}
+
+func TestSimFollow(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/fllws/a?latest=7", sim_url)
+	data := map[string]string{
+		"follow": "b",
+	}
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 7)
+
+	endpoint = fmt.Sprintf("%s/fllws/a?latest=8", sim_url)
+	data = map[string]string{
+		"follow": "c",
+	}
+	resp = encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 8)
+
+	endpoint = fmt.Sprintf("%s/fllws/a?latest=9", sim_url)
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	req.Header.Add("Authorization", sim_token)
+	client := &http.Client{}
+	resp, _ = client.Do(req)
+	assert.Equal(t, 200, resp.StatusCode)
+	body, _ := ioutil.ReadAll(resp.Body)
+	// make json out of body
+	json_like := make(map[string]interface{})
+	json.Unmarshal(body, &json_like)
+	assert.Contains(t, json_like["follows"], "b")
+	assert.Contains(t, json_like["follows"], "c")
+	checkLatest(t, 9)
+}
+
+func TestSimAUnfollowsB(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/fllws/a?latest=10", sim_url)
+	data := map[string]string{
+		"unfollow": "b",
+	}
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 10)
+
+	endpoint = fmt.Sprintf("%s/fllws/a?latest=11", sim_url)
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	req.Header.Add("Authorization", sim_token)
+	client := &http.Client{}
+	resp, _ = client.Do(req)
+	assert.Equal(t, 200, resp.StatusCode)
+	body, _ := ioutil.ReadAll(resp.Body)
+	// make json out of body
+	json_like := make(map[string]interface{})
+	json.Unmarshal(body, &json_like)
+	fmt.Println("json_like after unfollow: ", json_like)
+	assert.NotContains(t, json_like["follows"], "b")
+	assert.Contains(t, json_like["follows"], "c")
+	checkLatest(t, 11)
 }

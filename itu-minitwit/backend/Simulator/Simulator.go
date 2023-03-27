@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	main "minitwit-backend/init/Api"
 	"minitwit-backend/init/models"
 	"net/http"
@@ -86,6 +87,7 @@ func register(c *gin.Context) {
 	bytes, _ := io.ReadAll(c.Request.Body)
 	body := make(map[string]string)
 	json.Unmarshal(bytes, &body)
+	fmt.Println("register request body: ", body)
 
 	// retrieve data from request
 	username := body["username"]
@@ -103,12 +105,12 @@ func register(c *gin.Context) {
 		return
 	}
 	// add formData to the request body
-	data := url.Values{}
-	data.Set("username", username)
-	data.Set("email", email)
-	data.Set("password", password)
-	data.Set("password2", password2)
-	req.Body = ioutil.NopCloser(strings.NewReader(data.Encode()))
+	form := url.Values{}
+	form.Set("username", username)
+	form.Set("email", email)
+	form.Set("password", password)
+	form.Set("password2", password2)
+	req.Body = ioutil.NopCloser(strings.NewReader(form.Encode()))
 
 	// set the content-type header
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -116,12 +118,21 @@ func register(c *gin.Context) {
 	// send the request
 	resp, err := client.Do(req)
 	if err != nil {
+		log.Println("Error on response.\n[ERRO] -", err)
 		c.JSON(400, gin.H{"error_msg": err.Error()})
 		return
 	}
 
 	if resp.StatusCode != 200 {
-		c.JSON(400, gin.H{"error_msg": "Something went wrong with the registration!"})
+		// read resp body and return it
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			c.JSON(400, gin.H{"error_msg": err.Error()})
+			return
+		}
+		bodyString := string(bodyBytes)
+		log.Println("register bodyString", bodyString)
+		c.JSON(400, gin.H{"error_msg": bodyString})
 		return
 	}
 	defer resp.Body.Close()
@@ -390,6 +401,7 @@ func follow(c *gin.Context) {
 		}
 
 		c.JSON(204, gin.H{})
+		return
 	} else if c.Request.Method == "POST" && body["unfollow"] != "" {
 		unfollows_username := body["unfollow"]
 		unfollows_user_id := main.GetUserIdByName(unfollows_username)
@@ -428,6 +440,7 @@ func follow(c *gin.Context) {
 			return
 		}
 		c.JSON(204, gin.H{})
+		return
 	} else if c.Request.Method == "GET" {
 		// default
 		num_followers := getNumMsgs(c)

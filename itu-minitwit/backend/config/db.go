@@ -56,6 +56,7 @@ func Connect_prod_db() {
 	db.AutoMigrate(&models.Follower{})
 
 	DB = db
+	fmt.Println("Connected to PRODUCTION database")
 }
 
 func Connect_test_db() {
@@ -99,4 +100,5 @@ func Connect_test_db() {
 	db.AutoMigrate(&models.Follower{})
 
 	DB = db
+	fmt.Println("Connected to TEST database")
 }
