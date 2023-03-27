@@ -157,14 +157,30 @@ func TestTimelines(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 }
 func TestSimLatest(t *testing.T) {
+	t.Skip("not finished")
 	// post something to update LATEST
 	endpoint := fmt.Sprintf("%s/register?latest=1337", sim_url)
 	form := url.Values{}
 	form.Add("username", "test")
-	form.Add("email", "test")
-	form.Add("pwd", "foo")
+	form.Add("email", "test@test.com")
+	form.Add("password", "foo")
+	form.Add("password2", "foo")
 	fmt.Println("pre TestLatest POST")
 	fmt.Println("endpoint", endpoint)
+	req, err := http.NewRequest("POST", endpoint, strings.NewReader(form.Encode()))
+	if err != nil {
+		t.Fatalf("TestLatest failed")
+	}
+	// create client
+	client := &http.Client{}
+	// send request
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("TestLatest failed")
+	}
+	fmt.Println("resp", resp)
+	assert.Equal(t, 200, resp.StatusCode)
+
 }
 
 func TestSimRegister(t *testing.T) {
