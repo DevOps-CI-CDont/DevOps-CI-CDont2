@@ -20,7 +20,7 @@ jobs:
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASS }}
+          DB_PASS: ${{ secrets.DB_PASS }}
         run: |    
           (cd itu-minitwit/backend/Main && go run main.go "test" &) # run the Go API in the background
       - name: Delay before running tests
@@ -32,6 +32,6 @@ jobs:
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASS }}
+          DB_PASS: ${{ secrets.DB_PASS }}
         run: |
           (cd itu-minitwit/backend/test && go test -v ./...)
