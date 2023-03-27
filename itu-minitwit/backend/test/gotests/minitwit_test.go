@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -12,6 +13,7 @@ import (
 )
 
 const base = "http://localhost:8080"
+const sim_url = "http://localhost:8081"
 
 func main() {
 	// run the test
@@ -32,6 +34,22 @@ func main() {
 		{
 			Name: "TestPostTweet",
 			F:    TestPostTweet,
+		},
+		{
+			Name: "SimTestLatest",
+			F:    TestSimLatest,
+		},
+		{
+			Name: "SimTestRegister",
+			F:    TestSimRegister,
+		},
+		{
+			Name: "SimTestCreateMsg",
+			F:    TestSimCreateMsg,
+		},
+		{
+			Name: "SimTestGetLatestUserMsgs",
+			F:    TestSimGetLatestUserMsgs,
 		},
 	}, []testing.InternalBenchmark{}, []testing.InternalExample{})
 
@@ -66,16 +84,16 @@ func TestRegister(t *testing.T) {
 }
 
 func loginLogout(t *testing.T) {
-	t.Skip("Skipping login/logout test")
-	//make sure logg in in works and out wworks
+	// t.Skip("Skipping login/logout test")
 	res := login("Silas", "password")
 	assert.Equal(t, 200, res.StatusCode)
-	getHelper("/logout", t, 200, "Logout")
+	url := base + "/logout"
+	getHelper(url, t, 200, "Logout")
 
 }
 
 func TestLoginLogout(t *testing.T) {
-	t.Skip("Skipping login/logout test")
+	// t.Skip("Skipping login/logout test")
 	//test login fails with wrong password
 	postHelper("/login", t, 401, "Login fails with wrong password", url.Values{"username": {"Silas"}, "password": {"wrongpassword"}})
 	// with wrong username
@@ -84,7 +102,7 @@ func TestLoginLogout(t *testing.T) {
 }
 
 func TestPostTweet(t *testing.T) {
-	t.Skip("Skipping post tweet test")
+	// t.Skip("Skipping post tweet test")
 	//Check if adding messages works
 	jar, _ := cookiejar.New(nil)
 	client := &http.Client{
@@ -111,9 +129,9 @@ func TestPostTweet(t *testing.T) {
 	log.Println("Testing add message passed")
 
 }
-func getHelper(endpoint string, t *testing.T, expected int, name string) {
+func getHelper(url string, t *testing.T, expected int, name string) {
 	log.Println("Testing " + name)
-	res, err := http.Get(base + endpoint)
+	res, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -132,32 +150,46 @@ func postHelper(endpoint string, t *testing.T, expected int, name string, data u
 }
 
 func TestTimelines(t *testing.T) {
-	t.Skip("Skipping timelines test")
+	// t.Skip("Skipping timelines test")
 	// public & user timeline
-	getHelper("/public", t, 200, "Public Timeline")
+	endpoint := base + "/public"
+	getHelper(endpoint, t, 401, "Public Timeline") // no tweets -> 401
 
 	// personal timeline: needs authentication
-	jar, _ := cookiejar.New(nil)
-	client := &http.Client{
-		Jar: jar,
+	req, err := http.NewRequest("GET", base+"/mytimeline", nil)
+	if err != nil {
+		log.Fatal(err)
 	}
-	res, err := http.NewRequest("GET", base+"/mytimeline", nil)
-	res.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
 	cookie := &http.Cookie{
 		Name:  "user_id",
 		Value: "1",
 	}
-	res.AddCookie(cookie)
-	if err != nil {
-		log.Fatal(err)
+	req.AddCookie(cookie)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	//create client
+	client := &http.Client{}
+	//send request
+	resp, errM := client.Do(req)
+	if errM != nil {
+		t.Fatalf("mytimeline testfailed")
 	}
-	resp, err := client.Do(res)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println(resp.Body)
-
 	assert.Equal(t, 200, resp.StatusCode)
+}
+func TestSimLatest(t *testing.T) {
+	// post something to update LATEST
+	endpoint := fmt.Sprintf("%s/register?latest=1337", sim_url)
+	form := url.Values{}
+	form.Add("username", "test")
+	form.Add("email", "test")
+	form.Add("pwd", "foo")
+	fmt.Println("pre TestLatest POST")
+	fmt.Println("endpoint", endpoint)
+}
 
+func TestSimRegister(t *testing.T) {
+}
+func TestSimCreateMsg(t *testing.T) {
+}
+
+func TestSimGetLatestUserMsgs(t *testing.T) {
 }
