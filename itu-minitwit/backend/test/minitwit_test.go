@@ -18,6 +18,7 @@ import (
 
 const base = "http://localhost:8080"
 const sim_url = "http://localhost:8081"
+const sim_token = "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh"
 
 func clearTestDB() {
 	config.Connect_test_db()
@@ -36,17 +37,26 @@ func clearTestDB() {
 
 func encodeJsonAndPOST(t *testing.T, endpoint string, data map[string]string) *http.Response { // utility function to encode data to JSON and POST to endpoint
 	// encode the data as a JSON string
-	jsonData, _ := json.Marshal(data)
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Fatalf("failed to encode data to JSON")
+	}
 
 	// create the request with the JSON-encoded data
-	req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonData))
-	req.Header.Add("Authorization", "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh")
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Fatalf("failed to create request")
+	}
+	req.Header.Add("Authorization", sim_token)
 
 	// create client
 	client := &http.Client{}
 
 	// send request
-	resp, _ := client.Do(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("failed to send request")
+	}
 
 	return resp
 }
@@ -228,7 +238,7 @@ func TestSimLatest(t *testing.T) {
 
 /* SIMULATOR TESTS BELOW */
 
-func TestSimRegister(t *testing.T) {
+func TestSimRegisterA(t *testing.T) {
 	endpoint := fmt.Sprintf("%s/register?latest=1", sim_url)
 	data := map[string]string{
 		"username": "a",
@@ -258,5 +268,61 @@ func TestSimCreateMsg(t *testing.T) {
 }
 
 func TestSimGetLatestUserMsgs(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/msgs/a?no=20&latest=3", sim_url)
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	req.Header.Add("Authorization", sim_token)
+	client := &http.Client{}
+	resp, _ := client.Do(req)
+	assert.Equal(t, 200, resp.StatusCode)
+	// check if response content contains "Blub!"
+	body, _ := ioutil.ReadAll(resp.Body)
+	assert.Contains(t, string(body), "Blub!")
+	checkLatest(t, 3)
+}
 
+func TestSimGetLatestMsgs(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/msgs?latest=4", sim_url)
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	req.Header.Add("Authorization", sim_token)
+	client := &http.Client{}
+	resp, _ := client.Do(req)
+	assert.Equal(t, 200, resp.StatusCode)
+	// check if response content contains "Blub!"
+	body, _ := ioutil.ReadAll(resp.Body)
+	assert.Contains(t, string(body), "Blub!")
+	checkLatest(t, 4)
+}
+
+func TestSimRegisterB(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/register?latest=5", sim_url)
+	data := map[string]string{
+		"username": "b",
+		"email":    "b@b",
+		"pwd":      "b",
+	}
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 5)
+}
+
+func TestSimRegisterC(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/register?latest=6", sim_url)
+	data := map[string]string{
+		"username": "c",
+		"email":    "c@c",
+		"pwd":      "c",
+	}
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 6)
+}
+
+func TestSimFollow(t *testing.T) {
+	endpoint := fmt.Sprintf("%s/fllws/a?latest=7", sim_url)
+	data := map[string]string{
+		"follow": "b",
+	}
+	resp := encodeJsonAndPOST(t, endpoint, data)
+	assert.Equal(t, 204, resp.StatusCode)
+	checkLatest(t, 7)
 }

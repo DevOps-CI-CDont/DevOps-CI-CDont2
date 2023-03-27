@@ -401,6 +401,7 @@ func follow(c *gin.Context) {
 		}
 
 		c.JSON(204, gin.H{})
+		return
 	} else if c.Request.Method == "POST" && body["unfollow"] != "" {
 		unfollows_username := body["unfollow"]
 		unfollows_user_id := main.GetUserIdByName(unfollows_username)
@@ -439,6 +440,7 @@ func follow(c *gin.Context) {
 			return
 		}
 		c.JSON(204, gin.H{})
+		return
 	} else if c.Request.Method == "GET" {
 		// default
 		num_followers := getNumMsgs(c)
