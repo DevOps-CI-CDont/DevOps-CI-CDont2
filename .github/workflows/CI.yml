@@ -7,7 +7,7 @@ on:
 
 jobs:
   api_tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
     steps:
       - uses: actions/checkout@v2
       - name: Set up Go
@@ -23,15 +23,4 @@ jobs:
           DB_PASS: ${{ secrets.DB_PASS }}
         run: |    
           (cd itu-minitwit/backend/Main && go run main.go "test" &) # run the Go API in the background
-      - name: Delay before running tests
-        run: |
-          sleep 10
-      - name: go test (8080 + 8081)
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASS: ${{ secrets.DB_PASS }}
-        run: |
           (cd itu-minitwit/backend/test && go test -v ./...)
