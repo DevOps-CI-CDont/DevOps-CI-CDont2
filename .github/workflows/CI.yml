@@ -27,5 +27,11 @@ jobs:
         run: |
           sleep 10
       - name: go test (8080 + 8081)
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_TEST_NAME: ${{ secrets.DB_TEST_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASS }}
         run: |
           (cd itu-minitwit/backend/test && go test -v ./...)
