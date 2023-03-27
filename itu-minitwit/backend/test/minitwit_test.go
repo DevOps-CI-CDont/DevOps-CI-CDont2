@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"minitwit-backend/init/config"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -15,44 +16,29 @@ import (
 const base = "http://localhost:8080"
 const sim_url = "http://localhost:8081"
 
-func main() {
-	// run the test
-	// r := main.SetUpRouter
-	testing.Main(func(pat, str string) (bool, error) { return true, nil }, []testing.InternalTest{
-		{
-			Name: "TestTimelines",
-			F:    TestTimelines,
-		},
-		{
-			Name: "TestRegister",
-			F:    TestRegister,
-		},
-		{
-			Name: "TestLoginLogout",
-			F:    TestLoginLogout,
-		},
-		{
-			Name: "TestPostTweet",
-			F:    TestPostTweet,
-		},
-		{
-			Name: "SimTestLatest",
-			F:    TestSimLatest,
-		},
-		{
-			Name: "SimTestRegister",
-			F:    TestSimRegister,
-		},
-		{
-			Name: "SimTestCreateMsg",
-			F:    TestSimCreateMsg,
-		},
-		{
-			Name: "SimTestGetLatestUserMsgs",
-			F:    TestSimGetLatestUserMsgs,
-		},
-	}, []testing.InternalBenchmark{}, []testing.InternalExample{})
+func clearTestDB() {
+	config.Connect_test_db()
+	// delete from messages
+	config.DB.Exec("DELETE FROM messages")
+	// delete from users
+	config.DB.Exec("DELETE FROM users")
+	// delete from followers
+	config.DB.Exec("DELETE FROM followers")
+	// alter sequences
+	config.DB.Exec("ALTER SEQUENCE messages_id_seq RESTART WITH 1")
+	config.DB.Exec("ALTER SEQUENCE users_id_seq RESTART WITH 1")
+	config.DB.Exec("ALTER SEQUENCE followers_id_seq RESTART WITH 1")
+	fmt.Println("Test database tables & sequences reset")
+}
 
+func TestMain(m *testing.M) {
+	// put your setup code here
+	clearTestDB()
+
+	// run the tests
+	code := m.Run()
+
+	fmt.Println("code:", code)
 }
 
 func login(username string, password string) *http.Response {
@@ -64,7 +50,6 @@ func login(username string, password string) *http.Response {
 }
 
 func TestRegister(t *testing.T) {
-	t.Skip("Skipping register test")
 	username := "testuser"
 	password := "testpassword"
 	email := "test@example.com"
@@ -84,7 +69,6 @@ func TestRegister(t *testing.T) {
 }
 
 func loginLogout(t *testing.T) {
-	// t.Skip("Skipping login/logout test")
 	res := login("Silas", "password")
 	assert.Equal(t, 200, res.StatusCode)
 	url := base + "/logout"
@@ -93,7 +77,6 @@ func loginLogout(t *testing.T) {
 }
 
 func TestLoginLogout(t *testing.T) {
-	// t.Skip("Skipping login/logout test")
 	//test login fails with wrong password
 	postHelper("/login", t, 401, "Login fails with wrong password", url.Values{"username": {"Silas"}, "password": {"wrongpassword"}})
 	// with wrong username
@@ -102,7 +85,6 @@ func TestLoginLogout(t *testing.T) {
 }
 
 func TestPostTweet(t *testing.T) {
-	// t.Skip("Skipping post tweet test")
 	//Check if adding messages works
 	jar, _ := cookiejar.New(nil)
 	client := &http.Client{
@@ -150,10 +132,9 @@ func postHelper(endpoint string, t *testing.T, expected int, name string, data u
 }
 
 func TestTimelines(t *testing.T) {
-	// t.Skip("Skipping timelines test")
 	// public & user timeline
 	endpoint := base + "/public"
-	getHelper(endpoint, t, 401, "Public Timeline") // no tweets -> 401
+	getHelper(endpoint, t, 200, "Public Timeline") // no tweets -> 401
 
 	// personal timeline: needs authentication
 	req, err := http.NewRequest("GET", base+"/mytimeline", nil)
