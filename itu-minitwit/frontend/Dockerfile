@@ -26,6 +26,9 @@ RUN \
 
 # Rebuild the source code only when needed
 FROM base AS builder
+
+ARG NEXT_PUBLIC_API_URL
+
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules 
 COPY . .
@@ -42,6 +45,9 @@ RUN npm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
+
+ARG NEXT_PUBLIC_API_URL
+
 WORKDIR /app
 
 ENV NODE_ENV production
@@ -58,8 +64,6 @@ COPY --from=builder /app/public ./public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-
 
 USER nextjs
 
