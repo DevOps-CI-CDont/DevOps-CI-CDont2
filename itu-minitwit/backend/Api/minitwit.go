@@ -98,7 +98,7 @@ func incrementCounter(m *metrics, endpointName string) gin.HandlerFunc {
 }
 
 func GetUsernameByIDEndpoint(c *gin.Context) {
-	userID := c.Param("id")
+	userID := c.Request.URL.Query().Get("id")
 	var user models.User
 	err := config.DB.Table("users").Where("id = ?", userID).First(&user).Error
 	if err != nil {
