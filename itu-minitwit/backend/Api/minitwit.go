@@ -85,7 +85,7 @@ func Start(mode string) {
 	Router.GET("/AmIFollowing/:username", amIFollowing, incrementCounter(m, "/AmIFollowing/:username"))
 	Router.GET("/allUsers", getAllUsers, incrementCounter(m, "/allUsers"))
 	Router.GET("/AllIAmFollowing", getAllFollowing)
-	Router.GET("/getUserNameById", getUserNameByIdEndpoint, incrementCounter(m, "/getUserNameById"))
+	Router.GET("/getUserNameById", GetUsernameByIDEndpoint, incrementCounter(m, "/getUserNameById"))
 
 	Router.Run(":8080")
 }
@@ -97,8 +97,8 @@ func incrementCounter(m *metrics, endpointName string) gin.HandlerFunc {
 	return fn
 }
 
-func getUserNameByIdEndpoint(c *gin.Context) {
-	userID := getUserIdIfLoggedIn(c)
+func GetUsernameByIDEndpoint(c *gin.Context) {
+	userID := c.Param("id")
 	var user models.User
 	err := config.DB.Table("users").Where("id = ?", userID).First(&user).Error
 	if err != nil {
