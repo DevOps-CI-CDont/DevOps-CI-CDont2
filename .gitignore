@@ -27,6 +27,9 @@ logs/
 .idea/
 .vscode/
 
+# ds store
+*.DS_Store
+
 # pytest stuff
 .coverage
 .coverage.*
