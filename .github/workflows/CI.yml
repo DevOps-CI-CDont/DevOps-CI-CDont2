@@ -6,24 +6,36 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build_and_push_api_test_image:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Build TEST API Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./itu-minitwit/backend
-          dockerfile: ./itu-minitwit/backend/Dockerfile-test
-          push: false
-          tags: api-test:latest
-      
-  api_tests:
+       - uses: actions/checkout@v3
+       - name: Build the Docker image for api test
+         run: | 
+          export DB_HOST=${{ secrets.DB_HOST }}
+          export DB_PORT=${{ secrets.DB_PORT }}
+          export DB_NAME=${{ secrets.DB_NAME }}
+          export DB_USERNAME=${{ secrets.DB_USER }}
+          export DB_PASSWORD=${{ secrets.DB_PASS }}
+          docker build -f ./itu-minitwit/backend/Dockerfile-test --build-arg DB_HOST --build-arg DB_PORT --build-arg DB_NAME --build-arg DB_USERNAME --build-arg DB_PASSWORD -t api-test:latest ./itu-minitwit/backend
+     
+       - name: Install doctl
+         uses: digitalocean/action-doctl@v2
+         with:
+          token: ${{ secrets.DIGITAL_OCEAN_REGISTRY }}
+
+       - name: doctl registry login
+         run: doctl registry login
+
+       - name: Tag and push backend Docker image to DigitalOcean Container Registry
+         run: |
+          docker tag api-test:latest registry.digitalocean.com/cicdont-images/api-test:latest
+          docker push registry.digitalocean.com/cicdont-images/api-test:latest
+  api_tests_on_image:
     runs-on: ubuntu-latest
     services:
       api:
-        image: api-test:latest
+        image: registry.digitalocean.com/cicdont-images/api-test:latest
         ports:
           - 8080:8080
           - 8081:8081
@@ -34,11 +46,6 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASS: ${{ secrets.DB_PASS }}
     steps:
-      - name: Load Docker image
-        uses: docker/load-action@v2
-        with:
-          image: api-test:latest
-          load_path: api-test-latest.tar
       - uses: actions/checkout@v2
       - name: Set up Go
         uses: actions/setup-go@v2
