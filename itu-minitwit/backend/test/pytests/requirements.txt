@@ -1,4 +1,0 @@
-requests==2.22.0
-requests-unixsocket==0.2.0
-psycopg2-binary==2.9.5
-python-dotenv==1.0.0
