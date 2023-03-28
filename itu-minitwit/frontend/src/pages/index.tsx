@@ -52,7 +52,6 @@ export async function getServerSideProps(context: any) {
 			},
 		};
 	} catch (e) {
-		// @eslint-ignore
 		console.error(e);
 		return {
 			props: {

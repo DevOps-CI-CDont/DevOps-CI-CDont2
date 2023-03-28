@@ -5,7 +5,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 
-export function Tweet({ text, author_name, pub_date, author_id }: TweetType) {
+export function Tweet({ text, author_name, CreatedAt, author_id }: TweetType) {
 	const userId = useUserStore((state) => state.userId);
 
 	return (
@@ -42,7 +42,7 @@ export function Tweet({ text, author_name, pub_date, author_id }: TweetType) {
 					>
 						{author_name}
 					</Link>{" "}
-					at {new Date(pub_date * 1000).toLocaleString()}
+					at {CreatedAt}
 				</span>
 			</div>
 		</div>

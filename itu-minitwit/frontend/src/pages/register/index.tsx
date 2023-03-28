@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { useCookies } from "react-cookie";
 
 export default function RegisterPage() {
-	const cookie = useCookies(["user_id"]);
+	const [, setUserIdCookie] = useCookies(["user_id"]);
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [password2, setPassword2] = useState("");
@@ -70,7 +70,7 @@ export default function RegisterPage() {
 		if (res.message) {
 			const res = await postLogin({ username, password });
 
-			cookie[1]("user_id", res["user_id"]);
+			setUserIdCookie("user_id", res["user_id"]);
 
 			router.push("/");
 		} else {

@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { useCookies } from "react-cookie";
 
 export default function LoginPage() {
-	const cookie = useCookies(["user_id"]);
+	const [, setUserIdCookie] = useCookies(["user_id"]);
 	const setUserId = useUserStore((state) => state.setUserId);
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -52,7 +52,7 @@ export default function LoginPage() {
 
 			if (res.error) return alert(res.error);
 
-			cookie[1]("user_id", res["user_id"]);
+			setUserIdCookie("user_id", res["user_id"]);
 			setUserId(res["user_id"]);
 
 			router.push("/");
