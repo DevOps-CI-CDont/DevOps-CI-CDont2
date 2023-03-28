@@ -85,6 +85,7 @@ func Start(mode string) {
 	Router.GET("/AmIFollowing/:username", amIFollowing, incrementCounter(m, "/AmIFollowing/:username"))
 	Router.GET("/allUsers", getAllUsers, incrementCounter(m, "/allUsers"))
 	Router.GET("/AllIAmFollowing", getAllFollowing)
+	Router.GET("/getUserNameById", getUserNameByIdEndpoint, incrementCounter(m, "/getUserNameById"))
 
 	Router.Run(":8080")
 }
@@ -94,6 +95,22 @@ func incrementCounter(m *metrics, endpointName string) gin.HandlerFunc {
 		m.funcCounter.WithLabelValues(c.Request.Method, endpointName, strconv.Itoa(c.Writer.Status())).Inc()
 	}
 	return fn
+}
+
+func getUserNameByIdEndpoint(c *gin.Context) {
+	userID := getUserIdIfLoggedIn(c)
+	var user models.User
+	err := config.DB.Table("users").Where("id = ?", userID).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(400, false)
+			return
+		}
+		fmt.Println("error", err)
+		c.AbortWithStatusJSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+	c.JSON(200, user.Username)
 }
 
 func infrastructureGauge(intervalInSeconds int, m *metrics) {
