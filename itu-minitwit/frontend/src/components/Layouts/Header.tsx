@@ -1,5 +1,6 @@
 import { authenticatedRouter, router } from "@/globals/router";
 import { getLogout } from "@/server/getLogout";
+import { getUsernameById } from "@/server/getUsername";
 import useAuthStore from "@/store/authStore";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -9,13 +10,19 @@ import { DarkModeToggle } from "../DarkModeToggle";
 
 export function Header() {
 	const isAuth = useAuthStore((state) => state.isAuth);
-	const cookie = useCookies(["user_id"]);
+	const [userIdCookie, , removeUserIdCookie] = useCookies(["user_id"]);
 	const nextRouter = useRouter();
 	const [userId, setUserId] = useState<string | null>(null);
+	const [username, setUsername] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (cookie[0].user_id) {
-			setUserId(cookie[0].user_id);
+		if (userIdCookie.user_id) {
+			setUserId(userIdCookie.user_id);
+			try {
+				userId && getUsernameById(userId).then((res) => setUsername(res));
+			} catch (e) {
+				console.error(e);
+			}
 		}
 	});
 
@@ -26,7 +33,7 @@ export function Header() {
 					<Link href={"/public"}>
 						<h2 className="font-bold text-lg">ITU Minitwit (now with CD)</h2>
 					</Link>
-					{userId && <span>UserID: {userId}</span>}
+					{username && <span>Welcome: {username}</span>}
 				</div>
 				<ul className="flex justify-center items-center">
 					<DarkModeToggle />
@@ -66,7 +73,7 @@ export function Header() {
 
 	async function handleSignOut() {
 		await getLogout();
-		cookie[2]("user_id");
+		removeUserIdCookie("user_id");
 		nextRouter.push("/public");
 	}
 }
