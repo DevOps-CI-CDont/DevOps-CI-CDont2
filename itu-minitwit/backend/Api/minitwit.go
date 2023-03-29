@@ -448,6 +448,8 @@ func register(c *gin.Context) {
 func getUserByName(userName string) *models.User {
 	user := &models.User{}
 	result := config.DB.Where("username = ?", userName).First(user)
+	log.Println("getUserByName result: ", result)
+	log.Println("error: ", result.Error)
 	if result.Error != nil {
 		fmt.Println("didn't find user with username: " + userName + ": this is expected for new users")
 		return nil
