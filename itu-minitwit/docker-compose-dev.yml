@@ -2,6 +2,9 @@
 # "docker build -t cicdont/backend ." in root directories minitwit-front 
 # and minitwit-backend, respectively, before running this file with command
 # "docker-compose up"
+networks:
+    elk:
+
 services:
 
   frontend-dev:
@@ -9,6 +12,7 @@ services:
       context: ./frontend
       args:
         - NEXT_PUBLIC_API_URL=http://host.docker.internal:8080
+    image: cicdont-images/frontend
     container_name: frontend-dev
     ports:
       - "3000:3000"
@@ -20,6 +24,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile-test
+    image: cicdont-images/backend
     container_name: api-dev
     ports:
       - "8080:8080"
@@ -49,6 +54,51 @@ services:
       - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
       - ./grafana/dashboards:/var/lib/grafana/dashboards
 
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.2.0"
+    environment:
+        - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+        - "discovery.type=single-node"
+    volumes:
+        - elk_elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+        - elk
+
+  kibana:
+    image: "docker.elastic.co/kibana/kibana:7.2.0"
+    environment:
+        elasticsearch.hosts: '["http://elasticsearch:9200"]'
+    networks:
+        - elk
+
+  filebeat:
+    image: "docker.elastic.co/beats/filebeat:7.2.0"
+    user: root
+    volumes:
+        - ${ELK_DIR}/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+        - /var/lib/docker:/var/lib/docker:ro
+        - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+        - elk
+          
+  nginx: 
+    image: nginx
+    ports:
+      - 9200:9200
+      - 5601:5601
+      - 8881:8881
+      - 8882:8882
+    networks:
+      - elk
+    volumes:
+      - type: bind
+        source: ${ELK_DIR}/nginx.conf
+        target: /etc/nginx/nginx.conf
+      - type: bind
+        source: ${ELK_DIR}/.htpasswd
+        target: /etc/nginx/.htpasswd
+
 volumes:
+  elk_elasticsearch_data:
   prometheus_data: {}
   grafana:
