@@ -44,6 +44,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/prometheus/client_golang v1.14.0
+	github.com/sirupsen/logrus v1.9.0
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/net v0.8.0 // indirect

@@ -5,13 +5,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
 	"minitwit-backend/init/config"
 	"minitwit-backend/init/models"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"gorm.io/gorm"
 
@@ -52,6 +54,8 @@ func SetUpRouter() *gin.Engine {
 }
 
 func Start(mode string) {
+	log.SetOutput(os.Stdout)
+
 	Router = SetUpRouter()
 
 	if mode == "test" {
@@ -202,6 +206,9 @@ func getTimeline(c *gin.Context) {
 }
 
 func getPublicTimeline(c *gin.Context) {
+	// dummy log to test ELK functionality
+	log.Info("getPublicTimeline called!")
+
 	num_msgs := c.Request.URL.Query().Get("num_msgs")
 	int_num_msgs, err := strconv.Atoi(num_msgs)
 	if num_msgs == "" || err != nil {
