@@ -8,6 +8,19 @@ import Link from "next/link";
 export function Tweet({ text, author_name, CreatedAt, author_id }: TweetType) {
 	const userId = useUserStore((state) => state.userId);
 
+	const date = new Date(CreatedAt);
+
+	const year = date.getFullYear();
+	const month = date.getMonth() + 1;
+	const day = date.getDate();
+	const hours = date.getHours();
+	const minutes = date.getMinutes();
+	const seconds = date.getSeconds();
+
+	const readableTimestamp = `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day} ${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+	CreatedAt = readableTimestamp;
+
+
 	return (
 		<div
 			className={clsx(
