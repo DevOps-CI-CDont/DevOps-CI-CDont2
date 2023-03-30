@@ -187,9 +187,9 @@ func getTimeline(c *gin.Context) {
 	result := config.DB.Table("messages").
 		Select("messages.*, users.*").
 		Joins("JOIN users ON messages.author_id = users.id").
-		Where("messages.flagged = ? AND (users.id = ? OR users.id IN (?))",
+		Where("messages.flagged = ? AND (users.id = ? OR users.id IN (?)) AND (messages.created_at is not null)",
 			0, userID, config.DB.Table("followers").Select("whom_id").Where("who_id = ?", userID)).
-		Order("messages.pub_date DESC").
+		Order("messages.created_at DESC").
 		Limit(PER_PAGE).
 		Scan(&messages)
 
