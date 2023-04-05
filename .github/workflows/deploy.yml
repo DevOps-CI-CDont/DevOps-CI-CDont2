@@ -25,7 +25,8 @@ jobs:
           export DB_NAME=${{ secrets.DB_NAME }}
           export DB_USERNAME=${{ secrets.DB_USER }}
           export DB_PASSWORD=${{ secrets.DB_PASS }}
-          docker build --build-arg DB_HOST --build-arg DB_PORT --build-arg DB_NAME --build-arg DB_USERNAME --build-arg DB_PASSWORD -t backend ./itu-minitwit/backend
+          export FLAG_AUTH=${{ secrets.FLAG_AUTH }}
+          docker build --build-arg DB_HOST --build-arg DB_PORT --build-arg DB_NAME --build-arg DB_USERNAME --build-arg DB_PASSWORD --build-arg FLAG_AUTH -t backend ./itu-minitwit/backend
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
