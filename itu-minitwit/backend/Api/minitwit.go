@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 
 	"gorm.io/gorm"
@@ -90,6 +91,7 @@ func Start(mode string) {
 	Router.GET("/allUsers", getAllUsers, incrementCounter(m, "/allUsers"))
 	Router.GET("/AllIAmFollowing", getAllFollowing)
 	Router.GET("/getUserNameById", GetUsernameByIDEndpoint, incrementCounter(m, "/getUserNameById"))
+	Router.POST("/flagTweet", flagTweet, incrementCounter(m, "/flagTweet"))
 
 	Router.Run(":8080")
 }
@@ -525,4 +527,56 @@ func getAllUsers(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"users": users})
+}
+
+func flagTweet(c *gin.Context) {
+	auth := c.Request.Header.Get("Authorization")
+	// check if .env file exists
+	_, err := os.Stat("../.env")
+	if os.IsNotExist(err) {
+		fmt.Println("no .env file found")
+	} else { // load .env file if it exists
+		err := godotenv.Load("../.env")
+		if err != nil {
+			fmt.Println("err = ", err)
+			log.Fatal("Error loading .env file")
+		}
+	}
+	authShouldBe := os.Getenv("FLAG_AUTH")
+	if auth == "" {
+		c.JSON(401, gin.H{"error": "no Authorization header"})
+		return
+	} else if auth != authShouldBe {
+		c.JSON(401, gin.H{"error": "invalid Authorization header"})
+		return
+	} else {
+		log.Println("flagging tweet")
+		messageID := c.Request.URL.Query().Get("message_id")
+		flagValue := c.Request.URL.Query().Get("flag_value")
+		// conv flagval to int
+		int_flagval, err := strconv.Atoi(flagValue)
+		if err != nil {
+			c.JSON(400, gin.H{"error": "flag value is not an integer"})
+			return
+		}
+		message := &models.Message{}
+		err = config.DB.Where("id = ?", messageID).First(message).Error
+		if err != nil {
+			c.JSON(500, gin.H{"error": "unable to retrieve message"})
+			return
+		}
+		message.Flagged = int_flagval
+		err = config.DB.Save(message).Error
+		if err != nil {
+			c.JSON(500, gin.H{"error": "unable to flag message"})
+			return
+		}
+		if int_flagval == 1 {
+			log.Println("flagged message")
+			c.JSON(200, gin.H{"message": "message flagged"})
+		} else if int_flagval == 0 {
+			log.Println("unflagged message")
+			c.JSON(200, gin.H{"message": "message unflagged"})
+		}
+	}
 }
