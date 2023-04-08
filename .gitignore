@@ -16,6 +16,9 @@
 /bin/
 /pkg/
 
+# .htpasswd
+*.htpasswd
+
 # Next.js frontend
 .next/
 node_modules/
