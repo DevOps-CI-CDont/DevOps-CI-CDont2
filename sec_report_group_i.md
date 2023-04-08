@@ -11,6 +11,8 @@
 ### sources
 
 * SQL Injection if you don't sanitize your inputs or use an ORM that does this for you.
+* unencrypted traffic (HTTP) between client and server.
+* virtual machine intrusion.
 
 ### scenarios
 
@@ -46,3 +48,9 @@
 
 ## pentesting
 
+`wmap` found endpoints:
+[+] Found http://157.245.16.6:8000/docs 200
+[+] Found http://157.245.16.6:8000/login 200
+[+] Found http://157.245.16.6:8000/logout 302
+[+] Found http://157.245.16.6:8000/public 200
+[+] Found http://157.245.16.6:8000/register 200
