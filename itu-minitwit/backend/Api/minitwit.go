@@ -221,8 +221,8 @@ func getPublicTimeline(c *gin.Context) {
 		Table("messages").
 		Select("messages.*, users.*").
 		Joins("JOIN users ON messages.author_id = users.id").
-		Where("messages.flagged = ?", 0).
-		Order("messages.pub_date desc").
+		Where("messages.flagged = ? AND messages.created_at IS NOT NULL", 0).
+		Order("messages.created_at desc").
 		Limit(int_num_msgs).
 		Find(&messages).Error
 
