@@ -21,16 +21,19 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"github.com/mackerelio/go-osstat/memory"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var Router *gin.Engine
 
-// type metrics struct {
-// 	funcCounter *prometheus.CounterVec
-// 	memoryUsage prometheus.Gauge
-// }
+type metrics struct {
+	funcCounter *prometheus.CounterVec
+	memoryUsage prometheus.Gauge
+}
 
-/* func NewMetrics(reg prometheus.Registerer) *metrics {
+func NewMetrics(reg prometheus.Registerer) *metrics {
 	m := &metrics{
 		funcCounter: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "function_calls_total",
@@ -44,7 +47,7 @@ var Router *gin.Engine
 	reg.MustRegister(m.funcCounter)
 	reg.MustRegister(m.memoryUsage)
 	return m
-} */
+}
 
 func SetUpRouter() *gin.Engine {
 	r := gin.Default()
@@ -67,38 +70,38 @@ func Start(mode string) {
 	// ALL MY HOMIES HATE CORS :D
 
 	// metrics
-	/* reg := prometheus.NewRegistry()
+	reg := prometheus.NewRegistry()
 	m := NewMetrics(reg)
 	go infrastructureGauge(10, m)
 
-	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{}) */
+	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 
 	// endpoints
-	// Router.GET("/metrics", gin.WrapH(promHandler))
-	Router.GET("/mytimeline", getTimeline)
-	Router.GET("/public", getPublicTimeline)
-	Router.GET("/user/:username", getUsersTweets)
-	Router.POST("/user/:username/follow", followUser)
-	Router.POST("/user/:username/unfollow", unfollowUser)
-	Router.POST("/add_message", postMessage)
-	Router.POST("/login", login)
-	Router.POST("/register", register)
-	Router.GET("/logout", logout)
-	Router.GET("/AmIFollowing/:username", amIFollowing)
-	Router.GET("/allUsers", getAllUsers)
+	Router.GET("/metrics", gin.WrapH(promHandler))
+	Router.GET("/mytimeline", getTimeline, incrementCounter(m, "/mytimeline"))
+	Router.GET("/public", getPublicTimeline, incrementCounter(m, "/public"))
+	Router.GET("/user/:username", getUsersTweets, incrementCounter(m, "/user/:username"))
+	Router.POST("/user/:username/follow", followUser, incrementCounter(m, "/user/:username/follow"))
+	Router.POST("/user/:username/unfollow", unfollowUser, incrementCounter(m, "/user/:username/unfollow"))
+	Router.POST("/add_message", postMessage, incrementCounter(m, "/add_message"))
+	Router.POST("/login", login, incrementCounter(m, "/login"))
+	Router.POST("/register", register, incrementCounter(m, "/register"))
+	Router.GET("/logout", logout, incrementCounter(m, "/logout"))
+	Router.GET("/AmIFollowing/:username", amIFollowing, incrementCounter(m, "/AmIFollowing/:username"))
+	Router.GET("/allUsers", getAllUsers, incrementCounter(m, "/allUsers"))
 	Router.GET("/AllIAmFollowing", getAllFollowing)
-	Router.GET("/getUserNameById", GetUsernameByIDEndpoint)
-	Router.POST("/flagTweet", flagTweet)
+	Router.GET("/getUserNameById", GetUsernameByIDEndpoint, incrementCounter(m, "/getUserNameById"))
+	Router.POST("/flagTweet", flagTweet, incrementCounter(m, "/flagTweet"))
 
 	Router.Run(":8080")
 }
 
-/* func incrementCounter(m *metrics, endpointName string) gin.HandlerFunc {
+func incrementCounter(m *metrics, endpointName string) gin.HandlerFunc {
 	fn := func(c *gin.Context) {
 		m.funcCounter.WithLabelValues(c.Request.Method, endpointName, strconv.Itoa(c.Writer.Status())).Inc()
 	}
 	return fn
-} */
+}
 
 func GetUsernameByIDEndpoint(c *gin.Context) {
 	userID := c.Request.URL.Query().Get("id")
@@ -116,7 +119,7 @@ func GetUsernameByIDEndpoint(c *gin.Context) {
 	c.JSON(200, user.Username)
 }
 
-/* func infrastructureGauge(intervalInSeconds int, m *metrics) {
+func infrastructureGauge(intervalInSeconds int, m *metrics) {
 	for {
 		memory, err := memory.Get()
 		if err != nil {
@@ -128,7 +131,7 @@ func GetUsernameByIDEndpoint(c *gin.Context) {
 		m.memoryUsage.Set(memoryUsageInPercent)
 		time.Sleep(time.Duration(intervalInSeconds) * time.Second)
 	}
-} */
+}
 
 var PER_PAGE = 30
 var DEBUG = true
