@@ -8,6 +8,15 @@ const nextConfig = {
 	eslint: {
 		ignoreDuringBuilds: true,
 	},
+	async redirects() {
+		return [
+		  {
+			source: '/grafana',
+			destination: ':4000',
+			permanent: true,
+		  },
+		]
+	},
 };
 
 module.exports = nextConfig;

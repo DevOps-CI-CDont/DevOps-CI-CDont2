@@ -59,3 +59,8 @@ Our CD workflow runs if the CI workflow succeeds (avoid deploying broken code). 
 
 On our droplet we run Watchtower (*"A container-based solution for automating Docker container base image updates."*) to deploy the latest images to the Droplet.
 Watchtower is configured to pull the latest images from our container registry and restart the containers with the new images (should have extremely little downtime). Inspecting our image registry at a given interval.
+
+## Domain
+
+We have our domain purchased for free through Name.com, although we use DigitalOcean name servers.
+ 
