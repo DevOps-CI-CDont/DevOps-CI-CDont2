@@ -117,12 +117,14 @@ func register(c *gin.Context) {
 
 	// send the request
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		log.Println("Error on response.\n[ERRO] -", err)
 		c.JSON(400, gin.H{"error_msg": err.Error()})
 		return
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		// read resp body and return it
@@ -136,8 +138,8 @@ func register(c *gin.Context) {
 		c.JSON(400, gin.H{"error_msg": bodyString})
 		return
 	}
-
-	c.JSON(204, gin.H{}) // no content
+	_, err = io.Copy(ioutil.Discard, resp.Body) // Read just to discard, to avoid leaking connections
+	c.JSON(204, gin.H{})                        // no content
 }
 
 func getMsgs(c *gin.Context) {
@@ -169,11 +171,13 @@ func getMsgs(c *gin.Context) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		c.JSON(400, gin.H{"error_msg": err.Error()})
 		return
 	}
-	defer resp.Body.Close()
 
 	// Read the response body as JSON
 	var data map[string]interface{}
@@ -257,11 +261,13 @@ func msgsPerUser(c *gin.Context) {
 
 		// send the request
 		resp, err := client.Do(req)
+		if resp != nil {
+			defer resp.Body.Close()
+		}
 		if err != nil {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
-		defer resp.Body.Close()
 
 		// Read the response body as JSON
 		var data map[string]interface{}
@@ -329,11 +335,13 @@ func msgsPerUser(c *gin.Context) {
 		client := &http.Client{}
 		//send request
 		resp, err2 := client.Do(req)
+		if resp != nil {
+			defer resp.Body.Close()
+		}
 		if err2 != nil {
 			c.JSON(400, gin.H{"error_msg": err2.Error()})
 			return
 		}
-		defer resp.Body.Close()
 
 		fmt.Println("user " + c.Param("username") + " posted a message: " + body["content"])
 		c.JSON(204, gin.H{})
@@ -398,11 +406,13 @@ func follow(c *gin.Context) {
 		client := &http.Client{}
 		//send request
 		resp, err2 := client.Do(req)
+		if resp != nil {
+			defer resp.Body.Close()
+		}
 		if err2 != nil {
 			c.JSON(400, gin.H{"error_msg": err2.Error()})
 			return
 		}
-		defer resp.Body.Close()
 
 		c.JSON(204, gin.H{})
 		return
@@ -439,11 +449,13 @@ func follow(c *gin.Context) {
 		client := &http.Client{}
 		//send request
 		resp, err2 := client.Do(req)
+		if resp != nil {
+			defer resp.Body.Close()
+		}
 		if err2 != nil {
 			c.JSON(400, gin.H{"error_msg": err2.Error()})
 			return
 		}
-		defer resp.Body.Close()
 		c.JSON(204, gin.H{})
 		return
 	} else if c.Request.Method == "GET" {
@@ -473,12 +485,13 @@ func follow(c *gin.Context) {
 
 		//send request
 		resp, err := client.Do(req)
+		if resp != nil {
+			defer resp.Body.Close()
+		}
 		if err != nil {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
-		defer resp.Body.Close()
-
 		//read the response body
 		resp_body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
