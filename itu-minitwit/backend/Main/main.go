@@ -1,7 +1,10 @@
 package main
 
 import (
+	_ "minitwit-backend/init/tzinit"
+
 	api "minitwit-backend/init/Api"
+
 	simulator "minitwit-backend/init/Simulator"
 	"os"
 	"sync"
@@ -9,7 +12,6 @@ import (
 
 func main() {
 	var mode string
-
 	if len(os.Args) > 1 {
 		mode = os.Args[1]
 	} else {
