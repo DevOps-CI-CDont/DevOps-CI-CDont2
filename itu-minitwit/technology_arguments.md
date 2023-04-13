@@ -36,7 +36,7 @@ At first we "inherited a local" database setup (a db file inside backend/tmp), a
 
 We have since changed the database to a PostgreSQL database on a DigitalOcean..
 
-## DigitalOcean
+## Cloud provider - DigitalOcean
 
 We went with DigitalOcean as a cloud provider since it has \$200 in free credits for students.
 We created a Droplet setup manually, at first a very basic one with only 1 CPU and 1GB of RAM (7$ / month).
@@ -62,5 +62,25 @@ Watchtower is configured to pull the latest images from our container registry a
 
 ## Domain
 
-We have our domain purchased for free through Name.com, although we use DigitalOcean name servers.
+We have our domain purchased for free through Name.com, although we use DigitalOcean name servers. We utilize iptables in the linux droplet to redirect all HTTP traffic to port 3000 (where the next.js frontend is hosted).
  
+## Static code analysis tools
+
+TODO: write more
+
+- zod
+- eslint
+- sonarqube
+- husky (precommit hooks)
+
+## Monitoring
+
+TODO: write more
+
+Prometheus + Grafana
+
+## Logging setup
+
+TODO: write more
+
+EFK stack (as the exercises)
