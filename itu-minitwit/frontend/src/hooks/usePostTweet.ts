@@ -1,13 +1,30 @@
 import { useMutation } from "react-query";
-import { postTweet, PostTweetProps } from "@/server/postTweet";
 import { queryClient } from "@/pages/_app";
+import { PostTweetSchemaType } from "@/types/tweet.type";
 
-export async function usePostTweet({ message, userId }: PostTweetProps) {
-	const mutation = useMutation(await postTweet({ message, userId }), {
+export function usePostTweet() {
+	const postTweetMutation = useMutation({
+		mutationFn: async ({ message, userId }: PostTweetSchemaType) => {
+			let formData = new FormData();
+			formData.append("text", message);
+			return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/add_message`, {
+				mode: "no-cors",
+				method: "POST",
+				cache: "no-cache",
+				headers: {
+					Cookie: `user_id=${userId}`,
+					"Content-Type": "application/json",
+					origin: "http://localhost:3000",
+				},
+				credentials: "include",
+				redirect: "follow",
+				body: formData,
+			});
+		},
 		onSuccess: () => {
-			queryClient.invalidateQueries("timeline");
+			queryClient.invalidateQueries(["timeline", "publicTimeline"]);
 		},
 	});
 
-	return mutation;
+	return postTweetMutation;
 }

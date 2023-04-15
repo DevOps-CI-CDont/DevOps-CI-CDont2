@@ -1,31 +1,35 @@
+import { Loading } from "@/components/Loading";
 import { TweetContainer } from "@/components/Message/TweetContainer";
+import { useFollow } from "@/hooks/useFollow";
+import { useGetIsFollowing } from "@/hooks/useGetIsFollowing";
+import { useGetTweetsByUsername } from "@/hooks/useGetTweetsByUserId";
+import { useUnfollow } from "@/hooks/useUnfollow";
 import DefaultLayout from "@/layouts/DefaultLayout";
-import { getIsFollowing } from "@/server/getIsFollowing";
-import { getUserTweets } from "@/server/getUserTweets";
-import { postIsFollowing } from "@/server/postFollow";
-import { Tweet } from "@/types/tweet.type";
-import { useEffect, useState } from "react";
+import { FollowSchema } from "@/types/User.type";
+
+import { useRouter } from "next/router";
 import { useCookies } from "react-cookie";
 
-interface UserProfileProps {
-	username?: string;
-	tweets?: Tweet[];
-	isFollowing: boolean;
-}
+export default function UserProfilePage() {
+	const router = useRouter();
 
-export default function UserProfilePage({
-	username,
-	tweets,
-	isFollowing,
-}: UserProfileProps) {
 	const [userIdCookie] = useCookies(["user_id"]);
-	const [followDisabled, setFollowDisabled] = useState<boolean>(false);
-	const [isFollowingState, setIsFollowingState] =
-		useState<boolean>(isFollowing);
 
-	useEffect(() => {
-		setFollowDisabled(userIdCookie.user_id == undefined ? false : true);
-	}, [userIdCookie]);
+	const { username } = router.query;
+
+	const { data: userTweets, isLoading } = useGetTweetsByUsername(
+		username as string
+	);
+
+	const { data: isFollowing, isLoading: isLoadingFollowing } =
+		useGetIsFollowing({
+			username: username as string,
+			userId: userIdCookie.user_id as string,
+		});
+
+	const { mutate: mutateFollow, isLoading: isLoadingFollow } = useFollow();
+	const { mutate: mutateUnfollow, isLoading: isLoadingUnfollow } =
+		useUnfollow();
 
 	return (
 		<DefaultLayout>
@@ -33,70 +37,51 @@ export default function UserProfilePage({
 				<div className="flex items-center justify-between">
 					<h1 className="text-lg">{username}&apos;s profile</h1>
 					<button
-						disabled={!followDisabled}
+						disabled={
+							isLoadingFollowing || isLoadingFollow || isLoadingUnfollow
+						}
 						onClick={handleFollow}
 						className="ml-2 font-bold px-2 py-1 border bg-blue-500 shadow-md text-white rounded-md disabled:bg-gray-200"
 					>
-						{isFollowingState ? "Unfollow" : "Follow"}
+						{isFollowing ? "Unfollow" : "Follow"}
 					</button>
 				</div>
-				<TweetContainer tweets={tweets} />
+				{isLoading ? (
+					<Loading />
+				) : (
+					<TweetContainer tweets={userTweets?.tweets} />
+				)}
 			</div>
 		</DefaultLayout>
 	);
 
 	async function handleFollow() {
-		try {
-			await postIsFollowing({
-				userId: userIdCookie.user_id,
-				username: username,
-				isFollowing: isFollowingState,
-			});
-
-			setIsFollowingState(!isFollowingState);
-		} catch (e) {
-			console.error(e);
-		}
-	}
-}
-
-export async function getServerSideProps(context: any) {
-	const { username } = context.query;
-
-	const cookies = String(context.req.headers?.cookie).split(";");
-
-	let isFollowing = false;
-
-	if (cookies) {
-		const userId = cookies.find((cookie: string) => cookie.includes("user_id"));
-
-		if (userId) {
-			const userIdValue = userId.split("=")[1];
-
-			isFollowing = await getIsFollowing({
-				userId: userIdValue,
-				username,
-			});
-		}
-	}
-
-	const messages = await getUserTweets({ username });
-
-	if (!messages) {
-		return {
-			props: {
-				username,
-				tweets: [],
-				isFollowing,
-			},
+		const userfollowRequest = {
+			username: username as string,
+			userId: userIdCookie?.user_id as string,
 		};
-	}
 
-	return {
-		props: {
-			username,
-			tweets: messages.tweets,
-			isFollowing,
-		},
-	};
+		if (!FollowSchema.parse(userfollowRequest)) {
+			return alert("Something went wrong");
+		}
+		if (isFollowing) {
+			mutateUnfollow(userfollowRequest, {
+				onSuccess: (data) => {
+					// console.log(data);
+				},
+				onError: (error) => {
+					console.error(error);
+				},
+			});
+		} else {
+			mutateFollow(userfollowRequest, {
+				onSuccess: (data) => {
+					// console.log(data);
+				},
+				onError: (error) => {
+					console.error(error);
+				},
+			});
+		}
+	}
 }
