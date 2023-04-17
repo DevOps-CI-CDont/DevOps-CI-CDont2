@@ -14,7 +14,7 @@ export function Header() {
 	const { data: username } = useGetUsernameById(userIdCookie.user_id as string);
 
 	return (
-		<div className="border-b shadow-md w-screen fixed top-0 left-0 right-0 bg-white">
+		<div className="border-b dark:border-b-slate-800 shadow-md w-screen fixed top-0 left-0 right-0 bg-white dark:bg-slate-900 dark:text-slate-100">
 			<nav className="flex justify-between items-center h-20 max-w-7xl mx-auto px-2">
 				<div>
 					<Link href={"/public"}>

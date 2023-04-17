@@ -8,7 +8,7 @@ export default function PublicTimelinePage() {
 
 	return (
 		<DefaultLayout>
-			<div className="mt-4">
+			<div className="mt-4 dark:text-slate-100">
 				<h1>Public timeline</h1>
 				{isLoading ? (
 					<Loading />
