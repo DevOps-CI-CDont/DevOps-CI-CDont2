@@ -6,7 +6,7 @@ import { useGetTimeline } from "@/hooks/useGetTimeline";
 
 export default function MyTimelinePage() {
 	const [userIdCookie] = useCookies(["user_id"]);
-	const { data, isLoading } = useGetTimeline(userIdCookie as string);
+	const { data, isLoading } = useGetTimeline(userIdCookie.user_id);
 
 	return (
 		<DefaultLayout>

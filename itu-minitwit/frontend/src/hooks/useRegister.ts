@@ -3,6 +3,7 @@ import { RegisterSchemaType } from "@/types/Auth.type";
 import { useRouter } from "next/router";
 import { useMutation } from "react-query";
 import { useLogin } from "./useLogin";
+import { makeFetch } from "@/lib/makeFetch";
 
 export function useRegister() {
 	const router = useRouter();
@@ -15,18 +16,17 @@ export function useRegister() {
 			password,
 			password2,
 		}: RegisterSchemaType) => {
-			var formdata = new FormData();
-			formdata.append("username", username);
-			formdata.append("email", email);
-			formdata.append("password", password);
-			formdata.append("password2", password2);
+			const formData = new FormData();
+			formData.append("username", username);
+			formData.append("email", email);
+			formData.append("password", password);
+			formData.append("password2", password2);
 
 			return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
 				method: "POST",
-				cache: "no-cache",
+				body: formData,
 				redirect: "follow",
-				body: formdata,
-			}).then((response) => response.json());
+			}).then((res) => res.json());
 		},
 	});
 }

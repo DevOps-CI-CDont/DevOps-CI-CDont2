@@ -6,8 +6,13 @@ export function useForm<TValues>(
 ) {
 	return {
 		onSubmit: (values: TValues) => {
-			const newValues = schema.parse(values);
-			onSubmit(newValues);
+			const parsedValues = schema.safeParse(values);
+
+			if (parsedValues.success) {
+				onSubmit(parsedValues.data);
+			} else {
+				alert("Something went wrong \n" + parsedValues.error.message);
+			}
 		},
 	};
 }

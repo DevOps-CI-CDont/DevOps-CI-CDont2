@@ -11,9 +11,7 @@ export function Header() {
 	const isAuth = useAuthStore((state) => state.isAuth);
 	const [userIdCookie, , removeUserIdCookie] = useCookies(["user_id"]);
 	const nextRouter = useRouter();
-	const { data: username } = useGetUsernameById(
-		userIdCookie?.user_id as string
-	);
+	const { data: username } = useGetUsernameById(userIdCookie.user_id as string);
 
 	return (
 		<div className="border-b shadow-md w-screen fixed top-0 left-0 right-0 bg-white">
@@ -22,7 +20,7 @@ export function Header() {
 					<Link href={"/public"}>
 						<h2 className="font-bold text-lg">ITU Minitwit (now with CD)</h2>
 					</Link>
-					{username && <span>Welcome: {username}</span>}
+					{username && <span>Welcome: {username.toString()}</span>}
 				</div>
 				<ul className="flex justify-center items-center">
 					<DarkModeToggle />

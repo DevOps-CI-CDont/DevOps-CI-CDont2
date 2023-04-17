@@ -1,11 +1,17 @@
+import { makeFetch } from "@/lib/makeFetch";
 import { useQuery } from "react-query";
+
+type GetUsernameByIdError = {
+	error: string;
+};
 
 export function useGetUsernameById(userId: string | number) {
 	return useQuery(["username", userId], async () => {
-		return await fetch(
-			`${
-				process.env.NEXT_PUBLIC_API_URL
-			}/getUserNameById?id=${userId.toString()}`
-		).then((response) => response.json());
+		if (!userId) return null;
+
+		return await makeFetch<GetUsernameByIdError | string>({
+			url: `/getUserNameById?id=${userId}`,
+			method: "GET",
+		});
 	});
 }

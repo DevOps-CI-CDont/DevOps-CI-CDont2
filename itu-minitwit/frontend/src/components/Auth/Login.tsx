@@ -4,7 +4,6 @@ import useUserStore from "@/store/userStore";
 import { LoginSchema } from "@/types/Auth.type";
 import { useState } from "react";
 import { useCookies } from "react-cookie";
-import { Loading } from "../Loading";
 import { useRouter } from "next/router";
 import { Button } from "../Input/Button";
 

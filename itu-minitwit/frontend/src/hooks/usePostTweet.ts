@@ -5,24 +5,22 @@ import { PostTweetSchemaType } from "@/types/tweet.type";
 export function usePostTweet() {
 	const postTweetMutation = useMutation({
 		mutationFn: async ({ message, userId }: PostTweetSchemaType) => {
-			let formData = new FormData();
+			const formData = new FormData();
 			formData.append("text", message);
+
+			const headers = new Headers();
+			headers.append("Authorization", userId);
+
 			return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/add_message`, {
-				mode: "no-cors",
 				method: "POST",
-				cache: "no-cache",
-				headers: {
-					Cookie: `user_id=${userId}`,
-					"Content-Type": "application/json",
-					origin: "http://localhost:3000",
-				},
-				credentials: "include",
-				redirect: "follow",
 				body: formData,
-			});
+				headers,
+				redirect: "follow",
+			}).then((res) => res.json());
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries(["timeline", "publicTimeline"]);
+			queryClient.invalidateQueries("mytimeline");
+			queryClient.invalidateQueries("publicTimeline");
 		},
 	});
 

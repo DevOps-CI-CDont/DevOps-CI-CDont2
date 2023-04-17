@@ -1,3 +1,4 @@
+import { makeFetch } from "@/lib/makeFetch";
 import { queryClient } from "@/pages/_app";
 import { FollowType } from "@/types/User.type";
 import { useMutation } from "react-query";
@@ -5,17 +6,17 @@ import { useMutation } from "react-query";
 export function useUnfollow() {
 	return useMutation({
 		mutationFn: async ({ userId, username }: FollowType) => {
-			var myHeaders = new Headers();
-			myHeaders.append("Cookie", `user_id=${userId}`);
+			const headers = new Headers();
+			headers.append("Authorization", userId);
 
 			return await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/user/${username}/unfollow`,
+				`${process.env.NEXT_PUBLIC_API_URL}/user/${username}/follow`,
 				{
 					method: "POST",
-					headers: myHeaders,
+					headers,
 					redirect: "follow",
 				}
-			).then((response) => response.json());
+			);
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries("isFollowing");
