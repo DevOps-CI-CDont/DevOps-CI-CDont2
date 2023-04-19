@@ -10,7 +10,7 @@ export function useUnfollow() {
 			headers.append("Authorization", userId);
 
 			return await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/user/${username}/follow`,
+				`${process.env.NEXT_PUBLIC_API_URL}/user/${username}/unfollow`,
 				{
 					method: "POST",
 					headers,
