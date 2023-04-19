@@ -21,6 +21,7 @@ export async function makeFetch<TData>({
 		method,
 		headers,
 		redirect: "follow",
+		credentials: "include",
 	});
 	return await res.json();
 }
