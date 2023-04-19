@@ -2,6 +2,7 @@ import { usePostTweet } from "@/hooks/usePostTweet";
 import { postTweetSchema } from "@/types/tweet.type";
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
+import { Button } from "../Input/Button";
 
 export function CreateMessage() {
 	const [message, setMessage] = useState("");
@@ -22,7 +23,7 @@ export function CreateMessage() {
 	if (!hasCookie) return <></>;
 
 	return (
-		<div className="w-full mt-2 bg-gray-300 shadow-md px-1 py-1 rounded-md">
+		<div className="w-full mt-2 bg-gray-300 dark:bg-slate-900 dark:text-slate-100 shadow-md px-1 py-1 rounded-md">
 			<div className="mx-4 my-2">
 				<span>What&apos;s on your mind?</span>
 				<form className="flex flex-row mt-2" onSubmit={(e) => handleSubmit(e)}>
@@ -31,15 +32,10 @@ export function CreateMessage() {
 						value={message}
 						disabled={!hasCookie || postTweetMutation.isLoading}
 						onChange={(e) => setMessage(e.target.value)}
-						className="px-2 py-1 mr-2 rounded-md w-full border shadown-md"
+						className="px-2 py-1 mr-2 rounded-md w-full border shadown-md dark:border-slate-900"
 						placeholder="write here..."
 					/>
-					<button
-						className="px-3 py-1 border rounded-md shadow-md bg-blue-500 text-white"
-						type="submit"
-					>
-						Share
-					</button>
+					<Button isLoading={postTweetMutation.isLoading} text={"Share"} />
 				</form>
 			</div>
 		</div>

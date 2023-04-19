@@ -17,14 +17,17 @@ export function Tweet({ text, author_name, CreatedAt, author_id }: TweetType) {
 	const minutes = date.getMinutes();
 	const seconds = date.getSeconds();
 
-	const readableTimestamp = `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day} ${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+	const readableTimestamp = `${year}-${month < 10 ? "0" + month : month}-${
+		day < 10 ? "0" + day : day
+	} ${hours < 10 ? "0" + hours : hours}:${
+		minutes < 10 ? "0" + minutes : minutes
+	}:${seconds < 10 ? "0" + seconds : seconds}`;
 	CreatedAt = readableTimestamp;
-
 
 	return (
 		<div
 			className={clsx(
-				"mx-4 my-4 py-2 px-2 bg-blue-500 flex rounded-md items-center",
+				"mx-4 my-4 py-2 px-2 bg-blue-500 flex rounded-md items-center dark:bg-blue-700",
 				userId == author_id && "flex-row-reverse"
 			)}
 		>

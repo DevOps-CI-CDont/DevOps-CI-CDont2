@@ -48,7 +48,7 @@ export function Register() {
 
 	return (
 		<form
-			className="flex flex-col m-2 p-2"
+			className="flex flex-col p-4 rounded-md dark:bg-slate-900"
 			onSubmit={(e) => {
 				e.preventDefault();
 				registerForm.onSubmit({ username, email, password, password2 });

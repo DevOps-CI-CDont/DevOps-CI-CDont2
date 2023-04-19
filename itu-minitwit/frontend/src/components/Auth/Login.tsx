@@ -33,7 +33,7 @@ export function Login() {
 	});
 	return (
 		<form
-			className="flex flex-col m-2 p-2"
+			className="flex flex-col p-4 dark:bg-slate-900"
 			onSubmit={(e) => {
 				e.preventDefault();
 				loginForm.onSubmit({
