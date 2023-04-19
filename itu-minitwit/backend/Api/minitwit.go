@@ -64,8 +64,14 @@ func Start(mode string) {
 	} else {
 		config.Connect_prod_db()
 	}
+
+    config := cors.DefaultConfig()
+    config.AllowAllOrigins = true
+    config.AllowHeaders = []string{"Authorization", "content-type"}
+    Router.Use(cors.New(config))
+
 	// router config
-	Router.Use(cors.Default()) // cors.Default() should allow all origins
+	//Router.Use(cors.Default()) // cors.Default() should allow all origins
 	// it's important to set this before any routes are registered so that the middleware is applied to all routes
 	// ALL MY HOMIES HATE CORS :D
 

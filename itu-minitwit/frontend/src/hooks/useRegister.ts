@@ -1,14 +1,7 @@
-import { postLogin } from "@/server/postLogin";
 import { RegisterSchemaType } from "@/types/Auth.type";
-import { useRouter } from "next/router";
 import { useMutation } from "react-query";
-import { useLogin } from "./useLogin";
-import { makeFetch } from "@/lib/makeFetch";
 
 export function useRegister() {
-	const router = useRouter();
-	const mutateLogin = useLogin();
-
 	return useMutation({
 		mutationFn: async ({
 			username,
@@ -26,7 +19,6 @@ export function useRegister() {
 				method: "POST",
 				body: formData,
 				redirect: "follow",
-				credentials: "include",
 			}).then((res) => res.json());
 		},
 	});
