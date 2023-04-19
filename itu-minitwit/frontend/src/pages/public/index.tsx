@@ -1,37 +1,21 @@
+import { Loading } from "@/components/Loading";
 import { TweetContainer } from "@/components/Message/TweetContainer";
+import { useGetPublicTimeline } from "@/hooks/useGetPublicTimeline";
 import DefaultLayout from "@/layouts/DefaultLayout";
-import { getPublicTweets } from "@/server/getPublicTweets";
-import { Tweet } from "@/types/tweet.type";
 
-interface HomePageProps {
-	tweets: Tweet[];
-}
+export default function PublicTimelinePage() {
+	const { data, isLoading } = useGetPublicTimeline();
 
-export default function PublicTimelinePage({ tweets }: HomePageProps) {
 	return (
 		<DefaultLayout>
 			<div className="mt-4">
 				<h1>Public timeline</h1>
-				<TweetContainer tweets={tweets} />
+				{isLoading ? (
+					<Loading />
+				) : (
+					data?.tweets && <TweetContainer tweets={data.tweets} />
+				)}
 			</div>
 		</DefaultLayout>
 	);
-}
-
-export async function getServerSideProps() {
-	const messages = await getPublicTweets();
-
-	if (!messages.tweets) {
-		return {
-			props: {
-				tweets: [],
-			},
-		};
-	}
-
-	return {
-		props: {
-			tweets: messages.tweets,
-		},
-	};
 }

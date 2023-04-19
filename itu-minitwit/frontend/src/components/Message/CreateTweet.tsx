@@ -1,21 +1,23 @@
-import { postTweet } from "@/server/postTweet";
-import { useRouter } from "next/router";
+import { usePostTweet } from "@/hooks/usePostTweet";
+import { postTweetSchema } from "@/types/tweet.type";
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 
 export function CreateMessage() {
 	const [message, setMessage] = useState("");
-	const [cookies] = useCookies(["user_id"]);
 
+	const [userIdCookie] = useCookies(["user_id"]);
 	const [hasCookie, setHasCookie] = useState(false);
 
-	const router = useRouter();
+	const postTweetMutation = usePostTweet();
 
 	useEffect(() => {
-		if (cookies.user_id) {
+		if (userIdCookie.user_id) {
 			setHasCookie(true);
+		} else {
+			setHasCookie(false);
 		}
-	}, [cookies]);
+	}, [userIdCookie]);
 
 	if (!hasCookie) return <></>;
 
@@ -27,6 +29,7 @@ export function CreateMessage() {
 					<input
 						type="text"
 						value={message}
+						disabled={!hasCookie || postTweetMutation.isLoading}
 						onChange={(e) => setMessage(e.target.value)}
 						className="px-2 py-1 mr-2 rounded-md w-full border shadown-md"
 						placeholder="write here..."
@@ -45,20 +48,23 @@ export function CreateMessage() {
 	async function handleSubmit(e: any) {
 		e.preventDefault();
 
-		try {
-			if (!hasCookie) return;
+		if (!hasCookie) {
+			return alert("You need to be logged in to post a tweet");
+		}
 
-			await postTweet({
-				message,
-				userId: cookies.user_id,
+		const tweet = {
+			message,
+			userId: userIdCookie.user_id,
+		};
+
+		if (!postTweetSchema.parse(tweet)) {
+			return alert("Invalid tweet");
+		} else {
+			postTweetMutation.mutate(tweet, {
+				onSuccess: () => {
+					setMessage("");
+				},
 			});
-			setMessage("");
-			router.reload();
-		} catch (e) {
-			console.error("Error: ", e);
-		} finally {
-			setMessage("");
-			router.reload();
 		}
 	}
 }

@@ -76,6 +76,8 @@ func Start(mode string) {
 
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 
+
+
 	// endpoints
 	Router.GET("/metrics", gin.WrapH(promHandler))
 	Router.GET("/mytimeline", getTimeline, incrementCounter(m, "/mytimeline"))
@@ -89,7 +91,7 @@ func Start(mode string) {
 	Router.GET("/logout", logout, incrementCounter(m, "/logout"))
 	Router.GET("/AmIFollowing/:username", amIFollowing, incrementCounter(m, "/AmIFollowing/:username"))
 	Router.GET("/allUsers", getAllUsers, incrementCounter(m, "/allUsers"))
-	Router.GET("/AllIAmFollowing", getAllFollowing)
+	Router.GET("/AllIAmFollowing", getAllFollowing) // is this getting used? @TODO
 	Router.GET("/getUserNameById", GetUsernameByIDEndpoint, incrementCounter(m, "/getUserNameById"))
 	Router.POST("/flagTweet", flagTweet, incrementCounter(m, "/flagTweet"))
 
@@ -188,6 +190,8 @@ func amIFollowing(c *gin.Context) {
 
 func getTimeline(c *gin.Context) {
 	userID := getUserIdIfLoggedIn(c)
+
+	fmt.Println(userID)
 
 	var messages []models.Message
 	result := config.DB.Table("messages").
@@ -391,6 +395,9 @@ func login(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")
 
+	log.Println("username: " + username)
+	log.Println("password: " + password)
+
 	if username == "" || password == "" {
 		c.JSON(400, gin.H{"error": "username or password is empty"})
 		return
@@ -467,13 +474,12 @@ func getUserByName(userName string) *models.User {
 }
 
 func getUserIdIfLoggedIn(c *gin.Context) string {
-	userid, err := c.Cookie("user_id")
-	log.Println("cookie user_id: " + userid)
-	errorCheck(err)
-	if userid == "" || userid == "-1" {
-		return "-1"
-	}
-	return userid
+	authHeader := c.GetHeader("Authorization")
+
+	// if userid == "" || userid == "-1" {
+	// 	return "-1"
+	// }
+	return authHeader
 
 }
 

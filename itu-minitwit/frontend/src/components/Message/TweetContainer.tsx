@@ -2,7 +2,7 @@ import { Tweet as TweetType } from "@/types/tweet.type";
 import { Tweet } from "./Tweet";
 
 interface TweetContainerProps {
-	tweets?: TweetType[];
+	tweets?: TweetType[] | null;
 }
 
 export function TweetContainer({ tweets }: TweetContainerProps) {
