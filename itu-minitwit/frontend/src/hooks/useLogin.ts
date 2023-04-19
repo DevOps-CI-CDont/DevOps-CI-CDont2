@@ -13,6 +13,7 @@ export function useLogin() {
 				method: "POST",
 				body: formData,
 				redirect: "follow",
+				credentials: "include",
 			}).then((res) => res.json());
 		},
 	});

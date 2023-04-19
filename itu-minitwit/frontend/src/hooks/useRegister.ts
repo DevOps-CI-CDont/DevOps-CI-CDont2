@@ -26,6 +26,7 @@ export function useRegister() {
 				method: "POST",
 				body: formData,
 				redirect: "follow",
+				credentials: "include",
 			}).then((res) => res.json());
 		},
 	});

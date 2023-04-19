@@ -15,6 +15,7 @@ export function useFollow() {
 					method: "POST",
 					headers,
 					redirect: "follow",
+					credentials: "include",
 				}
 			);
 		},

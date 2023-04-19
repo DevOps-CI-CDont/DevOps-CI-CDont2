@@ -16,6 +16,7 @@ export function usePostTweet() {
 				body: formData,
 				headers,
 				redirect: "follow",
+				credentials: "include",
 			}).then((res) => res.json());
 		},
 		onSuccess: () => {
