@@ -10,7 +10,7 @@ export function useGetUsernameById(userId: string | number) {
 		if (!userId) return null;
 
 		return await makeFetch<GetUsernameByIdError | string>({
-			url: `/getUserNameById?id=${userId}`,
+			url: `getUserNameById?id=${userId}`,
 			method: "GET",
 		});
 	});
