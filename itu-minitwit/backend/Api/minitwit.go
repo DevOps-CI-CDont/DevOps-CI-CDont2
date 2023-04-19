@@ -76,8 +76,6 @@ func Start(mode string) {
 
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 
-
-
 	// endpoints
 	Router.GET("/metrics", gin.WrapH(promHandler))
 	Router.GET("/mytimeline", getTimeline, incrementCounter(m, "/mytimeline"))
@@ -208,6 +206,10 @@ func getTimeline(c *gin.Context) {
 		return
 	}
 
+	if len(messages) == 0 {
+		c.JSON(200, gin.H{"tweets": []models.Message{}})
+		return
+	}
 	c.JSON(200, gin.H{"tweets": messages})
 }
 
@@ -238,13 +240,12 @@ func getPublicTimeline(c *gin.Context) {
 		return
 	}
 
-	// if no messages, return 401
 	if len(messages) == 0 {
-		c.JSON(401, gin.H{"message": "no messages"})
+		c.JSON(200, gin.H{"tweets": []models.Message{}})
 		return
 	}
 
-	fmt.Println("messages", messages)
+	log.Println("messages", messages)
 
 	c.JSON(200, gin.H{"tweets": messages})
 }
