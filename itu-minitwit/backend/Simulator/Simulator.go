@@ -316,21 +316,15 @@ func msgsPerUser(c *gin.Context) {
 		form := url.Values{}
 		form.Add("text", body["content"])
 
-		//Create a new POST request with a cookie set named "user_id" with value "author_id"
 		req, err := http.NewRequest("POST", endpoint, strings.NewReader(form.Encode()))
-
-		cookie := &http.Cookie{
-			Name:  "user_id",
-			Value: author_id,
-		}
-		req.AddCookie(cookie)
-
 		if err != nil {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
 
+		req.Header.Set("Authorization", author_id)
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
 		//create client
 		client := &http.Client{}
 		//send request
@@ -387,19 +381,13 @@ func follow(c *gin.Context) {
 
 		url := api_base_url + "/user/" + follows_username + "/follow"
 
-		//Create a new POST request with a cookie set named "user_id" with value "user_id"
 		req, err := http.NewRequest("POST", url, nil)
 		if err != nil {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
 
-		cookie := &http.Cookie{ // this is the cookie that seems to work
-			Name:  "user_id",
-			Value: user_id,
-		}
-		req.AddCookie(cookie)
-
+		req.Header.Set("Authorization", user_id)
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 		//create client
@@ -430,19 +418,13 @@ func follow(c *gin.Context) {
 
 		url := api_base_url + "/user/" + unfollows_username + "/unfollow"
 
-		//Create a new POST request with a cookie set named "user_id" with value "user_id"
 		req, err := http.NewRequest("POST", url, strings.NewReader("user_id="+user_id))
 		if err != nil {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
 
-		cookie := &http.Cookie{ // this is the cookie that seems to work
-			Name:  "user_id",
-			Value: user_id,
-		}
-		req.AddCookie(cookie)
-
+		req.Header.Set("Authorization", user_id)
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 		//create client
@@ -467,18 +449,14 @@ func follow(c *gin.Context) {
 
 		url := api_base_url + "/AllIAmFollowing" + "?num_followers=" + num_followers_str
 
-		//Create a get request with cookie set named "user_id" with value "user_id"
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			c.JSON(400, gin.H{"error_msg": err.Error()})
 			return
 		}
+
+		req.Header.Set("Authorization", user_id)
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		cookie := &http.Cookie{ // this is the cookie that seems to work
-			Name:  "user_id",
-			Value: user_id,
-		}
-		req.AddCookie(cookie)
 
 		//create client
 		client := &http.Client{}

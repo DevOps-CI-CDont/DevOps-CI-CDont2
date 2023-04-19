@@ -201,18 +201,14 @@ func postHelper(endpoint string, t *testing.T, expected int, name string, data u
 func TestTimelines(t *testing.T) {
 	// public & user timeline
 	endpoint := base + "/public"
-	getHelper(endpoint, t, 200, "Public Timeline") // no tweets -> 401
+	getHelper(endpoint, t, 200, "Public Timeline")
 
 	// personal timeline: needs authentication
 	req, err := http.NewRequest("GET", base+"/mytimeline", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	cookie := &http.Cookie{
-		Name:  "user_id",
-		Value: "1",
-	}
-	req.AddCookie(cookie)
+	req.Header.Set("Authorization", "1")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	//create client
 	client := &http.Client{}
