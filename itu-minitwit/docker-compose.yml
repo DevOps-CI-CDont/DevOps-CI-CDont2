@@ -80,6 +80,10 @@ services:
           
   nginx: 
     image: nginx
+    depends_on:
+      - kibana
+      - filebeat
+      - elasticsearch
     ports:
       - 9200:9200
       - 5601:5601
