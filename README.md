@@ -16,3 +16,7 @@ DNS via DigitalOcean
 note: droplet currently redirects traffic on port 80 (http) to port 3000 (frontend)
 if we want to update iptables firewall rules:
 <https://www.digitalocean.com/community/tutorials/how-to-migrate-iptables-firewall-rules-to-a-new-server#save-rules>
+
+## Link to static analysis
+https://codeclimate.com/github/DevOps-CI-CDont/DevOps-CI-CDont
+https://sonarcloud.io/project/overview?id=DevOps-CI-CDont_DevOps-CI-CDont2
