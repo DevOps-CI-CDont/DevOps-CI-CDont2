@@ -65,3 +65,14 @@ jobs:
         run: |
           docker run -e DB_HOST=$DB_HOST -e DB_PORT=$DB_PORT -e DB_TEST_NAME=$DB_TEST_NAME -e DB_USER=$DB_USER -e DB_PASS=$DB_PASS --detach -p 8080:8080 -p 8081:8081 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           (cd itu-minitwit/backend/test && go test -v ./...)
+  EsLint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: npx eslint --ext .js,.jsx .
