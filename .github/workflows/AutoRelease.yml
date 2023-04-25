@@ -1,14 +1,13 @@
----
-name: "Auto_release"
+name: "pre-release"
 
 on:
   push:
     branches:
-      - "main"
+      - "master"
 
 jobs:
   pre-release:
-    name: "Release"
+    name: "Pre Release"
     runs-on: "ubuntu-latest"
 
     steps:
@@ -21,8 +20,8 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
-          prerelease: false
-          title: "Automatic release"
+          prerelease: true
+          title: "Development Build"
           files: |
             LICENSE.txt
             *.jar
