@@ -93,10 +93,6 @@ services:
       - frontend
       - backend
     ports:
-      - 9200:9200
-      - 5601:5601
-      - 8881:8881
-      - 8882:8882
       - 80:80
     networks:
       - elk 
