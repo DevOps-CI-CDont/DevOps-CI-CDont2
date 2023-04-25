@@ -5,4 +5,4 @@ We provide no uptime guarantee, but we will try to keep the application up and r
 
 ## price
 
-8$ per request, paid in dogecoin (_more value than twitter blue!_)
+8$ per request, paid in dogecoin (_more value than twitter blue_)
