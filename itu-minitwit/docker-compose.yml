@@ -14,15 +14,19 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://138.68.93.147:8080
+    networks:
+        - elk
   backend:
     image: registry.digitalocean.com/cicdont-images/backend
-    container_name: api
+    container_name: backend
     restart: always
     ports:
       - "8080:8080"
       - "8081:8081"
     env_file:
       - ./backend/.env
+    networks:
+        - elk
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
@@ -34,6 +38,8 @@ services:
   prometheus:
     image: prom/prometheus
     container_name: prometheus
+    networks:
+        - elk
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -44,6 +50,8 @@ services:
     image: grafana/grafana:9.3.0
     ports:
       - "4000:3000"
+    networks:
+        - elk
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
     volumes:
@@ -84,13 +92,14 @@ services:
       - kibana
       - filebeat
       - elasticsearch
+      - prometheus
+      - grafana
+      - frontend
+      - backend
     ports:
-      - 9200:9200
-      - 5601:5601
-      - 8881:8881
-      - 8882:8882
+      - 80:80
     networks:
-      - elk
+      - elk 
     volumes:
       - type: bind
         source: ${ELK_DIR}/nginx.conf
