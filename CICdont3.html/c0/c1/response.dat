@@ -1,0 +1,9 @@
+HTTP/1.1 308 Permanent Redirect
+Location: /cicdont.live
+Refresh: 0;url=/cicdont.live
+Date: Wed, 29 Mar 2023 15:08:19 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+/cicdont.live

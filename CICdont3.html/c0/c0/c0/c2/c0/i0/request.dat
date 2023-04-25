@@ -1,0 +1,8 @@
+GET /_next/static/css/bd5a00752dea42bb.css HTTP/1.1
+Host: cicdont.live
+Accept-Encoding: gzip
+Connection: keep-alive
+User-Agent: Mozilla/5.0 SF/2.10b
+Range: bytes=0-399999
+Referer: http://cicdont.live/
+

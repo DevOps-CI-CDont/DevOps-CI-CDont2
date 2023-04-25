@@ -1,0 +1,9 @@
+HTTP/1.1 308 Permanent Redirect
+Location: /_next/static/chunks/polyfills-c67a75d1b6f99dc8.js/'/"
+Refresh: 0;url=/_next/static/chunks/polyfills-c67a75d1b6f99dc8.js/'/"
+Date: Wed, 29 Mar 2023 15:08:25 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Content-Length: 54
+
+/_next/static/chunks/polyfills-c67a75d1b6f99dc8.js/'/"

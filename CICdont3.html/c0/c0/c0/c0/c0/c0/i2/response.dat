@@ -1,0 +1,9 @@
+HTTP/1.1 308 Permanent Redirect
+Location: /_next/static/chunks/pages/_app-3e512b57cf2b63bb.js/'/"
+Refresh: 0;url=/_next/static/chunks/pages/_app-3e512b57cf2b63bb.js/'/"
+Date: Wed, 29 Mar 2023 15:08:26 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Content-Length: 55
+
+/_next/static/chunks/pages/_app-3e512b57cf2b63bb.js/'/"lidate

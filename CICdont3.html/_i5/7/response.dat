@@ -1,0 +1,9 @@
+HTTP/1.1 308 Permanent Redirect
+Location: /_next/static/chunks/framework-2c79e2a64abdb08b.js/'/"
+Refresh: 0;url=/_next/static/chunks/framework-2c79e2a64abdb08b.js/'/"
+Date: Wed, 29 Mar 2023 15:08:22 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Content-Length: 54
+
+/_next/static/chunks/framework-2c79e2a64abdb08b.js/'/"alidate

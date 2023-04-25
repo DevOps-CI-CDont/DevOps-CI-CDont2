@@ -1,0 +1,9 @@
+HTTP/1.1 308 Permanent Redirect
+Location: /_next/static/cO_FbQjKKiNhlmcyV4QJt/_ssgManifest.js/'/"
+Refresh: 0;url=/_next/static/cO_FbQjKKiNhlmcyV4QJt/_ssgManifest.js/'/"
+Date: Wed, 29 Mar 2023 15:08:28 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Content-Length: 55
+
+/_next/static/cO_FbQjKKiNhlmcyV4QJt/_ssgManifest.js/'/"lidate
