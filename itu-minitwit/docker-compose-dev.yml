@@ -27,7 +27,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile-test
     image: cicdont-images/backend
-    container_name: api-dev
+    container_name: backend
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -46,6 +46,8 @@ services:
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"
+    networks:
+        - elk
   
   grafana:
     image: grafana/grafana:9.3.0
@@ -57,6 +59,8 @@ services:
       - ./grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
       - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
       - ./grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - elk
 
   elasticsearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch:7.2.0"
