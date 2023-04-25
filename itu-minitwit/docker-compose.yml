@@ -14,6 +14,8 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://138.68.93.147:8080
+    networks:
+        - elk
   backend:
     image: registry.digitalocean.com/cicdont-images/backend
     container_name: api
@@ -23,6 +25,8 @@ services:
       - "8081:8081"
     env_file:
       - ./backend/.env
+    networks:
+        - elk
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
@@ -84,6 +88,10 @@ services:
       - kibana
       - filebeat
       - elasticsearch
+      - prometheus
+      - grafana
+      - frontend
+      - backend
     ports:
       - 9200:9200
       - 5601:5601

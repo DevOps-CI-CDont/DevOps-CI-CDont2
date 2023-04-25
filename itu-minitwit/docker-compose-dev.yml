@@ -20,6 +20,8 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - NEXT_PUBLIC_API_URL=http://host.docker.internal:8080
+    networks:
+        - elk
   backend-dev:
     build:
       context: ./backend
@@ -33,6 +35,8 @@ services:
       - ./backend/.env
     command:
       - test
+    networks:
+        - elk
   
   prometheus:
     image: prom/prometheus
@@ -83,11 +87,20 @@ services:
           
   nginx: 
     image: nginx
+    depends_on:
+      - kibana
+      - filebeat
+      - elasticsearch
+      - prometheus
+      - grafana
+      - frontend-dev
+      - backend-dev
     ports:
       - 9200:9200
       - 5601:5601
       - 8881:8881
       - 8882:8882
+      - 80:80
     networks:
       - elk
     volumes:
