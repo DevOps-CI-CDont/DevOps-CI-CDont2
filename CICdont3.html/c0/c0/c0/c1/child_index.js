@@ -1,0 +1,4 @@
+var child = [
+  { 'dupe': false, 'type': 8, 'name': '_buildManifest.js', 'dir': 'c0', 'linked': 2, 'url': 'http://cicdont.live/_next/static/cO_FbQjKKiNhlmcyV4QJt/_buildManifest.js', 'fetched': true, 'code': 200, 'len': 714, 'decl_mime': 'application/javascript', 'sniff_mime': 'application/javascript', 'cset': 'UTF-8', 'missing': false, 'csens': false, 'child_cnt': 0, 'issue_cnt': [ 2, 0, 0, 0, 0 ], 'sig': 0xd6bfd338 },
+  { 'dupe': false, 'type': 8, 'name': '_ssgManifest.js', 'dir': 'c1', 'linked': 2, 'url': 'http://cicdont.live/_next/static/cO_FbQjKKiNhlmcyV4QJt/_ssgManifest.js', 'fetched': true, 'code': 200, 'len': 77, 'decl_mime': 'application/javascript', 'sniff_mime': 'application/javascript', 'cset': 'UTF-8', 'missing': false, 'csens': false, 'child_cnt': 0, 'issue_cnt': [ 2, 0, 0, 0, 0 ], 'sig': 0xd6bfd338 }
+];

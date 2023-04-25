@@ -1,0 +1,9 @@
+HTTP/1.1 308 Permanent Redirect
+Location: http:/cicdont.live/_next/static/cO_FbQjKKiNhlmcyV4QJt/
+Refresh: 0;url=http:/cicdont.live/_next/static/cO_FbQjKKiNhlmcyV4QJt/
+Date: Wed, 29 Mar 2023 15:08:27 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Content-Length: 54
+
+http:/cicdont.live/_next/static/cO_FbQjKKiNhlmcyV4QJt/

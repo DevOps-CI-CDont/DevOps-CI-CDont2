@@ -1,0 +1,5 @@
+var child = [
+  { 'dupe': false, 'type': 4, 'name': 'chunks', 'dir': 'c0', 'linked': 2, 'url': 'http://cicdont.live/_next/static/chunks/', 'fetched': true, 'code': 308, 'len': 20, 'decl_mime': '[none]', 'sniff_mime': 'text/plain', 'cset': '[none]', 'missing': false, 'csens': false, 'child_cnt': 7, 'issue_cnt': [ 22, 4, 0, 1, 0 ], 'sig': 0x86ba8313 },
+  { 'dupe': false, 'type': 4, 'name': 'cO_FbQjKKiNhlmcyV4QJt', 'dir': 'c1', 'linked': 2, 'url': 'http://cicdont.live/_next/static/cO_FbQjKKiNhlmcyV4QJt/', 'fetched': true, 'code': 308, 'len': 35, 'decl_mime': '[none]', 'sniff_mime': 'text/plain', 'cset': '[none]', 'missing': false, 'csens': true, 'child_cnt': 2, 'issue_cnt': [ 7, 2, 0, 1, 0 ], 'sig': 0x6951dd08 },
+  { 'dupe': false, 'type': 4, 'name': 'css', 'dir': 'c2', 'linked': 2, 'url': 'http://cicdont.live/_next/static/css/', 'fetched': true, 'code': 308, 'len': 17, 'decl_mime': '[none]', 'sniff_mime': 'text/plain', 'cset': '[none]', 'missing': false, 'csens': true, 'child_cnt': 1, 'issue_cnt': [ 5, 2, 0, 0, 0 ], 'sig': 0x4a51be0f }
+];
