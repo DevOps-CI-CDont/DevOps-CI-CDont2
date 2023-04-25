@@ -18,7 +18,7 @@ services:
         - elk
   backend:
     image: registry.digitalocean.com/cicdont-images/backend
-    container_name: api
+    container_name: backend
     restart: always
     ports:
       - "8080:8080"
