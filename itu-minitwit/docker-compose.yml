@@ -38,6 +38,8 @@ services:
   prometheus:
     image: prom/prometheus
     container_name: prometheus
+    networks:
+        - elk
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -48,6 +50,8 @@ services:
     image: grafana/grafana:9.3.0
     ports:
       - "4000:3000"
+    networks:
+        - elk
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
     volumes:
