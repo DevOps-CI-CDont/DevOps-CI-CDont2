@@ -78,7 +78,11 @@ jobs:
         npm ci
 
     - name: Run tsc
-      run: npm run tsc
+      run: |
+        cd itu-minitwit/frontend
+        npm run tsc
     
     - name: run eslint
-      run: npm run lint:strict
+      run: |
+        cd itu-minitwit/frontend
+        npm run lint:strict
