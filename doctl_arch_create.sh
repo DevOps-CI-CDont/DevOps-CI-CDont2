@@ -1,7 +1,16 @@
 #!/bin/bash
-# fingerprints
+
+if doctl compute droplet list --format "Name" | grep "manager1"; then
+    echo "Error: Droplet with name manager1 already exists."
+    exit 1
+fi
+
+# define fingerprints
 ssh_key_fingerprints="ea:e6:b9:88:5a:8f:d6:4b:c7:03:06:c2:fd:aa:ca:a8,3d:83:40:84:6a:ee:3b:e4:da:e6:b8:c9:1e:4f:24:e5,58:15:a0:48:24:47:dc:79:af:80:1b:f9:e3:0e:ff:67,cd:82:77:0a:e5:c3:b4:b2:06:91:30:b6:b3:60:f0:76"
 echo "ssh_key_fingerprints: $ssh_key_fingerprints"
+
+# read path to a .env file
+read -p "Enter path to a .env file: " env_file_path
 
 # create droplets
 echo "creating droplets"
@@ -23,6 +32,8 @@ echo "docker engine installed on worker1"
 echo "trying to install docker engine on worker2"
 doctl compute ssh worker2 --ssh-command "sudo snap install docker"
 echo "docker engine installed on worker2"
+
+# transfer .env file to manager1
 
 # get docker compose file on manager 1
 echo "trying to get docker compose file on manager1"
