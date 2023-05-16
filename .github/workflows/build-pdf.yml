@@ -16,8 +16,14 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up TeX Live environment
-        uses: docker://texlive/texlive:latest
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update
+          sudo apt-get install texlive-full -y
+
+      - name: Set PATH for TeX Live
+        run: |
+          echo "::add-path::/usr/local/texlive/2023/bin/x86_64-linux"
 
       - name: Build PDF
         run: |
