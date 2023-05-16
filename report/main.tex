@@ -1,9 +1,10 @@
-\input{./other/packages}
-\input{./other/config}
+\newcommand*{\MyPath}{../report}%
+\input{\MyPath/other/packages}
+\input{\MyPath/other/config}
 
 \begin{document}
 
-\input{./sections/frontpage}\newpage
+\input{\MyPath/sections/frontpage}\newpage
 
 \tableofcontents\newpage
 
@@ -13,15 +14,15 @@
 \fancyhead[RO]{\titleOfPaper \hspace{1.5em} \thepage}
 \pagestyle{fancy}
 
-\input{./sections/system_perspective}\newpage
+\input{\MyPath/sections/system_perspective}\newpage
 
-\input{./sections/process_perspective}\newpage
+\input{\MyPath/sections/process_perspective}\newpage
 
-\input{./sections/lessons_learned_perspective}\newpage
+\input{\MyPath/sections/lessons_learned_perspective}\newpage
 
 
-\input{./sections/references} \newpage
-\input{./sections/appendix}
+\input{\MyPath/sections/references} \newpage
+\input{\MyPath/sections/appendix}
 
 
 \end{document}
