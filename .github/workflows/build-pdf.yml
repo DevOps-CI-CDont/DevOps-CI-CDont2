@@ -21,14 +21,14 @@ jobs:
         with:
           package-file: 
             report/packages.txt
-            
+
       - name: Check `tlmgr` version
         run: tlmgr --version
 
       - name: Build PDF
         run: |
           cd report
-          pdflatex -interaction=nonstopmode main.tex
+          pdftex /report/main.tex 
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v2
