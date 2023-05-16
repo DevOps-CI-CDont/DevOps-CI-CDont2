@@ -9,26 +9,18 @@ on:
       - main
 
 jobs:
-  build:
+  tex-to-pdf:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Setup TeX Live
-        uses: teatimeguest/setup-texlive-action@v2
+      - name: Convert to pdf
+        id: convert-to-pdf
+        uses: closoco/pdflatex-action@v1.1.0
         with:
-          package-file: 
-            report/packages.txt
-
-      - name: Check `tlmgr` version
-        run: tlmgr --version
-
-      - name: Build PDF
-        run: |
-          cd report
-          pdftex /report/main.tex 
+          texFile: ./report/main.tex
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v2
