@@ -1,0 +1,27 @@
+\input{other/packages}
+\input{other/config}
+
+\begin{document}
+
+\input{sections/frontpage}\newpage
+
+\tableofcontents\newpage
+
+\fancyhf{}
+\renewcommand\headrulewidth{1pt}
+\fancyhead[LE]{\thepage \hspace{1.5em} \authorOfPaper}
+\fancyhead[RO]{\titleOfPaper \hspace{1.5em} \thepage}
+\pagestyle{fancy}
+
+\input{sections/system_perspective}\newpage
+
+\input{sections/process_perspective}\newpage
+
+\input{sections/lesson_learned_perspective}\newpage
+
+
+\input{sections/references} \newpage
+\input{sections/appendix}
+
+
+\end{document}
