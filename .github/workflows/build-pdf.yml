@@ -1,0 +1,31 @@
+name: Build LaTeX PDF
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up LaTeX
+        uses: dante-ev/setup-texlive@v1
+
+      - name: Build PDF
+        run: |
+          cd report
+          pdflatex -interaction=nonstopmode main.tex
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: report-pdf
+          path: report/main.pdf
