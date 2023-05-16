@@ -2,8 +2,12 @@ name: Continuous Integration
 
 on:
   push:
+    paths-ignore:
+      - 'report/**'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'report/**'
 
 jobs:
   build_and_push_api_test_image:
