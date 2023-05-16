@@ -9,18 +9,30 @@ on:
       - main
 
 jobs:
-  tex-to-pdf:
+  pdf-to-tex:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Convert to pdf
-        id: convert-to-pdf
-        uses: closoco/pdflatex-action@v1.1.0
-        with:
-          texFile: ./report/main.tex
+      - name: install texlive
+        run: sudo apt-get install texlive
+    
+      - name: install texinfo
+        run: sudo apt-get install texinfo
+
+      - name: install texlive-fonts-recommended 
+        run: sudo apt-get install texlive-fonts-recommended
+
+      - name: install texlive-fonts-extra
+        run: sudo apt-get install texlive-fonts-extra
+    
+      - name: install texlive-latex-extra
+        run: sudo apt-get install texlive-latex-extra
+
+      - name: Build PDF
+        run: pdflatex /report/main.tex 
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v2
