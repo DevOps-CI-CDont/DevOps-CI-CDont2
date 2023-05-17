@@ -1,12 +1,12 @@
 #!/bin/bash
-
 if doctl compute droplet list --format "Name" | grep "manager1"; then
     echo "Error: Droplet with name manager1 already exists."
     exit 1
 fi
 
+
 # define fingerprints
-ssh_key_fingerprints="ea:e6:b9:88:5a:8f:d6:4b:c7:03:06:c2:fd:aa:ca:a8,3d:83:40:84:6a:ee:3b:e4:da:e6:b8:c9:1e:4f:24:e5,58:15:a0:48:24:47:dc:79:af:80:1b:f9:e3:0e:ff:67,cd:82:77:0a:e5:c3:b4:b2:06:91:30:b6:b3:60:f0:76"
+ssh_key_fingerprints="ea:e6:b9:88:5a:8f:d6:4b:c7:03:06:c2:fd:aa:ca:a8,3d:83:40:84:6a:ee:3b:e4:da:e6:b8:c9:1e:4f:24:e5,58:15:a0:48:24:47:dc:79:af:80:1b:f9:e3:0e:ff:67,cd:82:77:0a:e5:c3:b4:b2:06:91:30:b6:b3:60:f0:76,ee:36:4b:17:af:40:f4:0c:00:8e:bf:a9:46:ab:df:e4"
 echo "ssh_key_fingerprints: $ssh_key_fingerprints"
 
 env_file_path="itu-minitwit/backend/.env"
@@ -89,9 +89,6 @@ echo "worker2_token: $worker2_token"
 
 echo "installing doctl on droplet"
 doctl compute ssh manager1 --ssh-command "sudo snap install doctl"
-# swap to root on manager 1
-echo "swapping to root on manager1"
-doctl compute ssh manager1 --ssh-command "sudo -i"
 echo "manager1 doctl auth init with token"
 doctl compute ssh manager1 --ssh-command "sudo doctl auth init -t $manager_token"
 echo "manager1 doctl registry login"
@@ -104,4 +101,3 @@ doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com
 echo "docker compose up on manager1"
 doctl compute ssh manager1 --ssh-command "cd DevOps-CI-CDont/itu-minitwit\
 && docker compose up"
-
