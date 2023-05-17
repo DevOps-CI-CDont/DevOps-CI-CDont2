@@ -1,0 +1,48 @@
+name: Docker Image CD
+
+on:
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types: ["completed"]
+    branches:
+      - main
+
+
+jobs:
+  build-tag-push-images:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image for frontend
+        run: docker build --build-arg NEXT_PUBLIC_API_URL=http://138.68.93.147:8080 -t frontend ./itu-minitwit/frontend 
+
+      - uses: actions/checkout@v3
+      - name: Build the Docker image for backend
+        run: | 
+          export DB_HOST=${{ secrets.DB_HOST }}
+          export DB_PORT=${{ secrets.DB_PORT }}
+          export DB_NAME=${{ secrets.DB_NAME }}
+          export DB_USERNAME=${{ secrets.DB_USER }}
+          export DB_PASSWORD=${{ secrets.DB_PASS }}
+          export FLAG_AUTH=${{ secrets.FLAG_AUTH }}
+          docker build --build-arg DB_HOST --build-arg DB_PORT --build-arg DB_NAME --build-arg DB_USERNAME --build-arg DB_PASSWORD --build-arg FLAG_AUTH -t backend ./itu-minitwit/backend
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITAL_OCEAN_REGISTRY }}
+          
+      - name: doctl registry login
+        run: doctl registry login
+        
+      - name: Tag and push frontend Docker image to DigitalOcean Container Registry
+        run: |
+          docker tag frontend:latest registry.digitalocean.com/cicdont-images/frontend:latest
+          docker push registry.digitalocean.com/cicdont-images/frontend:latest
+          
+      - name: Tag and push backend Docker image to DigitalOcean Container Registry
+        run: |
+          docker tag backend:latest registry.digitalocean.com/cicdont-images/backend:latest
+          docker push registry.digitalocean.com/cicdont-images/backend:latest
+      

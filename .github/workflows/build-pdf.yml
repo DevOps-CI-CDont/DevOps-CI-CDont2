@@ -1,0 +1,40 @@
+name: Build LaTeX PDF
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pdf-to-tex:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update
+          sudo apt-get install texlive-full -y
+
+      - name: Set PATH for TeX Live
+        run: |
+          echo "::add-path::/usr/local/texlive/2023/bin/x86_64-linux"
+
+      - name: Build PDF
+        run: |
+          cd report
+          pdflatex -interaction=nonstopmode main.tex
+          biber main
+          pdflatex -interaction=nonstopmode main.tex
+          pdflatex -interaction=nonstopmode main.tex
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: report-pdf
+          path: report/main.pdf

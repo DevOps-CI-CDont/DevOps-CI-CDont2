@@ -1,0 +1,14 @@
+HTTP/1.1 200 Partial Content
+Cache-Control: public, max-age=31536000, immutable
+Accept-Ranges: bytes
+Last-Modified: Wed, 29 Mar 2023 12:45:06 GMT
+ETag: W/"4d-1872d668450"
+Content-Type: application/javascript; charset=UTF-8
+Content-Range: bytes 0-76/77
+Content-Length: 77
+Vary: Accept-Encoding
+Date: Wed, 29 Mar 2023 15:08:27 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+self.__SSG_MANIFEST=new Set,self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB();

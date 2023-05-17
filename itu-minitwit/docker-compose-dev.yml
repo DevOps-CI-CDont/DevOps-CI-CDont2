@@ -1,0 +1,121 @@
+# remember to run "docker build -t cicdont/frontend ." and
+# "docker build -t cicdont/backend ." in root directories minitwit-front 
+# and minitwit-backend, respectively, before running this file with command
+# "docker-compose up"
+networks:
+    elk:
+
+services:
+
+  frontend-dev:
+    build:
+      context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_URL=http://host.docker.internal:8080
+    image: cicdont-images/frontend
+    container_name: frontend-dev
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://host.docker.internal:8080
+    networks:
+        - elk
+  backend-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile-test
+    image: cicdont-images/backend
+    container_name: backend
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    env_file:
+      - ./backend/.env
+    command:
+      - test
+    networks:
+        - elk
+  
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+        - elk
+  
+  grafana:
+    image: grafana/grafana:9.3.0
+    ports:
+      - "4000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    volumes:
+      - ./grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - elk
+
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.2.0"
+    environment:
+        - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+        - "discovery.type=single-node"
+    volumes:
+        - elk_elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+        - elk
+
+  kibana:
+    image: "docker.elastic.co/kibana/kibana:7.2.0"
+    environment:
+        elasticsearch.hosts: '["http://elasticsearch:9200"]'
+    networks:
+        - elk
+
+  filebeat:
+    image: "docker.elastic.co/beats/filebeat:7.2.0"
+    user: root
+    volumes:
+        - ${ELK_DIR}/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+        - /var/lib/docker:/var/lib/docker:ro
+        - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+        - elk
+          
+  nginx: 
+    image: nginx
+    depends_on:
+      - kibana
+      - filebeat
+      - elasticsearch
+      - prometheus
+      - grafana
+      - frontend-dev
+      - backend-dev
+    ports:
+      - 9200:9200
+      - 5601:5601
+      - 8881:8881
+      - 8882:8882
+      - 80:80
+    networks:
+      - elk
+    volumes:
+      - type: bind
+        source: ${ELK_DIR}/nginx.conf
+        target: /etc/nginx/nginx.conf
+      - type: bind
+        source: ${ELK_DIR}/.htpasswd
+        target: /etc/nginx/.htpasswd
+
+volumes:
+  elk_elasticsearch_data:
+  prometheus_data: {}
+  grafana:

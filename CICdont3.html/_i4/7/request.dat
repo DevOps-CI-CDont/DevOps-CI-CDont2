@@ -1,0 +1,9 @@
+GET /_next/static/chunks/framework-2c79e2a64abdb08b.js/\'\" HTTP/1.1
+Host: cicdont.live
+Accept-Encoding: gzip
+Connection: keep-alive
+Range: bytes=0-399999
+User-Agent: sfish\'\"
+Referer: sfish\'\"
+Accept-Language: sfish\'\",en
+

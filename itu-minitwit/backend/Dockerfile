@@ -1,0 +1,35 @@
+FROM golang:1.20 AS builder
+
+ARG DB_HOST
+ARG DB_PORT
+ARG DB_NAME
+ARG DB_TEST_NAME
+ARG DB_USER
+ARG DB_PASSWORD
+ARG FLAG_AUTH
+
+
+WORKDIR /user/src/app
+
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+COPY . .
+
+WORKDIR /user/src/app
+RUN go build -v -o /usr/local/bin/app ./Main
+
+EXPOSE 8080
+EXPOSE 8081
+
+ENV PORT 8080
+ENV API_BASE_URL http://138.68.93.147:8080
+ENV DB_HOST $DB_HOST
+ENV DB_PORT $DB_PORT
+ENV DB_NAME $DB_NAME
+ENV DB_TEST_NAME $DB_TEST_NAME
+ENV DB_USER $DB_USER
+ENV DB_PASS $DB_PASS
+ENV FLAG_AUTH $FLAG_AUTH
+
+ENTRYPOINT [ "app" ]

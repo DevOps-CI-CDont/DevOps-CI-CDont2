@@ -1,0 +1,9 @@
+HTTP/1.1 308 Permanent Redirect
+Location: /_next/static/chunks
+Refresh: 0;url=/_next/static/chunks
+Date: Wed, 29 Mar 2023 15:08:20 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+/_next/static/chunks
