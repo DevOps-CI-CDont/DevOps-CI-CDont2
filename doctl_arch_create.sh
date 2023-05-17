@@ -68,15 +68,7 @@ for ip in $manager1_ip $wanky $worker2_ip; do
 done
 
 # install docker engine on droplets
-echo "trying to install docker engine on manager1"
-doctl compute ssh manager1 --ssh-command "sudo snap install docker"
-echo "docker engine installed on manager1"
-echo "trying to install docker engine on worker1"
-doctl compute ssh worker1 --ssh-command "sudo snap install docker"
-echo "docker engine installed on worker1"
-echo "trying to install docker engine on worker2"
-doctl compute ssh worker2 --ssh-command "sudo snap install docker"
-echo "docker engine installed on worker2"
+doctl compute ssh manager1 --ssh-command "curl -fsSL https://get.docker.com -o get-docker.sh"
 
 # get tokens from .env file
 echo "trying to get tokens from .env file"
@@ -90,14 +82,19 @@ echo "worker2_token: $worker2_token"
 echo "installing doctl on droplet"
 doctl compute ssh manager1 --ssh-command "sudo snap install doctl"
 echo "manager1 doctl auth init with token"
+doctl compute ssh manager1 --ssh-command "sudo mkdir /root/.config"
+doctl compute ssh manager1 --ssh-command "sudo snap connect doctl:dot-docker"
 doctl compute ssh manager1 --ssh-command "sudo doctl auth init -t $manager_token"
 echo "manager1 doctl registry login"
 doctl compute ssh manager1 --ssh-command "sudo doctl registry login"
 
 # get docker compose file on manager 1
 echo "trying to get docker compose file on manager1"
-doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/main/itu-minitwit/docker-compose.yml --output ./docker-compose.yml "
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/docker-compose-manager.yml --output ./docker-compose.yml "
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/nginx.conf --output /nginx.conf"
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/.htpasswd --output /.htpasswd"
 
 echo "docker compose up on manager1"
-doctl compute ssh manager1 --ssh-command "cd DevOps-CI-CDont/itu-minitwit\
-&& docker compose up"
+doctl compute ssh manager1 --ssh-command "sh get-docker.sh"
+scp $env_file_path root@$manager1_ip:./.env
+doctl compute ssh manager1 --ssh-command "docker compose up"

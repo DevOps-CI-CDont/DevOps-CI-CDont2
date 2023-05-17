@@ -89,7 +89,7 @@ services:
       - elk
     volumes:
       - type: bind
-        source: ${ELK_DIR}/nginx.conf
+        source: ./nginx.conf
         target: /etc/nginx/nginx.conf
       - type: bind
         source: ${ELK_DIR}/.htpasswd
