@@ -33,7 +33,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.docker/config.json:/config.json
-    command: --interval 60 # seconds between checks
+    command: --interval 60 --run-once # seconds between checks
   
   prometheus:
     image: prom/prometheus
