@@ -34,7 +34,7 @@ export function Register() {
 					},
 					{
 						onSuccess: (mutationResp) => {
-							if (mutationResp?.user_id && mutationResp?.user_id) {
+							if (mutationResp?.user_id) {
 								setUserIdCookie("user_id", mutationResp?.user_id);
 								setUserIdStore(mutationResp?.user_id);
 							}
