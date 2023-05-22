@@ -39,7 +39,23 @@ Later in the project, we developed a dedicated branching strategy, following the
 We used Github's built-in issue tracking system, eventually also using those issues inside a Kanban-like board via a Github "Project" for the Github organization we had. At the end, we had 4 columns in the board (Todo, In Progress, Done and Unprioritized). Unprioritized recommended all the tasks that we found would be realistic tasks for the project if it were to continue, that weren't prioritized for the course. 
 \subsection{Monitoring}
 % How do you monitor your systems and what precisely do you monitor?
-Prometheus \& Grafana ... \\
+For our monitoring setup we utilize Prometheus \& Grafana. A Prometheus container scrapes our backend api for metrics on a fixed time interval, and the metrics are visualised by grafana which queries Prometheus. In Grafana we have a single main dashboard with two graphs, specifically graphs for memory usage (\%) and endpoint counter. \\
+
+For the endpoint counter we gather the metrics by the mean of a middleware, which gets executed after every request. We are using the gin framework in Go, so we are able to register it like so:
+
+\begin{lstlisting}[language=Go]
+...
+Router.GET("/metrics", gin.WrapH(promHandler))
+Router.GET("/mytimeline", getTimeline, incrementCounter(m, "/mytimeline"))
+Router.GET("/public", getPublicTimeline, incrementCounter(m, "/public"))
+...
+\end{lstlisting}
+
+The \textit{incrementCounter} function is just a helper function we created, which returns a "gin.Handlerfunc", which will count the appropiate endpoint once triggered e.g. "/mytimeline".\\
+
+For recording the memory usage, we simply have a goroutine in the background which records the current memory usage every 10 seconds. In the end Promtheus will scrape this information from the "/metrics" endpoint.\\
+
+
 DigitalOcean resource alerts and uptime (\url{http://cicdont.live/public})
 \subsection{Logging}
 % What do you log in your systems and how do you aggregate logs?
