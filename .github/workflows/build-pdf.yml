@@ -4,7 +4,7 @@ on:
     branches:
       main
     paths:
-      'report/main.tex'  # only run on changes to the main.tex file
+      'report/**'  # only run on changes to the main.tex file
 
 
 jobs:
