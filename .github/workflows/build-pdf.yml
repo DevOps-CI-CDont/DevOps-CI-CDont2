@@ -3,8 +3,9 @@ on:
   push:
     branches:
       main
-    paths-ignore:
-      'report/main.pdf'  # Prevent running the action when the pdf changes
+    paths:
+      'report/main.tex'  # only run on changes to the main.tex file
+
 
 jobs:
   generatepdf:
