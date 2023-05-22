@@ -2,7 +2,7 @@
 
 ## Frontend choice
 
-We choose Next.js as our frontend service, due to it's many build in features, such as:
+We chose Next.js as our frontend service, due to it's many build in features, such as:
 
 - Code splitting
 - Routing support
