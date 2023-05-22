@@ -57,4 +57,4 @@ jobs:
           git remote set-url origin git@github.com:DevOps-CI-CDont/DevOps-CI-CDont.git
           git add report/main.pdf
           git commit -m "Add generated PDF"
-          git push origin HEAD:report2 --follow-tags
+          git push origin HEAD:main --follow-tags
