@@ -3,8 +3,6 @@ on:
   push:
     branches:
       main
-    paths: #only run on changes to tex files
-      'report/**'
     paths-ignore:
       'report/build/MSc_group_d.pdf'
 
