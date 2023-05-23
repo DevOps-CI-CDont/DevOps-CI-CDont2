@@ -19,14 +19,14 @@ jobs:
       
       - name: Generate PDF
         run: |
-          docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data blang/latex:ctanfull latexmk -pdf -shell-escape -outdir=/data/report /data/report/main.tex
+          docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data blang/latex:ctanfull latexmk -pdf -shell-escape -outdir=/data/report/build /data/report/main.tex
 
       
       - name: Upload PDF
         uses: actions/upload-artifact@v3
         with:
-          name: report
-          path: ./report/build/MSc_group_d.pdf
+          name: MSc_group_d
+          path: ./report/build/main.pdf
 
   deploy_pdf:
     name: Deploy PDF
