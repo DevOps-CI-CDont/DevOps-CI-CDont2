@@ -21,24 +21,16 @@ fi
 echo "creating droplets"
 doctl compute droplet create --image ubuntu-22-10-x64 --size s-2vcpu-4gb-amd --region fra1 --enable-monitoring manager1 --ssh-keys "$ssh_key_fingerprints"
 
-# wait for droplets to be created
-echo "waiting 60 seconds for droplets to be created"
-sleep 10
-echo "50"
-sleep 10
-echo "40"
-sleep 10
-echo "30"
-sleep 10
-echo "20"
-sleep 10
-echo "10"
-sleep 10
-echo "Done waiting"
+check_doctl_command() {
+    doctl compute droplet get manager1 --format PublicIPv4 --no-header >/dev/null 2>&1
+}
 
-
-# get droplet IP addresses
-manager1_ip=$(doctl compute droplet get manager1 --format PublicIPv4 --no-header)
+# Loop to get the Manager1 IP until it succeeds and has length greater than 2
+while ! check_doctl_command || [[ ${#manager1_ip} -le 2 ]]; do
+    echo "waiting 5 more seconds to see if droplet is ready... "
+    sleep 5  # Wait for 5 seconds before retrying
+    manager1_ip=$(doctl compute droplet get manager1 --format PublicIPv4 --no-header)
+done
 
 # print IP addresses
 echo "Manager1 IP address: $manager1_ip"
@@ -81,13 +73,23 @@ doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com
 doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/nginx.conf --output ./nginx.conf"
 doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/filebeat.yml --output /filebeat.yml"
 doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/.htpasswd --output /.htpasswd"
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/prometheus.yml --output /prometheus.yml"
 
 echo "docker compose up on manager1"
 doctl compute ssh manager1 --ssh-command "sh get-docker.sh"
+# Function to check if the 'docker' command is recognized on the droplet
+check_docker_command() {
+    doctl compute ssh manager1 --ssh-command "docker version >/dev/null 2>&1"
+}
+# Check if the 'docker' command is recognized
+while ! check_docker_command; do
+    echo "Docker command not recognized. Rerunning the script..."
+    doctl compute ssh manager1 --ssh-command "sh get-docker.sh"
+done
 scp $env_file_path root@$manager1_ip:./.env
-doctl compute ssh manager1 --ssh-command "docker compose up"
+doctl compute ssh manager1 --ssh-command "docker compose up -d"
 doctl compute domain records create cicdont.live --record-type A --record-name @ --record-data $manager1_ip --record-ttl 1800
 doctl compute ssh manager1 --ssh-command "sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000"
 # install iptables persistent
-doctl compute ssh manager1 --ssh-command "sudo apt-get install iptables-persistent -y"
-doctl compute ssh manager1 --ssh-command "sudo netfilter-persistent save"
+doctl compute ssh manager1 --ssh-command "echo yes | sudo apt-get install iptables-persistent -y"
+doctl compute ssh manager1 --ssh-command "echo yes | sudo netfilter-persistent save -y"
