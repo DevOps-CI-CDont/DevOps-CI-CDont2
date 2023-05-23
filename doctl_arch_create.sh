@@ -35,6 +35,17 @@ done
 # print IP addresses
 echo "Manager1 IP address: $manager1_ip"
 
+#Create DNS records on digital ocean
+doctl compute domain records create cicdont.live --record-type A --record-name @ --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name elasticsearch --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name logs --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name grafana --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name api --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name simulator --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name prometheus --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name sla --record-data $manager1_ip --record-ttl 1800
+
+
 # add droplets to known hosts
 sleep 1
 ssh-keyscan -H $manager1_ip >> ~/.ssh/known_hosts
@@ -88,14 +99,6 @@ while ! check_docker_command; do
 done
 scp $env_file_path root@$manager1_ip:./.env
 doctl compute ssh manager1 --ssh-command "docker compose up -d"
-doctl compute domain records create cicdont.live --record-type A --record-name @ --record-data $manager1_ip --record-ttl 1800
-doctl compute domain records create cicdont.live --record-type A --record-name elasticsearch --record-data $manager1_ip --record-ttl 1800
-doctl compute domain records create cicdont.live --record-type A --record-name logs --record-data $manager1_ip --record-ttl 1800
-doctl compute domain records create cicdont.live --record-type A --record-name grafana --record-data $manager1_ip --record-ttl 1800
-doctl compute domain records create cicdont.live --record-type A --record-name api --record-data $manager1_ip --record-ttl 1800
-doctl compute domain records create cicdont.live --record-type A --record-name simulator --record-data $manager1_ip --record-ttl 1800
-doctl compute domain records create cicdont.live --record-type A --record-name prometheus --record-data $manager1_ip --record-ttl 1800
-doctl compute domain records create cicdont.live --record-type A --record-name sla --record-data $manager1_ip --record-ttl 1800
 
 doctl compute ssh manager1 --ssh-command "sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000"
 
