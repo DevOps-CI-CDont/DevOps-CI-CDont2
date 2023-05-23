@@ -2,7 +2,9 @@
 % SECTION PURPOSE: In essence it has to be clear how code or other artifacts come from idea into the running system and everything that happens on the way.
 
 \subsection{Developer interaction}
-
+In order to handle interactions in an effecient manner, the team met at every lecture and exercise session, where a plan was discussed on how to reach the goal of the following weeks exercises. This plan was then carried out between the developers. In order to work asynchronously, we also decided on using Discord as an online communication tool. The reason this was chosen, was due to the ease of creating a group chanel, where all members could write their topics and update, whilst also being able to join voice calls and share individuals screens. 
+\\
+Another choice we could have made was to use Microsoft Teams, as this is also how the course provides news and discussions. We opted not to use teams, as all members were more comfortable with Discord and had accounts.
 
 \subsection{Organization of team}\label{subsec:organization_of_team}
 The team handled both Agile processes, DevOps practices, Frontend and backend development, therefore a suitable name for the team would be a "Full-Stack DevOps Team". The team was not build by generalists, but rather specialists in the frontend and backend departments. As DevOps is the main intended learning outcome of the course, all team members were responsible for this practice.
@@ -39,32 +41,46 @@ Later in the project, we developed a dedicated branching strategy, following the
 We used Github's built-in issue tracking system, eventually also using those issues inside a Kanban-like board via a Github "Project" for the Github organization we had. At the end, we had 4 columns in the board (Todo, In Progress, Done and Unprioritized). Unprioritized recommended all the tasks that we found would be realistic tasks for the project if it were to continue, that weren't prioritized for the course. 
 \subsection{Monitoring}
 % How do you monitor your systems and what precisely do you monitor?
-For our monitoring setup we utilize Prometheus \& Grafana. A Prometheus container scrapes our backend api for metrics on a fixed time interval, and the metrics are visualised by grafana which queries Prometheus. In Grafana we have a single main dashboard with two graphs, specifically graphs for memory usage (\%) and endpoint counter. \\
-
-For the endpoint counter we gather the metrics by the mean of a middleware, which gets executed after every request. We are using the gin framework in Go, so we are able to register it like so:
-
-\begin{lstlisting}[language=Go]
+For our monitoring setup we utilize Prometheus \& Grafana. A Prometheus container scrapes our backend api for metrics on a fixed time interval, and the metrics are visualized by grafana which queries Prometheus. In Grafana we have a single main dashboard with two graphs, specifically graphs for memory usage (\%) and endpoint counter, which can be seen on \autoref{fig:grafana}.
+\\\\
+For the endpoint counter we gather the metrics using middleware, that gets executed after every request. As we are using the gin framework in Go, we are able to register it like so:
+\begin{verbatim}
 ...
 Router.GET("/metrics", gin.WrapH(promHandler))
 Router.GET("/mytimeline", getTimeline, incrementCounter(m, "/mytimeline"))
 Router.GET("/public", getPublicTimeline, incrementCounter(m, "/public"))
 ...
-\end{lstlisting}
+\end{verbatim}
+The \textit{incrementCounter} function is just a helper function we created, which returns a "gin.Handlerfunc", which will count the appropiate endpoint once triggered e.g. "/mytimeline".
+\\\\
+For recording the memory usage, we simply have a goroutine in the background which records the current memory usage every 10 seconds. Promtheus will scrape our api this information from the "/metrics" endpoint at a fixed interval.
+\\\\
 
-The \textit{incrementCounter} function is just a helper function we created, which returns a "gin.Handlerfunc", which will count the appropiate endpoint once triggered e.g. "/mytimeline".\\
-
-For recording the memory usage, we simply have a goroutine in the background which records the current memory usage every 10 seconds. In the end Promtheus will scrape this information from the "/metrics" endpoint.\\
-
-
-DigitalOcean resource alerts and uptime (\url{http://cicdont.live/public})
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.35]{report/diagrams/grafana_example.png}
+    \caption{The grafana dashboard after executing some requests to the /public, /login, and /register endpoints.}
+    \label{fig:grafana}
+\end{figure}
+%DigitalOcean resource alerts and uptime (\url{http://cicdont.live/public})
 \subsection{Logging}
 % What do you log in your systems and how do you aggregate logs?
-Standard out from all containers...
+Our logging system consists of an EFK stack, i.e. elasticsearch, filebeat and kibana. Filebeat captures and ships the logs from standard out to  elasticsearch, and kibana is the user interface that allows us to retrieve the logs. As we did not implement docker swarm/load balancing, there was log aggregation from different sources. \\
+We abandoned plans of implementing Docker Swarm, due to time constraints. As such, we have no automatic load balancing or scaling strategy. We can however with a 
 \subsection{Security assessment}
 % Brief results
+The exercises for lecture 9 was to do a security assessment of the minitwit application. Our peer group sadly did not leave an assesment of our website, which is why we did it ourselves. For this, we used Skipfish \cite{skipfish}. Skipfish is a security reconnaissance tool, that gives an output of potential security risks. Running this tool on our website does not bring return any interesting security risks\footnote{Skipfish results: \url{https://github.com/DevOps-CI-CDont/DevOps-CI-CDont/tree/main/CICdont3.html}}.
+\\\\
+To answer some of the questions for the security assesment on lecture 9, we can give a reasoning to the security of our website:
+\begin{enumerate}
+    \item \textbf{HTTPS}: The website does not support HTTPS. For a short moment, we had a SSL certificate set up through Cloudflare, such that all traffic was considered safe. This caused an issue for all the API calls, which were hosted on a port that was not on HTTPS, but rather HTTP. HTTPS states that you cannot make calls to non-secure HTTP sites, meaning that all our API calls failed. Due to time restrictions, we were unable to fix this issue, which is why the website is still hosted on HTTP.
+    \item \textbf{SQL injection attacks (XSS)}: The frontend handles user logins and signup and more through input fields, which are sent directly to the backend API. In the backend, strings are never executed directly against the database, instead, an ORM interface sits between the user and the database, this makes it impossible for the user to inject SQL. 
+    \item \textbf{Frontend packages}: When dealing with external packages and dependencies, we may be subject to a zero day exploit. If there is discovered a XSS, prototype pollution or other kinds of attacks in a package, then we are left behind and stuck until a fix is created. For npm packages, we can run an audit, to check state of direct and indirect dependencies. Running an audit as of the handin date, there are no security risks with external packages.
+    \item \textbf{Authentication}: One of the biggests risks in our application is the authentication system. Not the signup or login process, but the way authentication is handled. Currently, when you login in the frontend, the backend sends your user ID back which is then set as a \verb|user_id| cookie. This is not optimal, as any user can login as any other user, by simply changing the \verb|user_id| cookie. A better way of doing this would be to implement JSON Web Tokens (JWT) \cite{jwt}, but again, due to time restrictions this was discarded.
+\end{enumerate}
 
 \subsection{Applied strategy for scaling and load balancing}
-Before trying to use Docker Swarm, our only scaling had been vertical: increasing resources for CPU, RAM, and Disk on a single Virtual Machine (Droplet). 
+Before trying to use Docker Swarm, our only scaling had been vertical: increasing resources for CPU, RAM, and Disk on a single Virtual Machine (Droplet). It has also been manual, meaning we have to notice resource usage on the droplet and go into DigitalOcean to upscale resources (during which the Droplet must be turned off). We had configured some resource alerts in DigitalOcean (Memory Usage percent and CPU utilization percent, sending an email if either is above 85\% for 15 minutes or longer). 
 
 \subsection{AI assistants}
 % Reflect how it supported/hindered your process.
