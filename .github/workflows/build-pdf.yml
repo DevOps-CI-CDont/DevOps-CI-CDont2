@@ -3,9 +3,10 @@ on:
   push:
     branches:
       main
-    paths:
-      'report/**'  # only run on changes to the main.tex file
-
+    paths: #only run on changes to tex files
+      'report/**'
+    paths-ignore:
+      'report/build/**'
 
 jobs:
   generatepdf:
@@ -52,9 +53,10 @@ jobs:
       
       - name: Commit and push PDF
         run: |
+          mv report/main.pdf report/build/MSc_group_d.pdf
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git remote set-url origin git@github.com:DevOps-CI-CDont/DevOps-CI-CDont.git
-          git add report/main.pdf
+          git add report/build/MSc_group_d.pdf
           git commit -m "Add generated PDF"
           git push origin HEAD:main --follow-tags
