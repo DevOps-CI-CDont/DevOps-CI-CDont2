@@ -69,11 +69,11 @@ doctl compute ssh manager1 --ssh-command "sudo doctl registry login"
 
 # get docker compose file on manager 1
 echo "trying to get docker compose file on manager1"
-doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/docker-compose-manager.yml --output ./docker-compose.yml "
-doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/nginx.conf --output ./nginx.conf"
-doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/filebeat.yml --output /filebeat.yml"
-doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/.htpasswd --output /.htpasswd"
-doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/prometheus.yml --output /prometheus.yml"
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/main/docker-compose-IaC.yml --output ./docker-compose.yml "
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/main/itu-minitwit/nginx.conf --output ./nginx.conf"
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/main/itu-minitwit/filebeat.yml --output /filebeat.yml"
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/main/itu-minitwit/.htpasswd --output /.htpasswd"
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/main/itu-minitwit/prometheus.yml --output /prometheus.yml"
 
 echo "docker compose up on manager1"
 doctl compute ssh manager1 --ssh-command "sh get-docker.sh"
@@ -89,4 +89,13 @@ done
 scp $env_file_path root@$manager1_ip:./.env
 doctl compute ssh manager1 --ssh-command "docker compose up -d"
 doctl compute domain records create cicdont.live --record-type A --record-name @ --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name elasticsearch --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name logs --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name grafana --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name api --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name simulator --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name prometheus --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name sla --record-data $manager1_ip --record-ttl 1800
+
 doctl compute ssh manager1 --ssh-command "sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000"
+
