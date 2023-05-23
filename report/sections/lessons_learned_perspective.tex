@@ -3,3 +3,33 @@
 % evolution and refactoring operation, and maintenance of your ITU-MiniTwit systems. Link back to respective commit messages, issues, tickets, etc. to illustrate these.
 % Also reflect and describe what was the "DevOps" style of your work. For example, what did you do differently to previous development projects and how did it work?
 
+\subsection{Maintenance burden with one Virtual Machine}
+We started off with our cloud infrastructure consisting of a single Virtual Machine. We have learned how much has to be managed to be able to run a Linux Server with plenty of dockerized services available to the world. \\
+Some notable tasks this has included:
+\begin{enumerate}
+    \item iptables configuration
+    \item resource management 
+    \begin{enumerate}
+        \item Upgrading, RAM, CPU, Disk space
+        \item Configuring Cronjobs to prune docker images (clean up disk space)
+    \end{enumerate}
+    \item Managing secrets and .env values on the machine. 
+    \item Authorizing SSH access for all group members.
+    \item Configuring watchtower to detect new images from our CD-chain, and then restarting relevant services on the droplet.
+\end{enumerate}
+Toward the end of the project, we developed a script to deploy a Droplet with all the important configurations being automatically set up on a Virtual Machine. So in principle, we can super-quickly deploy our architecture as it was.
+
+\subsection{DevOps style}
+We have had some channels of relatively quick feedback on problems in operation, such as resource alerts, uptime alerts, the error status page from Helge - which have all contributed to prompt us as developers to fix our errors quickly. \\
+In software, there are a \textbf{lot} of operational tasks that one could spend a lot of time on if doing so manually. We have quickly seen the value of testing, building, and deploying automatically. It has been a valuable experience to build Github Actions workflows to serve as automation with quality gate steps (static code analysis + tests), taking steps towards ensuring "bad code" doesn't reach production.  
+When you have good quality gates and a lot of automation, deployment is not scary.
+ 
+\subsection{Go Memory issue}
+For a big part of the project, our virtual machine would continually increase its memory usage until it eventually crashed, because a docker container for our APIs kept growing in memory usage. We created this issue for it: \url{https://github.com/DevOps-CI-CDont/DevOps-CI-CDont/issues/58}, where Silas continually updated with comments on diagnosing the reason for the problem. \\
+This issue meant that we would miss all requests from the simulator until we realized it had crashed and we could start it up again. The issue turned out to be a common pitfall in Go (specifically in the "net/http" package in go). Every time we received a request from the simulator we sent an API request to our backend, however, we didn't close the corresponding "Response Body" as we assumed that was done automatically in any garbage-collected language. This meant that response bodies that were stored in RAM kept racking up until there was no more RAM to store them in \cite{cloudimmunity}. The solution was to simply defer a call to response.body.close(), such that once we were done with any HTTP response the memory would be freed again. 
+This commit fixed the problem: \url{https://github.com/DevOps-CI-CDont/DevOps-CI-CDont/commit/2cdcb30858dd25fe5851d41f8c5547749718820d}.
+
+\subsection{Refactoring an old project}
+When starting on a old project with legacy code, there are a lot of things to be aware of. We want to keep all the same functionality as the old project provided, luckily there was already a good test suite that could be used to see what input leads to some expected output. Also, the whole original minitwit was written in Python, which we could all understand fairly well. \\
+One of the lessons we learned in this process, is that it can be tough to refactor code, whilst learning a new language, as we did with Go. Go was completely unfamiliar to us, meaning we did not know a lot of the pitfalls that the language had. \\\
+Furthermore in Next.js, even though this was not necessarily a new language to us (JavaScript), we tried implementing SSR (a Next.js feature) which is popular for optimizing SEO, without experience in this framework. All of these factors contributed to experiencing time sinks, that we would not have had if using languages/frameworks that we were more familiar with. 

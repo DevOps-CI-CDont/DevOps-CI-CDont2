@@ -1,28 +1,27 @@
-\newcommand*{\MyPath}{./report}%
-\input{\MyPath/other/packages}
-\input{\MyPath/other/config}
-\addbibresource{./report/other/references.bib}
+\input{report/other/packages}
+\input{report/other/config}
+\addbibresource{report/other/references.bib}
 \begin{document}
 
-\input{\MyPath/sections/frontpage}\newpage
+\input{report/sections/frontpage}\newpage
 
 \tableofcontents\newpage
 
 \fancyhf{}
 \renewcommand\headrulewidth{1pt}
-\fancyhead[LE]{\thepage \hspace{1.5em} \authorOfPaper}
-\fancyhead[RO]{\titleOfPaper \hspace{1.5em} \thepage}
+%\fancyhead[LE]{\thepage \hspace{1.5em} \authorOfPaper}
+%\fancyhead[RO]{\titleOfPaper \hspace{1.5em} \thepage}
 \pagestyle{fancy}
 
-\input{\MyPath/sections/system_perspective}\newpage
+\input{report/sections/Artifacts} \newpage
+\input{report/sections/system_perspective}\newpage
 
-\input{\MyPath/sections/process_perspective}\newpage
+\input{report/sections/process_perspective}\newpage
 
-\input{\MyPath/sections/lessons_learned_perspective}\newpage
+\input{report/sections/lessons_learned_perspective}\newpage
 
 
-\input{\MyPath/sections/references} \newpage
-\input{\MyPath/sections/appendix}
-
+\input{report/sections/references} \newpage
+\input{report/sections/appendix}
 
 \end{document}

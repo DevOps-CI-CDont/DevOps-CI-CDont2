@@ -14,32 +14,26 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://cicdont.live:8080
-    networks:
-        - elk
   backend:
     image: registry.digitalocean.com/cicdont-images/backend
-    container_name: backend
+    container_name: api
     restart: always
     ports:
       - "8080:8080"
       - "8081:8081"
     env_file:
-      - ./backend/.env
-    networks:
-        - elk
+      - ./.env
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.docker/config.json:/config.json
-    command: --interval 60 --run-once # seconds between checks
+    command: --interval 60 # seconds between checks
   
   prometheus:
     image: prom/prometheus
     container_name: prometheus
-    networks:
-        - elk
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -50,8 +44,6 @@ services:
     image: grafana/grafana:9.3.0
     ports:
       - "4000:3000"
-    networks:
-        - elk
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
     volumes:
@@ -88,21 +80,16 @@ services:
           
   nginx: 
     image: nginx
-    depends_on:
-      - kibana
-      - filebeat
-      - elasticsearch
-      - prometheus
-      - grafana
-      - frontend
-      - backend
     ports:
-      - 80:80
+      - 9200:9200
+      - 5601:5601
+      - 8881:8881
+      - 8882:8882
     networks:
-      - elk 
+      - elk
     volumes:
       - type: bind
-        source: ${ELK_DIR}/nginx.conf
+        source: ./nginx.conf
         target: /etc/nginx/nginx.conf
       - type: bind
         source: ${ELK_DIR}/.htpasswd

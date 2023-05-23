@@ -2,12 +2,12 @@ name: Continuous Integration
 
 on:
   push:
-    paths-ignore:
-      - 'report/**'
+    paths:
+      - 'itu-minitwit/**'
   pull_request:
     branches: [ "main" ]
-    paths-ignore:
-      - 'report/**'
+    paths:
+      - 'itu-minitwit/**'
 
 jobs:
   build_and_push_api_test_image:
