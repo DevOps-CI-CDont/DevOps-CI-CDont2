@@ -1,0 +1,34 @@
+% sætter linje afstand
+\onehalfspacing
+
+\addbibresource{other/references.bib}
+
+\pgfplotsset{compat=1.15}
+
+% sætter margener
+\geometry{top=3cm}
+\geometry{bottom=4cm}
+\geometry{left=3.75cm}
+\geometry{right=3.75cm}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    citecolor=blue,
+    breaklinks=true
+}
+
+\def\abstractname{Abstract.}
+\def\keywordname{{\bf Keywords:}}
+
+\renewenvironment{abstract}{%
+      \list{}{\advance\topsep by0.35cm\relax\small
+      \leftmargin=1cm
+      \labelwidth=\
+      \listparindent=\
+      \itemindent\listparindent
+      \rightmargin\leftmargin}\item[\hskip\labelsep
+                                    \bfseries\abstractname]}
+{\endlist}

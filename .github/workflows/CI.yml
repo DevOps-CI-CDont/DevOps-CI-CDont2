@@ -2,8 +2,12 @@ name: Continuous Integration
 
 on:
   push:
+    paths:
+      - 'itu-minitwit/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'itu-minitwit/**'
 
 jobs:
   build_and_push_api_test_image:
@@ -65,3 +69,29 @@ jobs:
         run: |
           docker run -e DB_HOST=$DB_HOST -e DB_PORT=$DB_PORT -e DB_TEST_NAME=$DB_TEST_NAME -e DB_USER=$DB_USER -e DB_PASS=$DB_PASS --detach -p 8080:8080 -p 8081:8081 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           (cd itu-minitwit/backend/test && go test -v ./...)
+  static-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+    
+      run: |
+        cd itu-minitwit/frontend
+        npm ci
+
+    - name: Run tsc
+      run: |
+        cd itu-minitwit/frontend
+        npm run tsc
+    
+    - name: run eslint
+      run: |
+        cd itu-minitwit/frontend
+        npm run lint:strict
+
+    - name: run go vet
+      run: |
+        cd itu-minitwit/backend
+        go vet ./...

@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net" modified="2023-05-05T10:56:37.637Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36" etag="Tan7pCJ7SVtzEX4FAejL" version="21.2.9" type="device">
+  <diagram name="Page-1" id="5f0bae14-7c28-e335-631c-24af17079c00">
+    <mxGraphModel dx="842" dy="1068" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="39150e848f15840c-10" value="Module" style="shape=component;align=left;spacingLeft=36;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;html=1;" parent="1" vertex="1">
+          <mxGeometry x="430" y="480" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s4gKY89Va9dKetKEaRoS-4" value="Digital Ocean" style="swimlane;" parent="1" vertex="1">
+          <mxGeometry x="280" y="370" width="650" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="39150e848f15840c-3" value="Droplet on Digital Ocean (VM)" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12" parent="s4gKY89Va9dKetKEaRoS-4" vertex="1">
+          <mxGeometry x="30" y="50" width="260" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="s4gKY89Va9dKetKEaRoS-1" value="PostgreSQL Database" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;rounded=0;shadow=0;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12" parent="s4gKY89Va9dKetKEaRoS-4" vertex="1">
+          <mxGeometry x="420" y="80" width="130" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="s4gKY89Va9dKetKEaRoS-6" value="Docker Containers" style="html=1;whiteSpace=wrap;" parent="s4gKY89Va9dKetKEaRoS-4" vertex="1">
+          <mxGeometry x="90" y="110" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="s4gKY89Va9dKetKEaRoS-22" value="" style="endArrow=block;startArrow=block;endFill=1;startFill=1;html=1;rounded=0;exitX=0;exitY=0;exitDx=70;exitDy=0;exitPerimeter=0;" parent="s4gKY89Va9dKetKEaRoS-4" source="39150e848f15840c-3" target="s4gKY89Va9dKetKEaRoS-1" edge="1">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="30" y="150" as="sourcePoint" />
+            <mxPoint x="190" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="s4gKY89Va9dKetKEaRoS-11" value="Client" style="verticalAlign=top;align=left;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="120" y="477.5" width="90" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="s4gKY89Va9dKetKEaRoS-19" value="" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0;exitY=0;exitDx=27.5;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="s4gKY89Va9dKetKEaRoS-11" target="s4gKY89Va9dKetKEaRoS-6" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="270" y="300" as="sourcePoint" />
+            <mxPoint x="430" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="s4gKY89Va9dKetKEaRoS-20" value="*" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" parent="s4gKY89Va9dKetKEaRoS-19" connectable="0" vertex="1">
+          <mxGeometry x="-1" relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

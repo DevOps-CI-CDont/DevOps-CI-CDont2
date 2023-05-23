@@ -1,0 +1,9 @@
+HTTP/1.1 308 Permanent Redirect
+Location: /sfi9876/static
+Refresh: 0;url=/sfi9876/static
+Date: Wed, 29 Mar 2023 15:08:20 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+/sfi9876/static

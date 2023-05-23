@@ -1,0 +1,1 @@
+var res = {'data':'HTTP/1.1 308 Permanent Redirect\x0aLocation: /sfi9876\x0aRefresh: 0;url=/sfi9876\x0aDate: Wed, 29 Mar 2023 15:08:19 GMT\x0aConnection: keep-alive\x0aKeep-Alive: timeout=5\x0aTransfer-Encoding: chunked\x0a\x0a/sfi9876'}

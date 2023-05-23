@@ -1,0 +1,26 @@
+\input{report/other/packages}
+\input{report/other/config}
+\addbibresource{report/other/references.bib}
+\begin{document}
+
+\input{report/sections/frontpage}\newpage
+
+\tableofcontents\newpage
+
+\fancyhf{}
+\renewcommand\headrulewidth{1pt}
+\fancyhead[LE]{\thepage \hspace{1.5em} \authorOfPaper}
+\fancyhead[RO]{\titleOfPaper \hspace{1.5em} \thepage}
+\pagestyle{fancy}
+
+\input{report/sections/system_perspective}\newpage
+
+\input{report/sections/process_perspective}\newpage
+
+\input{report/sections/lessons_learned_perspective}\newpage
+
+
+\input{report/sections/references} \newpage
+\input{report/sections/appendix}
+
+\end{document}

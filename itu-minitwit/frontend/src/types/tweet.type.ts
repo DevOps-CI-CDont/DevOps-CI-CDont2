@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export type Tweet = {
 	CreatedAt: string;
 	DeledtedAt: string | null;
@@ -9,3 +11,13 @@ export type Tweet = {
 	pub_date: number;
 	flagged: number;
 };
+
+const postTweetSchema = z.object({
+	message: z.string(),
+	userId: z.string(),
+});
+
+type PostTweetSchemaType = z.infer<typeof postTweetSchema>;
+
+export { postTweetSchema };
+export type { PostTweetSchemaType };

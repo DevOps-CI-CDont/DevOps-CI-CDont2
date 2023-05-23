@@ -1,39 +1,26 @@
 import { authenticatedRouter, router } from "@/globals/router";
 import { getLogout } from "@/server/getLogout";
-import { getUsernameById } from "@/server/getUsername";
 import useAuthStore from "@/store/authStore";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { DarkModeToggle } from "../DarkModeToggle";
+import { useGetUsernameById } from "@/hooks/useGetUsernameById";
 
 export function Header() {
 	const isAuth = useAuthStore((state) => state.isAuth);
 	const [userIdCookie, , removeUserIdCookie] = useCookies(["user_id"]);
 	const nextRouter = useRouter();
-	const [userId, setUserId] = useState<string | null>(null);
-	const [username, setUsername] = useState<string | null>(null);
-
-	useEffect(() => {
-		if (userIdCookie.user_id) {
-			setUserId(userIdCookie.user_id);
-			try {
-				userId && getUsernameById(userId).then((res) => setUsername(res));
-			} catch (e) {
-				console.error(e);
-			}
-		}
-	});
+	const { data: username } = useGetUsernameById(userIdCookie.user_id as string);
 
 	return (
-		<div className="border-b shadow-md w-screen fixed top-0 left-0 right-0 bg-white">
+		<div className="border-b dark:border-b-slate-800 shadow-md w-screen fixed top-0 left-0 right-0 bg-white dark:bg-slate-900 dark:text-slate-100">
 			<nav className="flex justify-between items-center h-20 max-w-7xl mx-auto px-2">
 				<div>
 					<Link href={"/public"}>
 						<h2 className="font-bold text-lg">ITU Minitwit (now with CD)</h2>
 					</Link>
-					{username && <span>Welcome: {username}</span>}
+					{username && <span>Welcome: {username.toString()}</span>}
 				</div>
 				<ul className="flex justify-center items-center">
 					<DarkModeToggle />
