@@ -19,14 +19,14 @@ jobs:
       
       - name: Generate PDF
         run: |
-          docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data blang/latex:ctanfull latexmk -pdf -shell-escape -outdir=/data/report/build /data/report/main.tex
+          docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data blang/latex:ctanfull latexmk -pdf -shell-escape -outdir=/data/report /data/report/main.tex
 
       
       - name: Upload PDF
         uses: actions/upload-artifact@v3
         with:
-          name: MSc_group_d
-          path: ./report/build/main.pdf
+          name: report
+          path: ./report/main.pdf
 
   deploy_pdf:
     name: Deploy PDF
@@ -41,7 +41,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: report
-          path: ./report/
+          path: ./report/main.pdf
 
       
       - name: Set up Git credentials
@@ -55,6 +55,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git remote set-url origin git@github.com:DevOps-CI-CDont/DevOps-CI-CDont.git
-          git add report/build/MSc_group_d.pdf
+          git add report/main.pdf
           git commit -m "Add generated PDF"
           git push origin HEAD:main --follow-tags
