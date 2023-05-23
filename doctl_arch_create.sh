@@ -20,8 +20,6 @@ fi
 # create droplets
 echo "creating droplets"
 doctl compute droplet create --image ubuntu-22-10-x64 --size s-2vcpu-4gb-amd --region fra1 --enable-monitoring manager1 --ssh-keys "$ssh_key_fingerprints"
-doctl compute droplet create --image ubuntu-22-10-x64 --size s-1vcpu-2gb --region fra1 --enable-monitoring worker1 --ssh-keys "$ssh_key_fingerprints"
-doctl compute droplet create --image ubuntu-22-10-x64 --size s-1vcpu-2gb --region fra1 --enable-monitoring worker2 --ssh-keys "$ssh_key_fingerprints"
 
 # wait for droplets to be created
 echo "waiting 60 seconds for droplets to be created"
@@ -41,25 +39,18 @@ echo "Done waiting"
 
 # get droplet IP addresses
 manager1_ip=$(doctl compute droplet get manager1 --format PublicIPv4 --no-header)
-wanky=$(doctl compute droplet get worker1 --format PublicIPv4 --no-header)
-worker2_ip=$(doctl compute droplet get worker2 --format PublicIPv4 --no-header)
 
 # print IP addresses
 echo "Manager1 IP address: $manager1_ip"
-echo "Worker1 IP address: $wanky"
-echo "Worker2 IP address: $worker2_ip"
 
 # add droplets to known hosts
 sleep 1
 ssh-keyscan -H $manager1_ip >> ~/.ssh/known_hosts
 sleep 1
-ssh-keyscan -H $wanky >> ~/.ssh/known_hosts
-sleep 1
-ssh-keyscan -H $worker2_ip >> ~/.ssh/known_hosts
 
 # Check that all dropslets are added to known hosts otherwise run again
 # add droplets to known hosts
-for ip in $manager1_ip $wanky $worker2_ip; do
+for ip in $manager1_ip; do
     while ! ssh-keygen -F $ip | grep -q $ip; do
         echo "Adding $ip to known hosts failed...retrying"
         sleep 5
@@ -74,10 +65,6 @@ doctl compute ssh manager1 --ssh-command "curl -fsSL https://get.docker.com -o g
 echo "trying to get tokens from .env file"
 source "$env_file_path"
 echo "manager_token: $manager_token"
-echo "worker1_token: $worker1_token"
-echo "worker2_token: $worker2_token"
-
-
 
 echo "installing doctl on droplet"
 doctl compute ssh manager1 --ssh-command "sudo snap install doctl"
@@ -91,7 +78,8 @@ doctl compute ssh manager1 --ssh-command "sudo doctl registry login"
 # get docker compose file on manager 1
 echo "trying to get docker compose file on manager1"
 doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/docker-compose-manager.yml --output ./docker-compose.yml "
-doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/nginx.conf --output /nginx.conf"
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/nginx.conf --output ./nginx.conf"
+doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/filebeat.yml --output /filebeat.yml"
 doctl compute ssh manager1 --ssh-command "curl https://raw.githubusercontent.com/DevOps-CI-CDont/DevOps-CI-CDont/IaC/itu-minitwit/.htpasswd --output /.htpasswd"
 
 echo "docker compose up on manager1"
