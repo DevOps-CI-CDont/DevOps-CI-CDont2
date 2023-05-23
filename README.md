@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # DevOps-CI-CDont
 
 Group project repository for the course DevOps, Software Evolution and Software Maintenance taught at the IT University of Copenhagen
