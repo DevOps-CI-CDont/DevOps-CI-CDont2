@@ -86,4 +86,8 @@ echo "docker compose up on manager1"
 doctl compute ssh manager1 --ssh-command "sh get-docker.sh"
 scp $env_file_path root@$manager1_ip:./.env
 doctl compute ssh manager1 --ssh-command "docker compose up"
-doctl compute domain records create cicdont.live --record-type A --record-name manager1 --record-data $manager1_ip --record-ttl 1800
+doctl compute domain records create cicdont.live --record-type A --record-name @ --record-data $manager1_ip --record-ttl 1800
+doctl compute ssh manager1 --ssh-command "sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000"
+# install iptables persistent
+doctl compute ssh manager1 --ssh-command "sudo apt-get install iptables-persistent -y"
+doctl compute ssh manager1 --ssh-command "sudo netfilter-persistent save"
