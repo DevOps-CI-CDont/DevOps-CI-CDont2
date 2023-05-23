@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build the Docker image for frontend
-        run: docker build --build-arg NEXT_PUBLIC_API_URL=http://138.68.93.147:8080 -t frontend ./itu-minitwit/frontend 
+        run: docker build --build-arg NEXT_PUBLIC_API_URL=http://cicdont.live:8080/ -t frontend ./itu-minitwit/frontend 
 
       - uses: actions/checkout@v3
       - name: Build the Docker image for backend
