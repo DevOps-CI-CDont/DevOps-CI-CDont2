@@ -86,3 +86,4 @@ echo "docker compose up on manager1"
 doctl compute ssh manager1 --ssh-command "sh get-docker.sh"
 scp $env_file_path root@$manager1_ip:./.env
 doctl compute ssh manager1 --ssh-command "docker compose up"
+doctl compute domain records create cicdont.live --record-type A --record-name manager1 --record-data $manager1_ip --record-ttl 1800
