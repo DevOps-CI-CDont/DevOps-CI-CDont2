@@ -55,6 +55,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git remote set-url origin git@github.com:DevOps-CI-CDont/DevOps-CI-CDont.git
-          git add report/main.pdf
+          git add report/build/MSc_group_d.pdf
           git commit -m "Add generated PDF"
           git push origin HEAD:main --follow-tags
