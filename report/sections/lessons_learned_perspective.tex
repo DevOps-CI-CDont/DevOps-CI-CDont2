@@ -3,4 +3,29 @@
 % evolution and refactoring operation, and maintenance of your ITU-MiniTwit systems. Link back to respective commit messages, issues, tickets, etc. to illustrate these.
 % Also reflect and describe what was the "DevOps" style of your work. For example, what did you do differently to previous development projects and how did it work?
 
-\todo{Software as a Service can be worth it :)}
+\subsection{Maintenance burden with one Virtual Machine}
+We started off with our cloud infrastructure consisting of a single Virtual Machine. We have learned how much has to be managed to be able to run a Linux Server with plenty of dockerized services available to the world. \\
+Some notable tasks this has included:
+\begin{enumerate}
+    \item iptables configuration
+    \item resource management 
+    \begin{enumerate}
+        \item Upgrading, RAM, CPU, Disk space
+        \item Configuring Cronjobs to prune docker images (clean up disk space)
+    \end{enumerate}
+    \item Managing secrets and .env values on the machine. 
+    \item Authorizing SSH access for all group members.
+    \item Configuring watchtower to detect new images from our CD-chain, and then restarting relevant services on the droplet.
+\end{enumerate}
+Towards the end of the project, we developed a script to deploy a Droplet with all the important configuration being automatically set up on a Virtual Machine. So in principle, we can super-quickly deploy our architecture as it was.
+
+\subsection{DevOps style}
+We have had some channels of relatively quick feedback on problems in operation, such as resource alerts, uptime alerts, the error status page from Helge - which have all contributed to prompt us as developers to fix our errors quickly. \\
+In software, there are a \textbf{lot} of operational tasks that one could spend a lot of time on if doing so manually. We have quickly seen the value of testing, building, and deploying automatically. It has been a valuable experience to build Github Actions workflows to serve as automation with quality gate steps (static code analysis + tests), taking steps towards ensuring "bad code" doesn't reach production.  
+When you have good quality gates and a lot of automation, deployment is not scary.
+ 
+\subsection{Go Memory issue}
+For a big part of the project, our system would continually increase its ram usage until it eventually crashed. This issue meant that we would lose all requests from the simulator until we realized it had crashed and we could start it up again. The issue turned out to be 
+
+\subsection{Refactoring an old project}
+When starting on a old project with legacy code, there are a lot of things to be aware of. When transferring it to a new project, we want to keep all the same functionality as the old project provided. One of the leasons we learned in this process, is that it can be tough to
