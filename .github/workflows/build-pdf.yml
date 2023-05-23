@@ -26,7 +26,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: report
-          path: ./report/main.pdf
+          path: ./report/build/MSc_group_d.pdf
 
   deploy_pdf:
     name: Deploy PDF
