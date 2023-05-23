@@ -1,40 +1,60 @@
-name: Build LaTeX PDF
-
+name: Generate pdf report from LaTeX
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      main
+    paths:
+      'report/**'  # only run on changes to the main.tex file
+
 
 jobs:
-  pdf-to-tex:
+  generatepdf:
+    name: Generate PDF
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Install TeX Live
+      
+      - name: Generate PDF
         run: |
-          sudo apt-get update
-          sudo apt-get install texlive-full -y
+          docker run --rm -i --user="$(id -u):$(id -g)" --net=none -v "$PWD":/data blang/latex:ctanfull latexmk -pdf -shell-escape -outdir=/data/report /data/report/main.tex
 
-      - name: Set PATH for TeX Live
-        run: |
-          echo "::add-path::/usr/local/texlive/2023/bin/x86_64-linux"
-
-      - name: Build PDF
-        run: |
-          cd report
-          pdflatex -interaction=nonstopmode main.tex
-          biber main
-          pdflatex -interaction=nonstopmode main.tex
-          pdflatex -interaction=nonstopmode main.tex
-
-      - name: Upload PDF artifact
-        uses: actions/upload-artifact@v2
+      
+      - name: Upload PDF
+        uses: actions/upload-artifact@v3
         with:
-          name: report-pdf
-          path: report/main.pdf
+          name: report
+          path: ./report/main.pdf
+
+  deploy_pdf:
+    name: Deploy PDF
+    needs: generatepdf
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      
+      - name: Download PDF
+        uses: actions/download-artifact@v3
+        with:
+          name: report
+          path: ./report/
+
+      
+      - name: Set up Git credentials
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.GH_SSH_PRIVATE_KEY }}
+
+      
+      - name: Commit and push PDF
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git remote set-url origin git@github.com:DevOps-CI-CDont/DevOps-CI-CDont.git
+          git add report/main.pdf
+          git commit -m "Add generated PDF"
+          git push origin HEAD:main --follow-tags
